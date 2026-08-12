@@ -11,14 +11,16 @@
 - [x] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5; island slab renders, Vitest wired with first economy test
 - [x] M1/M2: Third-person player + follow camera; trees/rocks to forage with E; inventory HUD
 - [x] Backpack (Q) with Craft + Learn above inventory; craft recipes and learn skills (hunt/build)
+- [x] Day/night cycle + night countdown HUD; night slimes; wooden gates; health/respawn; furnace recipe
 
 ## Now
 
-- [ ] M3: Day/night + traveling merchant + money (TDD systems layer)
+- [ ] M3 remainder: traveling merchant + money (TDD systems layer)
 
 ## Next
 
 - [ ] M4: Island upgrade unlocks second area
 - [ ] M5: Dungeon loop (stairs → mobs + platforming → reward chest → portal home)
 - [ ] M6: Lava biome + local saves + onboarding hints
-- [ ] Place crafted buildings in the world
+- [ ] Place more crafted buildings (furnace/campfire) in the world
+- [ ] Armour system to raise max HP toward 145

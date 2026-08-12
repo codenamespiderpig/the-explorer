@@ -5,6 +5,7 @@ import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
 import { useInventoryStore } from '../stores/inventoryStore'
+import { useGameStore } from '../stores/gameStore'
 import { listGatherables } from '../world/gatherableRegistry'
 
 const GATHER_RADIUS = 2.4
@@ -169,6 +170,7 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
   useFrame(() => {
     if (!ecctrl.current) return
     const pos = ecctrl.current.currPos
+    useGameStore.getState().setPlayerPos([pos.x, pos.y, pos.z])
     const nearest = findNearestGatherable(
       listGatherables(),
       [pos.x, pos.y, pos.z],
@@ -184,17 +186,51 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     } else {
       store.setNearby(null, null)
       store.setHint(
-        'WASD move · Hold left mouse to look · E gather · Q backpack',
+        'WASD · look · E gather · Q backpack · G place gate',
       )
     }
   })
 }
 
+function useGatePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
+  const { camera } = useThree()
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyG' || e.repeat) return
+      const inv = useInventoryStore.getState()
+      const count = inv.items['wooden-gate'] ?? 0
+      if (count < 1) {
+        inv.setHint('Craft a Wooden Gate in your backpack first')
+        return
+      }
+      if (!ecctrl.current) return
+      const pos = ecctrl.current.currPos
+      const forward = new THREE.Vector3()
+      camera.getWorldDirection(forward)
+      forward.y = 0
+      if (forward.lengthSq() < 0.001) forward.set(0, 0, 1)
+      forward.normalize()
+      const placeAt: [number, number, number] = [
+        pos.x + forward.x * 2.2,
+        0,
+        pos.z + forward.z * 2.2,
+      ]
+      inv.setItems({ ...inv.items, 'wooden-gate': count - 1 })
+      useGameStore.getState().placeGate(placeAt)
+      inv.setHint('Gate placed — it will block night slimes until broken')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [camera, ecctrl])
+}
+
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const keys = useMovementKeys()
+  const respawnToken = useGameStore((s) => s.respawnToken)
   useGatherInput()
   useProximityTracking(ecctrl)
+  useGatePlacement(ecctrl)
 
   useFrame(() => {
     const body = ecctrl.current
@@ -213,6 +249,7 @@ export function Player() {
   return (
     <>
       <Ecctrl
+        key={respawnToken}
         ref={ecctrl}
         position={[0, 3, 0]}
         maxWalkVel={4}

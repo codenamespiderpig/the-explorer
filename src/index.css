@@ -33,6 +33,38 @@ body,
   line-height: 1.5;
 }
 
+.hud-time {
+  left: auto;
+  right: 16px;
+  text-align: right;
+}
+
+.hud-health {
+  top: auto;
+  bottom: 72px;
+  left: 16px;
+}
+
+.hud-danger {
+  color: #a01818;
+  font-weight: 700;
+}
+
+.hp-bar {
+  width: 180px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 4px 0 6px;
+}
+
+.hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c0392b, #27ae60);
+  transition: width 0.15s linear;
+}
+
 .hud-title {
   font-weight: 700;
   margin-bottom: 4px;

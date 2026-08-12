@@ -24,7 +24,7 @@ interface InventoryState {
 const initialItems: Counts = { wood: 0, stone: 0 }
 
 const DEFAULT_HINT =
-  'WASD move · Hold left mouse to look · E gather · Q backpack'
+  'WASD · look · E gather · Q backpack · G place gate'
 
 export const createInventoryStore = create<InventoryState>((set) => ({
   tools: [...STARTING_TOOLS],

@@ -1,26 +1,25 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Sky } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
 import { Player } from './player/Player'
 import { Hud } from './ui/Hud'
+import { DayNightClock } from './world/DayNightClock'
+import { DayNightAtmosphere } from './world/DayNightAtmosphere'
+import { Gates } from './world/Gates'
+import { NightSlimes } from './world/NightSlimes'
 
 export default function App() {
   return (
     <div id="game-root">
       <Canvas shadows camera={{ position: [0, 6, 12], fov: 50 }}>
-        <Sky sunPosition={[100, 60, 100]} />
-        <ambientLight intensity={0.55} />
-        <directionalLight
-          castShadow
-          position={[50, 50, 25]}
-          intensity={1.2}
-          shadow-mapSize={[1024, 1024]}
-        />
+        <DayNightAtmosphere />
         <Suspense fallback={null}>
           <Physics>
+            <DayNightClock />
             <HomeIsland />
+            <Gates />
+            <NightSlimes />
             <Player />
           </Physics>
         </Suspense>

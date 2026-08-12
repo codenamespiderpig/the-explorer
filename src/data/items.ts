@@ -1,6 +1,12 @@
 export type ResourceId = 'wood' | 'stone'
 export type ToolId = 'wooden-sword' | 'wooden-pickaxe' | 'wooden-axe'
-export type CraftedItemId = 'campfire' | 'fence' | 'workbench' | 'hunting-spear'
+export type CraftedItemId =
+  | 'campfire'
+  | 'fence'
+  | 'workbench'
+  | 'hunting-spear'
+  | 'furnace'
+  | 'wooden-gate'
 export type ItemId = ResourceId | 'dungeon-relic' | ToolId | CraftedItemId
 
 export interface ItemDef {
@@ -21,6 +27,8 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   fence: { id: 'fence', name: 'Wooden Fence', sellValue: 3 },
   workbench: { id: 'workbench', name: 'Workbench', sellValue: 12 },
   'hunting-spear': { id: 'hunting-spear', name: 'Hunting Spear', sellValue: 8 },
+  furnace: { id: 'furnace', name: 'Furnace', sellValue: 20 },
+  'wooden-gate': { id: 'wooden-gate', name: 'Wooden Gate', sellValue: 6 },
 }
 
 export const STARTING_TOOLS: ToolId[] = [

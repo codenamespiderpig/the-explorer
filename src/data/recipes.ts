@@ -1,7 +1,13 @@
 import type { ItemId } from './items'
 import type { SkillId } from './skills'
 
-export type RecipeId = 'campfire' | 'fence' | 'workbench' | 'hunting-spear'
+export type RecipeId =
+  | 'campfire'
+  | 'fence'
+  | 'workbench'
+  | 'hunting-spear'
+  | 'furnace'
+  | 'wooden-gate'
 
 export interface Recipe {
   id: RecipeId
@@ -29,12 +35,27 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     output: 'fence',
     cost: { wood: 2 },
   },
+  'wooden-gate': {
+    id: 'wooden-gate',
+    name: 'Wooden Gate',
+    description: 'Blocks night slimes until they break it. Place with G.',
+    output: 'wooden-gate',
+    cost: { wood: 6, stone: 2 },
+  },
   workbench: {
     id: 'workbench',
     name: 'Workbench',
     description: 'Build more advanced structures.',
     output: 'workbench',
     cost: { wood: 5, stone: 3 },
+    requiresSkill: 'build',
+  },
+  furnace: {
+    id: 'furnace',
+    name: 'Furnace',
+    description: 'Smelt ores later in the game. Requires Build.',
+    output: 'furnace',
+    cost: { wood: 4, stone: 10 },
     requiresSkill: 'build',
   },
   'hunting-spear': {

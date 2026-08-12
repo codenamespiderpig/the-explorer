@@ -188,22 +188,26 @@ tests/                # Vitest unit tests for systems and stores
 3. Home island with gatherable stone + wood nodes (respawning)
 4. Backpack (Q) with Craft + Learn tabs above inventory
 5. Craft builds items from recipes; Learn unlocks skills (hunt, build) that gate advanced recipes
-6. Day/night cycle + traveling merchant (sell anything; value-scaled prices) + money HUD
-7. One island upgrade tier that unlocks a second area
-8. One dungeon: stairs → mob combat + light platforming (blocks) → reward chest → portal home
+6. Day/night cycle with countdown to night; night slimes attack player and break gates
+7. Health 100 (max 145 with armour later); death respawns at start with no item loss
+8. Craftable furnace (Build skill, for later smelting) and placeable wooden gates (G)
+9. Traveling merchant + money HUD (merchant still pending)
+10. One island upgrade tier that unlocks a second area
+11. One dungeon: stairs → mob combat + light platforming (blocks) → reward chest → portal home
    - Overworld has no jump; dungeon platforming TBD if jump is re-enabled only in dungeons
-9. Light combat: sword swing, 2–3 simple melee mobs, player health hearts
-10. One unique biome as the second area (lava world candidate)
-11. Local save/load via `localStorage`
-12. Minimal onboarding copy (contextual hints, no tutorial flow)
+12. Light combat: sword swing, 2–3 simple melee mobs, player health hearts
+13. One unique biome as the second area (lava world candidate)
+14. Local save/load via `localStorage`
+15. Minimal onboarding copy (contextual hints, no tutorial flow)
 
 **Out (backlog):**
 - Ranged combat, bosses, complex mob AI
 - Tool tiers beyond the wooden starting kit
 - Multiple upgrade tiers / many islands
 - Full skill tree UI beyond Learn tab
-- Placeable buildings in the world (crafted items stay in inventory for now)
-- Overworld night threats (night is cosmetic in v1)
+- Place furnace/campfire/workbench in the world (gates are placeable)
+- Armour drops/crafting to raise max HP toward 145
+- Overworld night threats beyond slimes
 - Audio (music/SFX)
 - Mobile/touch controls, gamepad
 - Multiplayer, cloud saves
@@ -248,7 +252,10 @@ Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be de
 | Crafting location | Backpack Craft tab (stations deferred) | Default |
 | Progression | Learn skills (hunt, build) gate advanced craft recipes | User |
 | Dungeon failure | Death respawns player at home, inventory intact, dungeon resets | Default |
-| Day/night | Fixed-length cycle; drives merchant only, night is cosmetic in v1 | Default |
+| Day/night | 90s day / 45s night; countdown HUD; night spawns slimes | User |
+| Night threats | Slimes spawn, attack player, damage/break gates | User |
+| Health | Start 100 HP; absolute max 145 via armour later; death = respawn at start, keep inventory | User |
+| Furnace | Craftable with Build skill for later smelting | User |
 | Art direction | Low-poly flat stylized (Forager-adjacent, cheap to author) | Default |
 | Audio | Out of v1 | Default |
 | Mobile/touch | Out of v1; desktop keyboard + mouse | Default |
