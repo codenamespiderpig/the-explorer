@@ -39,7 +39,6 @@ export function Hud() {
         </div>
         <div>
           {Math.ceil(health.current)} / {max}
-          <span className="hud-tools"> (max {145} with armour later)</span>
         </div>
       </div>
 
