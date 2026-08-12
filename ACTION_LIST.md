@@ -9,11 +9,9 @@
 - [x] Build out `PRD.md`: user stories, MVP feature list, architecture, testing approach, milestones (M0–M6)
 - [x] Add combat, tools, dungeon chest, and traveling-merchant mechanics; resolve all open questions with defaults
 
+- [x] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5; island slab renders, Vitest wired with first economy test
+
 ## Now
-
-- [ ] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5
-
-## Next
 
 - [ ] M1: Third-person controller, jumping + follow camera on home island
 - [ ] M2: Tool-gated gathering (pickaxe/axe) → inventory UI
