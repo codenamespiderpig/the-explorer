@@ -15,6 +15,7 @@ interface InventoryState {
   nearbyResource: ResourceId | null
   hint: string | null
   addItem: (id: ItemId, amount: number) => void
+  setItems: (items: Counts) => void
   setNearby: (nodeId: string | null, resource: ResourceId | null) => void
   setHint: (hint: string | null) => void
   reset: () => void
@@ -22,12 +23,15 @@ interface InventoryState {
 
 const initialItems: Counts = { wood: 0, stone: 0 }
 
+const DEFAULT_HINT =
+  'WASD move · Hold left mouse to look · E gather · Q backpack'
+
 export const createInventoryStore = create<InventoryState>((set) => ({
   tools: [...STARTING_TOOLS],
   items: { ...initialItems },
   nearbyNodeId: null,
   nearbyResource: null,
-  hint: 'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
+  hint: DEFAULT_HINT,
   addItem: (id, amount) =>
     set((state) => ({
       items: {
@@ -35,6 +39,7 @@ export const createInventoryStore = create<InventoryState>((set) => ({
         [id]: (state.items[id] ?? 0) + amount,
       },
     })),
+  setItems: (items) => set({ items: { ...items } }),
   setNearby: (nodeId, resource) =>
     set({ nearbyNodeId: nodeId, nearbyResource: resource }),
   setHint: (hint) => set({ hint }),
@@ -44,7 +49,7 @@ export const createInventoryStore = create<InventoryState>((set) => ({
       items: { ...initialItems },
       nearbyNodeId: null,
       nearbyResource: null,
-      hint: 'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
+      hint: DEFAULT_HINT,
     }),
 }))
 

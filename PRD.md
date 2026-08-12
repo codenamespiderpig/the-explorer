@@ -186,9 +186,9 @@ tests/                # Vitest unit tests for systems and stores
 1. Third-person character controller + follow camera (ecctrl); no jumping
 2. Starting tools: wooden sword, pickaxe, axe (tool-gated gathering)
 3. Home island with gatherable stone + wood nodes (respawning)
-4. Inventory UI (React overlay) with tools, resources, loot
-5. Day/night cycle + traveling merchant (sell anything; value-scaled prices) + money HUD
-6. Crafting with a small starter recipe list (anywhere, from inventory)
+4. Backpack (Q) with Craft + Learn tabs above inventory
+5. Craft builds items from recipes; Learn unlocks skills (hunt, build) that gate advanced recipes
+6. Day/night cycle + traveling merchant (sell anything; value-scaled prices) + money HUD
 7. One island upgrade tier that unlocks a second area
 8. One dungeon: stairs → mob combat + light platforming (blocks) → reward chest → portal home
    - Overworld has no jump; dungeon platforming TBD if jump is re-enabled only in dungeons
@@ -201,8 +201,8 @@ tests/                # Vitest unit tests for systems and stores
 - Ranged combat, bosses, complex mob AI
 - Tool tiers beyond the wooden starting kit
 - Multiple upgrade tiers / many islands
-- Skill trees, tech unlocks
-- Placeable buildings
+- Full skill tree UI beyond Learn tab
+- Placeable buildings in the world (crafted items stay in inventory for now)
 - Overworld night threats (night is cosmetic in v1)
 - Audio (music/SFX)
 - Mobile/touch controls, gamepad
@@ -245,7 +245,8 @@ Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be de
 | Dungeon traversal | Mob fights + jumping onto blocks (light platforming) | User |
 | Starting kit | Wooden sword, pickaxe, axe | User |
 | Island upgrade tier | Each tier unlocks one new adjacent area/island | Default |
-| Crafting location | Anywhere, from inventory (stations deferred) | Default |
+| Crafting location | Backpack Craft tab (stations deferred) | Default |
+| Progression | Learn skills (hunt, build) gate advanced craft recipes | User |
 | Dungeon failure | Death respawns player at home, inventory intact, dungeon resets | Default |
 | Day/night | Fixed-length cycle; drives merchant only, night is cosmetic in v1 | Default |
 | Art direction | Low-poly flat stylized (Forager-adjacent, cheap to author) | Default |

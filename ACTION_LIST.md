@@ -10,13 +10,15 @@
 - [x] Add combat, tools, dungeon chest, and traveling-merchant mechanics; resolve all open questions with defaults
 - [x] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5; island slab renders, Vitest wired with first economy test
 - [x] M1/M2: Third-person player + follow camera; trees/rocks to forage with E; inventory HUD
+- [x] Backpack (Q) with Craft + Learn above inventory; craft recipes and learn skills (hunt/build)
 
 ## Now
 
-- [ ] M3: Day/night + traveling merchant + money + craft recipes (TDD systems layer)
+- [ ] M3: Day/night + traveling merchant + money (TDD systems layer)
 
 ## Next
 
 - [ ] M4: Island upgrade unlocks second area
 - [ ] M5: Dungeon loop (stairs → mobs + platforming → reward chest → portal home)
 - [ ] M6: Lava biome + local saves + onboarding hints
+- [ ] Place crafted buildings in the world

@@ -184,7 +184,7 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     } else {
       store.setNearby(null, null)
       store.setHint(
-        'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
+        'WASD move · Hold left mouse to look · E gather · Q backpack',
       )
     }
   })
