@@ -2,7 +2,7 @@
 
 ## Overview
 
-**The Explorer** is a browser-based, third-person 3D sandbox inspired by *Forager*. Players explore a small map, gather resources, craft items, and expand their world through simple building and progression systems.
+**The Explorer** is a browser-based, third-person 3D sandbox inspired by *Forager*. Players start on a medium island, gather and sell or craft resources, spend money to expand their land, explore new islands and biomes, and run dungeons for loot.
 
 The product is a **web application** (not a native install), with simple stylized graphics and lightweight physics.
 
@@ -27,13 +27,58 @@ The product is a **web application** (not a native install), with simple stylize
 | Genre | 3D sandbox / crafting / light platformer exploration |
 | Perspective | Third-person |
 | Inspiration | *Forager* (3D reinterpretation) |
-| Map size | Relatively small |
+| Map size | Medium home island; expands via upgrades into more islands / biomes |
 | Graphics | Simple / stylized |
 | Physics | Simple (collisions, character movement, interact volumes) |
 
 ### Core player fantasy
 
-A compact world you can master: walk a third-person avatar across a small island-like space, harvest materials, open crafting/inventory UI, and unlock or place simple structures that expand what you can do.
+Start on a medium island, gather stone and wood, sell or craft, earn money to expand your land, then push outward into new islands, dungeons, and unique biomes (e.g. a lava world).
+
+## Game mechanics
+
+### Starting loop
+
+1. Player begins on a **medium-sized home island**.
+2. Gather basic resources: **stone** and **wood**.
+3. Choose what to do with resources:
+   - **Sell** them for **money**, or
+   - **Keep** them to **craft** items.
+4. When the player has enough money, they can **upgrade / expand their island**.
+
+### Expansion & discovery
+
+- Expanding unlocks **more islands / land**.
+- Exploring more land reveals **unique places** and biomes (example: a **lava world**).
+- Progression is exploration-driven: more land → more unique locations → more content.
+
+### Dungeons
+
+- On expanded islands, the player may find **steps leading down into a dungeon**.
+- Completing a dungeon (reaching the end) awards **loot**.
+- After completion, a **portal teleports the player back home**.
+
+### Economy (v1 intent)
+
+| Action | Result |
+|--------|--------|
+| Gather stone / wood | Add to inventory |
+| Sell resources | Gain money |
+| Craft items | Spend kept resources (recipes TBD) |
+| Upgrade island | Spend money; unlock more land / islands |
+
+### Systems implied by mechanics
+
+| System | Role |
+|--------|------|
+| Inventory | Hold stone, wood, crafted items, loot |
+| Selling | Convert resources → money |
+| Crafting | Convert resources → items |
+| Island upgrades | Money sink; unlock expansion |
+| Multi-island world | Separate areas unlocked over time |
+| Biomes / unique places | Content variety as the map grows |
+| Dungeons | Risk/reward instances with loot + return portal |
+| Home teleport | Portal returns player to home island after dungeon |
 
 ## Technical stack (agreed)
 
@@ -55,14 +100,14 @@ A compact world you can master: walk a third-person avatar across a small island
 
 ## Target experience (v1 sketch)
 
-1. Load into a small 3D map.
-2. Move in third person with a follow camera.
-3. Interact with gatherable nodes (e.g. trees, rocks, bushes).
-4. Store resources in an inventory UI.
-5. Craft basic items from recipes.
-6. Place or unlock at least one simple build/upgrade that changes the map or player capabilities.
+1. Spawn on the medium home island in third person.
+2. Gather stone and wood from nodes on the island.
+3. Sell resources for money and/or craft basic items.
+4. Spend money to upgrade the island and unlock additional land/islands.
+5. Explore newly unlocked areas and discover at least one unique place (e.g. lava world).
+6. Find dungeon entrance steps, complete a dungeon for loot, and portal home.
 
-Exact content lists (resources, recipes, buildings) will be defined in follow-up PRD sections as design firms up.
+Exact recipes, upgrade costs, dungeon layouts, and biome list will be defined as design firms up.
 
 ## Platform & constraints
 
@@ -73,17 +118,22 @@ Exact content lists (resources, recipes, buildings) will be defined in follow-up
 
 ## Success criteria (initial)
 
-- Player can move around the map in third person without broken camera/collision.
-- At least one full gather → inventory → craft loop works end-to-end.
+- Player can move around the home island in third person without broken camera/collision.
+- Gather → sell and/or craft → earn money → island upgrade works end-to-end.
+- At least one additional island/area can be unlocked and visited.
+- At least one dungeon run awards loot and returns the player home via portal.
 - Session is understandable without a long tutorial (short onboarding copy/UI is enough).
 - Codebase remains approachable: clear separation of world (R3F), systems (Zustand/domain), and UI (React).
 
 ## Open questions
 
-- Combat: none / light / required for v1?
-- Building depth: placeables vs unlock-only structures?
+- Combat in dungeons: none / light / required for v1?
+- Island upgrades: what exactly unlocks per tier (land size, new island, buildings)?
+- Selling: who/where do you sell (NPC shop, sell chest, UI button)?
+- Crafting: station-based vs anywhere from inventory?
 - Save system: local save only for v1?
-- Progression: skill tree, tech unlocks, or recipe gating only?
+- How many islands/biomes for MVP vs later (lava world in MVP)?
+- Dungeon failure: death / retreat / lose loot rules?
 - Art direction: low-poly realistic, voxel-ish, or flat stylized?
 - Audio: music/SFX scope for v1?
 - Mobile / touch support: in or out of v1?
