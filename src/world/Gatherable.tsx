@@ -3,7 +3,7 @@ import { BallCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
 import type { ResourceId } from '../data/items'
 import { registerGatherable, unregisterGatherable } from './gatherableRegistry'
 
-const RESPAWN_MS = 8000
+const RESPAWN_MS = 2500
 
 interface GatherableProps {
   id: string

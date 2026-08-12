@@ -1,5 +1,5 @@
-export const DAY_LENGTH_SEC = 90
-export const NIGHT_LENGTH_SEC = 45
+export const DAY_LENGTH_SEC = 5 * 60 // 5 minutes until darkness
+export const NIGHT_LENGTH_SEC = 60 // 1 minute of night
 export const CYCLE_LENGTH_SEC = DAY_LENGTH_SEC + NIGHT_LENGTH_SEC
 
 export type DayPhase = 'day' | 'night'

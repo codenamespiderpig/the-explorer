@@ -252,7 +252,7 @@ Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be de
 | Crafting location | Backpack Craft tab (stations deferred) | Default |
 | Progression | Learn skills (hunt, build) gate advanced craft recipes | User |
 | Dungeon failure | Death respawns player at home, inventory intact, dungeon resets | Default |
-| Day/night | 90s day / 45s night; countdown HUD; night spawns slimes | User |
+| Day/night | 5 min day / 1 min night; countdown HUD; night spawns slimes | User |
 | Night threats | Slimes spawn, attack player, damage/break gates | User |
 | Health | Start 100 HP; absolute max 145 via armour later; death = respawn at start, keep inventory | User |
 | Furnace | Craftable with Build skill for later smelting | User |
