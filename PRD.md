@@ -39,12 +39,30 @@ Start on a medium island, gather stone and wood, sell or craft, earn money to ex
 
 ### Starting loop
 
-1. Player begins on a **medium-sized home island**.
-2. Gather basic resources: **stone** and **wood**.
+1. Player begins on a **medium-sized home island** with **basic tools**: a **wooden sword**, a **pickaxe**, and an **axe**.
+2. Gather basic resources with the right tool: **pickaxe → stone**, **axe → wood**.
 3. Choose what to do with resources:
-   - **Sell** them for **money**, or
+   - **Sell** them to the traveling merchant for **money**, or
    - **Keep** them to **craft** items.
 4. When the player has enough money, they can **upgrade / expand their island**.
+
+### Tools (starting kit)
+
+| Tool | Use |
+|------|-----|
+| Wooden sword | Fight mobs in dungeons |
+| Pickaxe | Mine stone nodes |
+| Axe | Chop trees for wood |
+
+Better tool tiers (crafted or dungeon loot) are a natural upgrade path; only the wooden starting kit is required for MVP.
+
+### Selling & the traveling merchant
+
+- The world runs on a **day/night cycle**.
+- **Before nightfall**, a **traveling merchant** arrives on the home island.
+- While the merchant is present, the player can **sell anything** from their inventory.
+- **Better items sell for more money** — dungeon loot and crafted items outvalue raw stone/wood.
+- When night falls, the merchant leaves until the next day.
 
 ### Expansion & discovery
 
@@ -55,30 +73,33 @@ Start on a medium island, gather stone and wood, sell or craft, earn money to ex
 ### Dungeons
 
 - On expanded islands, the player may find **steps leading down into a dungeon**.
-- Completing a dungeon (reaching the end) awards **loot**.
-- After completion, a **portal teleports the player back home**.
+- Inside, the player must **fight mobs** (wooden sword melee) and **jump onto blocks** (light platforming) to progress.
+- At the end sits a **reward chest** containing items to **craft with or sell**.
+- After opening the chest, a **portal teleports the player back home**.
 
 ### Economy (v1 intent)
 
 | Action | Result |
 |--------|--------|
-| Gather stone / wood | Add to inventory |
-| Sell resources | Gain money |
-| Craft items | Spend kept resources (recipes TBD) |
+| Gather stone / wood (pickaxe / axe) | Add to inventory |
+| Sell to traveling merchant (daytime) | Gain money, scaled by item value |
+| Craft items | Spend kept resources and dungeon loot |
 | Upgrade island | Spend money; unlock more land / islands |
+| Dungeon reward chest | Gain higher-value items for crafting or selling |
 
 ### Systems implied by mechanics
 
 | System | Role |
 |--------|------|
-| Inventory | Hold stone, wood, crafted items, loot |
-| Selling | Convert resources → money |
-| Crafting | Convert resources → items |
+| Inventory & tools | Hold stone, wood, crafted items, loot; starting sword/pickaxe/axe |
+| Day/night cycle | Drives merchant arrival/departure |
+| Traveling merchant | Daytime vendor; converts any item → money by value |
+| Crafting | Convert resources + loot → items |
 | Island upgrades | Money sink; unlock expansion |
 | Multi-island world | Separate areas unlocked over time |
 | Biomes / unique places | Content variety as the map grows |
-| Dungeons | Risk/reward instances with loot + return portal |
-| Home teleport | Portal returns player to home island after dungeon |
+| Dungeons | Mob combat + block platforming → reward chest → portal home |
+| Combat & health | Sword melee vs dungeon mobs; player health |
 
 ## Technical stack (agreed)
 
@@ -137,11 +158,12 @@ tests/                # Vitest unit tests for systems and stores
 ## User stories
 
 ### Core loop
+- As a player, I start with a wooden sword, a pickaxe, and an axe.
 - As a player, I can move my character around the home island in third person, with the camera following me.
-- As a player, I can gather stone and wood by interacting with rocks and trees.
-- As a player, I can open an inventory and see what I'm carrying.
-- As a player, I can sell resources for money.
-- As a player, I can craft items from resources I've kept.
+- As a player, I can mine rocks with my pickaxe and chop trees with my axe.
+- As a player, I can open an inventory and see my tools, resources, and loot.
+- As a player, I can sell items to the traveling merchant during the day, and better items earn more money.
+- As a player, I can craft items from resources and dungeon loot I've kept.
 
 ### Expansion
 - As a player, I can see how much an island upgrade costs and buy it when I have enough money.
@@ -150,8 +172,10 @@ tests/                # Vitest unit tests for systems and stores
 
 ### Dungeons
 - As a player, I can find steps leading down to a dungeon on expanded land.
-- As a player, I can traverse a dungeon to its end and receive loot.
-- As a player, after finishing a dungeon, a portal returns me to my home island.
+- As a player, I fight mobs with my sword and jump across blocks to reach the dungeon's end.
+- As a player, I open a reward chest at the end and receive items for crafting or selling.
+- As a player, after opening the chest, a portal returns me to my home island.
+- As a player, if I die in a dungeon, I respawn at home with my inventory intact and the dungeon resets.
 
 ### Persistence
 - As a player, my progress (inventory, money, unlocks) survives a page reload.
@@ -159,36 +183,40 @@ tests/                # Vitest unit tests for systems and stores
 ## MVP feature list
 
 **In (v1):**
-1. Third-person character controller + follow camera (ecctrl)
-2. Home island with gatherable stone + wood nodes (respawning)
-3. Inventory UI (React overlay)
-4. Sell-for-money mechanic + money HUD
-5. Crafting with a small starter recipe list
-6. One island upgrade tier that unlocks a second area
-7. One dungeon: entrance stairs → linear path → loot chest → portal home
-8. One unique biome as the second area (lava world candidate)
-9. Local save/load via `localStorage`
-10. Minimal onboarding copy (contextual hints, no tutorial flow)
+1. Third-person character controller + follow camera (ecctrl), including jumping
+2. Starting tools: wooden sword, pickaxe, axe (tool-gated gathering)
+3. Home island with gatherable stone + wood nodes (respawning)
+4. Inventory UI (React overlay) with tools, resources, loot
+5. Day/night cycle + traveling merchant (sell anything; value-scaled prices) + money HUD
+6. Crafting with a small starter recipe list (anywhere, from inventory)
+7. One island upgrade tier that unlocks a second area
+8. One dungeon: stairs → mob combat + block platforming → reward chest → portal home
+9. Light combat: sword swing, 2–3 simple melee mobs, player health hearts
+10. One unique biome as the second area (lava world candidate)
+11. Local save/load via `localStorage`
+12. Minimal onboarding copy (contextual hints, no tutorial flow)
 
 **Out (backlog):**
-- Combat, enemies, health
+- Ranged combat, bosses, complex mob AI
+- Tool tiers beyond the wooden starting kit
 - Multiple upgrade tiers / many islands
 - Skill trees, tech unlocks
 - Placeable buildings
+- Overworld night threats (night is cosmetic in v1)
 - Audio (music/SFX)
 - Mobile/touch controls, gamepad
 - Multiplayer, cloud saves
 
 ## Target experience (v1 sketch)
 
-1. Spawn on the medium home island in third person.
-2. Gather stone and wood from nodes on the island.
-3. Sell resources for money and/or craft basic items.
+1. Spawn on the medium home island in third person with sword, pickaxe, and axe.
+2. Mine stone and chop wood from nodes on the island.
+3. Sell to the traveling merchant before nightfall and/or craft basic items.
 4. Spend money to upgrade the island and unlock additional land/islands.
 5. Explore newly unlocked areas and discover at least one unique place (e.g. lava world).
-6. Find dungeon entrance steps, complete a dungeon for loot, and portal home.
+6. Find dungeon entrance steps, fight mobs, platform across blocks, open the reward chest, and portal home.
 
-Exact recipes, upgrade costs, dungeon layouts, and biome list will be defined as design firms up.
+Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be defined in `data/` as content firms up.
 
 ## Platform & constraints
 
@@ -206,31 +234,37 @@ Exact recipes, upgrade costs, dungeon layouts, and biome list will be defined as
 - Session is understandable without a long tutorial (short onboarding copy/UI is enough).
 - Codebase remains approachable: clear separation of world (R3F), systems (Zustand/domain), and UI (React).
 
-## Open questions
+## Design decisions (user-specified + defaults)
 
-- Combat in dungeons: none / light / required for v1?
-- Island upgrades: what exactly unlocks per tier (land size, new island, buildings)?
-- Selling: who/where do you sell (NPC shop, sell chest, UI button)?
-- Crafting: station-based vs anywhere from inventory?
-- Dungeon failure: death / retreat / lose loot rules?
-- Art direction: low-poly realistic, voxel-ish, or flat stylized?
-- Audio: music/SFX scope for v1?
-- Mobile / touch support: in or out of v1?
+| Question | Decision | Source |
+|----------|----------|--------|
+| Combat in dungeons | Yes — light melee with wooden sword vs simple mobs | User |
+| Selling | Traveling merchant visits home island before nightfall; sells anything, value-scaled | User |
+| Dungeon reward | Chest at the end with items for crafting or selling | User |
+| Dungeon traversal | Mob fights + jumping onto blocks (light platforming) | User |
+| Starting kit | Wooden sword, pickaxe, axe | User |
+| Island upgrade tier | Each tier unlocks one new adjacent area/island | Default |
+| Crafting location | Anywhere, from inventory (stations deferred) | Default |
+| Dungeon failure | Death respawns player at home, inventory intact, dungeon resets | Default |
+| Day/night | Fixed-length cycle; drives merchant only, night is cosmetic in v1 | Default |
+| Art direction | Low-poly flat stylized (Forager-adjacent, cheap to author) | Default |
+| Audio | Out of v1 | Default |
+| Mobile/touch | Out of v1; desktop keyboard + mouse | Default |
 
 ## Milestones
 
 | # | Milestone | Proves |
 |---|-----------|--------|
 | M0 | Scaffold: Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5, blank island plane | Stack installs and renders |
-| M1 | Third-person movement + follow camera on home island | Core feel |
-| M2 | Gather stone/wood → inventory UI | First interaction loop |
-| M3 | Sell + money + craft starter recipes | Economy loop closes |
+| M1 | Third-person movement, jumping + follow camera on home island | Core feel |
+| M2 | Tool-gated gathering (pickaxe/axe) → inventory UI | First interaction loop |
+| M3 | Day/night cycle + traveling merchant selling + money + craft starter recipes | Economy loop closes |
 | M4 | Island upgrade unlocks second area | Expansion works |
-| M5 | Dungeon: stairs → path → loot → portal home | Dungeon loop closes |
+| M5 | Dungeon: stairs → mobs + sword combat + block platforming → reward chest → portal home | Dungeon loop closes |
 | M6 | Lava-world biome dressing + local saves + onboarding hints | MVP complete |
 
 ## Next steps
 
-1. Lock remaining open questions (combat, selling flow, crafting stations, dungeon failure rules, art direction).
-2. Scaffold the project (M0) with the pinned dependency majors above.
-3. Build milestones in order, TDD-ing the systems layer (economy, crafting, unlocks).
+1. Scaffold the project (M0) with the pinned dependency majors above.
+2. Build milestones in order, TDD-ing the systems layer (economy, merchant pricing, crafting, unlocks, dungeon flow).
+3. Define starter content in `data/`: recipes, item values, upgrade cost, mob stats.

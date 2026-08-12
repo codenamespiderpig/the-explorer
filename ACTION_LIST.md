@@ -7,17 +7,17 @@
 - [x] Document core game mechanics (gather/sell/craft, island upgrades, multi-island, dungeons, biomes)
 - [x] Verify stack versions against current docs (React 19 / fiber 9 / drei 10 / rapier 2 / zustand 5; ecctrl for controller)
 - [x] Build out `PRD.md`: user stories, MVP feature list, architecture, testing approach, milestones (M0–M6)
+- [x] Add combat, tools, dungeon chest, and traveling-merchant mechanics; resolve all open questions with defaults
 
 ## Now
 
-- [ ] Resolve remaining PRD open questions (combat, selling flow, crafting stations, dungeon failure, art direction, audio, mobile)
+- [ ] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5
 
 ## Next
 
-- [ ] M0: Scaffold Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5
-- [ ] M1: Third-person controller + follow camera on home island
-- [ ] M2: Gather stone/wood → inventory UI
-- [ ] M3: Sell + money + craft starter recipes (TDD systems layer)
+- [ ] M1: Third-person controller, jumping + follow camera on home island
+- [ ] M2: Tool-gated gathering (pickaxe/axe) → inventory UI
+- [ ] M3: Day/night + traveling merchant + money + craft recipes (TDD systems layer)
 - [ ] M4: Island upgrade unlocks second area
-- [ ] M5: Dungeon loop (stairs → path → loot → portal home)
+- [ ] M5: Dungeon loop (stairs → mobs + platforming → reward chest → portal home)
 - [ ] M6: Lava biome + local saves + onboarding hints
