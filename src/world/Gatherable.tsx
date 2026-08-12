@@ -71,7 +71,7 @@ export function Gatherable({ id, resource, position }: GatherableProps) {
           if (state.nearbyNodeId === id) {
             setNearby(null, null)
             setHint(
-              'WASD move · Space jump · Drag mouse to look · Walk to a tree or rock and press E',
+              'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
             )
           }
         }}

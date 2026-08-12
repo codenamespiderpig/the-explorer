@@ -27,7 +27,7 @@ export const createInventoryStore = create<InventoryState>((set) => ({
   items: { ...initialItems },
   nearbyNodeId: null,
   nearbyResource: null,
-  hint: 'WASD move · Space jump · Mouse look · Walk to a tree or rock and press E',
+  hint: 'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
   addItem: (id, amount) =>
     set((state) => ({
       items: {
@@ -44,7 +44,7 @@ export const createInventoryStore = create<InventoryState>((set) => ({
       items: { ...initialItems },
       nearbyNodeId: null,
       nearbyResource: null,
-      hint: 'WASD move · Space jump · Mouse look · Walk to a tree or rock and press E',
+      hint: 'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
     }),
 }))
 

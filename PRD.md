@@ -183,14 +183,15 @@ tests/                # Vitest unit tests for systems and stores
 ## MVP feature list
 
 **In (v1):**
-1. Third-person character controller + follow camera (ecctrl), including jumping
+1. Third-person character controller + follow camera (ecctrl); no jumping
 2. Starting tools: wooden sword, pickaxe, axe (tool-gated gathering)
 3. Home island with gatherable stone + wood nodes (respawning)
 4. Inventory UI (React overlay) with tools, resources, loot
 5. Day/night cycle + traveling merchant (sell anything; value-scaled prices) + money HUD
 6. Crafting with a small starter recipe list (anywhere, from inventory)
 7. One island upgrade tier that unlocks a second area
-8. One dungeon: stairs → mob combat + block platforming → reward chest → portal home
+8. One dungeon: stairs → mob combat + light platforming (blocks) → reward chest → portal home
+   - Overworld has no jump; dungeon platforming TBD if jump is re-enabled only in dungeons
 9. Light combat: sword swing, 2–3 simple melee mobs, player health hearts
 10. One unique biome as the second area (lava world candidate)
 11. Local save/load via `localStorage`
@@ -256,7 +257,7 @@ Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be de
 | # | Milestone | Proves |
 |---|-----------|--------|
 | M0 | Scaffold: Vite + React 19 + fiber v9 + drei v10 + rapier v2 + ecctrl + Zustand v5, blank island plane | Stack installs and renders |
-| M1 | Third-person movement, jumping + follow camera on home island | Core feel |
+| M1 | Third-person movement + follow camera on home island (no jump) | Core feel |
 | M2 | Tool-gated gathering (pickaxe/axe) → inventory UI | First interaction loop |
 | M3 | Day/night cycle + traveling merchant selling + money + craft starter recipes | Economy loop closes |
 | M4 | Island upgrade unlocks second area | Expansion works |

@@ -1,10 +1,9 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { KeyboardControls, Sky } from '@react-three/drei'
+import { Sky } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
 import { Player } from './player/Player'
-import { keyboardMap } from './player/keyboardMap'
 import { Hud } from './ui/Hud'
 
 export default function App() {
@@ -20,12 +19,10 @@ export default function App() {
           shadow-mapSize={[1024, 1024]}
         />
         <Suspense fallback={null}>
-          <KeyboardControls map={keyboardMap}>
-            <Physics>
-              <HomeIsland />
-              <Player />
-            </Physics>
-          </KeyboardControls>
+          <Physics>
+            <HomeIsland />
+            <Player />
+          </Physics>
         </Suspense>
       </Canvas>
       <Hud />
