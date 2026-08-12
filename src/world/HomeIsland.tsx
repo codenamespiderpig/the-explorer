@@ -3,6 +3,9 @@ import { Gatherable } from './Gatherable'
 
 const ISLAND_SIZE = 36
 const ISLAND_THICKNESS = 2
+const WALL_HEIGHT = 10
+const WALL_THICKNESS = 0.6
+const HALF = ISLAND_SIZE / 2
 
 const TREES: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'tree-1', position: [-6, 0, -5] },
@@ -38,6 +41,35 @@ const ROCKS: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'rock-12', position: [7, 0, -11] },
 ]
 
+/** Invisible walls around the island edge so the player cannot fall off. */
+function InvisibleWalls() {
+  const y = WALL_HEIGHT / 2
+  return (
+    <>
+      <RigidBody type="fixed" colliders="cuboid" position={[0, y, HALF]}>
+        <mesh visible={false}>
+          <boxGeometry args={[ISLAND_SIZE + WALL_THICKNESS * 2, WALL_HEIGHT, WALL_THICKNESS]} />
+        </mesh>
+      </RigidBody>
+      <RigidBody type="fixed" colliders="cuboid" position={[0, y, -HALF]}>
+        <mesh visible={false}>
+          <boxGeometry args={[ISLAND_SIZE + WALL_THICKNESS * 2, WALL_HEIGHT, WALL_THICKNESS]} />
+        </mesh>
+      </RigidBody>
+      <RigidBody type="fixed" colliders="cuboid" position={[HALF, y, 0]}>
+        <mesh visible={false}>
+          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, ISLAND_SIZE]} />
+        </mesh>
+      </RigidBody>
+      <RigidBody type="fixed" colliders="cuboid" position={[-HALF, y, 0]}>
+        <mesh visible={false}>
+          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, ISLAND_SIZE]} />
+        </mesh>
+      </RigidBody>
+    </>
+  )
+}
+
 /** Home island slab plus forageable trees and rocks. */
 export function HomeIsland() {
   return (
@@ -48,6 +80,7 @@ export function HomeIsland() {
           <meshStandardMaterial color="#6abe30" />
         </mesh>
       </RigidBody>
+      <InvisibleWalls />
 
       {TREES.map((tree) => (
         <Gatherable key={tree.id} id={tree.id} resource="wood" position={tree.position} />
