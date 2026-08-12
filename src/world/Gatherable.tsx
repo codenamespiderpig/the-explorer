@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { RigidBody } from '@react-three/rapier'
+import { BallCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
 import type { ResourceId } from '../data/items'
-import { useInventoryStore } from '../stores/inventoryStore'
+import { registerGatherable, unregisterGatherable } from './gatherableRegistry'
 
 const RESPAWN_MS = 8000
 
@@ -37,54 +37,43 @@ function RockVisual() {
 
 export function Gatherable({ id, resource, position }: GatherableProps) {
   const [available, setAvailable] = useState(true)
-  const setNearby = useInventoryStore((s) => s.setNearby)
-  const setHint = useInventoryStore((s) => s.setHint)
+
+  useEffect(() => {
+    if (!available) {
+      unregisterGatherable(id)
+      return
+    }
+    registerGatherable({ id, resource, position })
+    return () => unregisterGatherable(id)
+  }, [id, resource, position, available])
 
   useEffect(() => {
     const onHarvest = (event: Event) => {
       const detail = (event as CustomEvent<{ nodeId: string }>).detail
       if (detail.nodeId !== id) return
       setAvailable(false)
-      setNearby(null, null)
+      unregisterGatherable(id)
       window.setTimeout(() => setAvailable(true), RESPAWN_MS)
     }
     window.addEventListener('explorer:harvest', onHarvest)
     return () => window.removeEventListener('explorer:harvest', onHarvest)
-  }, [id, setNearby])
+  }, [id])
 
   if (!available) return null
 
+  if (resource === 'wood') {
+    return (
+      <RigidBody type="fixed" position={position} colliders={false}>
+        <CylinderCollider args={[0.7, 0.4]} position={[0, 0.7, 0]} />
+        <TreeVisual />
+      </RigidBody>
+    )
+  }
+
   return (
-    <group position={position}>
-      {resource === 'wood' ? <TreeVisual /> : <RockVisual />}
-      <RigidBody
-        type="fixed"
-        colliders="ball"
-        sensor
-        position={[0, 1, 0]}
-        onIntersectionEnter={() => {
-          setNearby(id, resource)
-          setHint(`Press E to gather ${resource}`)
-        }}
-        onIntersectionExit={() => {
-          const state = useInventoryStore.getState()
-          if (state.nearbyNodeId === id) {
-            setNearby(null, null)
-            setHint(
-              'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
-            )
-          }
-        }}
-      >
-        <mesh visible={false}>
-          <sphereGeometry args={[1.4, 8, 8]} />
-        </mesh>
-      </RigidBody>
-      <RigidBody type="fixed" colliders="cuboid" position={[0, 0.4, 0]}>
-        <mesh visible={false}>
-          <boxGeometry args={[0.6, 0.8, 0.6]} />
-        </mesh>
-      </RigidBody>
-    </group>
+    <RigidBody type="fixed" position={position} colliders={false}>
+      <BallCollider args={[0.65]} position={[0, 0.4, 0]} />
+      <RockVisual />
+    </RigidBody>
   )
 }

@@ -3,7 +3,11 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
+import { findNearestGatherable } from '../systems/proximity'
 import { useInventoryStore } from '../stores/inventoryStore'
+import { listGatherables } from '../world/gatherableRegistry'
+
+const GATHER_RADIUS = 2.4
 
 const MOVE_KEYS = {
   forward: new Set(['KeyW', 'ArrowUp']),
@@ -159,10 +163,38 @@ function useGatherInput() {
   }, [])
 }
 
+function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
+  const lastId = useRef<string | null>(null)
+
+  useFrame(() => {
+    if (!ecctrl.current) return
+    const pos = ecctrl.current.currPos
+    const nearest = findNearestGatherable(
+      listGatherables(),
+      [pos.x, pos.y, pos.z],
+      GATHER_RADIUS,
+    )
+    const nextId = nearest?.id ?? null
+    if (nextId === lastId.current) return
+    lastId.current = nextId
+    const store = useInventoryStore.getState()
+    if (nearest) {
+      store.setNearby(nearest.id, nearest.resource)
+      store.setHint(`Press E to gather ${nearest.resource}`)
+    } else {
+      store.setNearby(null, null)
+      store.setHint(
+        'WASD move · Hold left mouse to look · Walk to a tree or rock and press E',
+      )
+    }
+  })
+}
+
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const keys = useMovementKeys()
   useGatherInput()
+  useProximityTracking(ecctrl)
 
   useFrame(() => {
     const body = ecctrl.current
