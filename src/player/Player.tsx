@@ -4,7 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
-import { gatePlacement } from '../systems/gate'
+import { gatePlacementFromLookYaw } from '../systems/gate'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { listGatherables } from '../world/gatherableRegistry'
@@ -75,9 +75,15 @@ function useMovementKeys() {
   return keys
 }
 
-function FollowCamera({ ecctrl }: { ecctrl: RefObject<EcctrlHandle | null> }) {
+function FollowCamera({
+  ecctrl,
+  lookYaw,
+}: {
+  ecctrl: RefObject<EcctrlHandle | null>
+  lookYaw: RefObject<number>
+}) {
   const { camera, gl } = useThree()
-  const yaw = useRef(0)
+  const yaw = lookYaw
   const pitch = useRef(0.45)
   const distance = useRef(8)
   const dragging = useRef(false)
@@ -194,8 +200,10 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
   })
 }
 
-function useGatePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
-  const { camera } = useThree()
+function useGatePlacement(
+  ecctrl: RefObject<EcctrlHandle | null>,
+  lookYaw: RefObject<number>,
+) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'KeyG' || e.repeat) return
@@ -207,23 +215,24 @@ function useGatePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
       }
       if (!ecctrl.current) return
       const pos = ecctrl.current.currPos
-      const { position, yaw } = gatePlacement(pos, camera.position, 2.8)
+      const { position, yaw } = gatePlacementFromLookYaw(pos, lookYaw.current, 2.8)
       inv.setItems({ ...inv.items, 'wooden-gate': count - 1 })
       useGameStore.getState().placeGate(position, yaw)
       inv.setHint('Gate placed — it will block night slimes until broken')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [camera, ecctrl])
+  }, [ecctrl, lookYaw])
 }
 
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
+  const lookYaw = useRef(0)
   const keys = useMovementKeys()
   const respawnToken = useGameStore((s) => s.respawnToken)
   useGatherInput()
   useProximityTracking(ecctrl)
-  useGatePlacement(ecctrl)
+  useGatePlacement(ecctrl, lookYaw)
 
   useFrame(() => {
     const body = ecctrl.current
@@ -266,7 +275,7 @@ export function Player() {
       >
         <CharacterModel />
       </Ecctrl>
-      <FollowCamera ecctrl={ecctrl} />
+      <FollowCamera lookYaw={lookYaw} ecctrl={ecctrl} />
     </>
   )
 }

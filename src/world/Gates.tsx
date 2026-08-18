@@ -38,19 +38,23 @@ export function Gates() {
   return (
     <>
       {gates.map((gate) => (
-        <RigidBody
-          key={gate.id}
-          type="fixed"
-          position={gate.position}
-          rotation={[0, gate.yaw, 0]}
-          colliders={false}
-        >
-          <CuboidCollider
-            args={[GATE_HALF_WIDTH, GATE_HEIGHT / 2, GATE_HALF_THICKNESS]}
-            position={[0, GATE_HEIGHT / 2, 0]}
-          />
-          <GateMesh hp={gate.hp} maxHp={gate.maxHp} />
-        </RigidBody>
+        <group key={gate.id}>
+          {/* Visual rotation is on a Three.js group so it cannot be overwritten by Rapier. */}
+          <group position={gate.position} rotation={[0, gate.yaw, 0]}>
+            <GateMesh hp={gate.hp} maxHp={gate.maxHp} />
+          </group>
+          <RigidBody
+            type="fixed"
+            colliders={false}
+            position={gate.position}
+            rotation={[0, gate.yaw, 0]}
+          >
+            <CuboidCollider
+              args={[GATE_HALF_WIDTH, GATE_HEIGHT / 2, GATE_HALF_THICKNESS]}
+              position={[0, GATE_HEIGHT / 2, 0]}
+            />
+          </RigidBody>
+        </group>
       ))}
     </>
   )

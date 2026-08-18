@@ -30,22 +30,17 @@ export interface Vec3 {
   z: number
 }
 
-/** Place a gate in front of the player, facing the camera look direction. */
-export function gatePlacement(
+/**
+ * Place a gate in front of the player using the follow-camera orbit yaw.
+ * Camera sits at player + (sin(lookYaw), cos(lookYaw)), so look direction is the opposite.
+ */
+export function gatePlacementFromLookYaw(
   player: Vec3,
-  camera: Vec3,
+  lookYaw: number,
   distance = 2.8,
 ): { position: [number, number, number]; yaw: number } {
-  let lx = player.x - camera.x
-  let lz = player.z - camera.z
-  const len = Math.hypot(lx, lz)
-  if (len < 0.001) {
-    lx = 0
-    lz = 1
-  } else {
-    lx /= len
-    lz /= len
-  }
+  const lx = -Math.sin(lookYaw)
+  const lz = -Math.cos(lookYaw)
   return {
     position: [player.x + lx * distance, 0, player.z + lz * distance],
     yaw: Math.atan2(lx, lz),
