@@ -12,6 +12,7 @@
 - [x] M1/M2: Third-person player + follow camera; trees/rocks to forage with E; inventory HUD
 - [x] Backpack (Q) with Craft + Learn above inventory; craft recipes and learn skills (hunt/build)
 - [x] Day/night cycle + night countdown HUD; night slimes; wooden gates; health/respawn; furnace recipe
+- [x] Invisible island barrier: thick Rapier walls + player position clamp so you cannot fall off
 
 ## Now
 

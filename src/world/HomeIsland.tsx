@@ -1,11 +1,11 @@
-import { RigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { Gatherable } from './Gatherable'
+import { ISLAND_HALF, ISLAND_SIZE } from './bounds'
 
-const ISLAND_SIZE = 36
 const ISLAND_THICKNESS = 2
-const WALL_HEIGHT = 10
-const WALL_THICKNESS = 0.6
-const HALF = ISLAND_SIZE / 2
+const WALL_HEIGHT = 12
+const WALL_THICKNESS = 2
+const WALL_Y = WALL_HEIGHT / 2 - 0.5
 
 const TREES: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'tree-1', position: [-6, 0, -5] },
@@ -41,32 +41,23 @@ const ROCKS: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'rock-12', position: [7, 0, -11] },
 ]
 
-/** Invisible walls around the island edge so the player cannot fall off. */
+/**
+ * Thick inset colliders around the island. Mesh-derived walls were too thin
+ * for the character controller and sat on the lip, so the player walked off.
+ */
 function InvisibleWalls() {
-  const y = WALL_HEIGHT / 2
+  const hx = WALL_THICKNESS / 2
+  const hy = WALL_HEIGHT / 2
+  const hz = ISLAND_SIZE / 2 + hx
+  const inset = ISLAND_HALF - hx
+
   return (
-    <>
-      <RigidBody type="fixed" colliders="cuboid" position={[0, y, HALF]}>
-        <mesh visible={false}>
-          <boxGeometry args={[ISLAND_SIZE + WALL_THICKNESS * 2, WALL_HEIGHT, WALL_THICKNESS]} />
-        </mesh>
-      </RigidBody>
-      <RigidBody type="fixed" colliders="cuboid" position={[0, y, -HALF]}>
-        <mesh visible={false}>
-          <boxGeometry args={[ISLAND_SIZE + WALL_THICKNESS * 2, WALL_HEIGHT, WALL_THICKNESS]} />
-        </mesh>
-      </RigidBody>
-      <RigidBody type="fixed" colliders="cuboid" position={[HALF, y, 0]}>
-        <mesh visible={false}>
-          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, ISLAND_SIZE]} />
-        </mesh>
-      </RigidBody>
-      <RigidBody type="fixed" colliders="cuboid" position={[-HALF, y, 0]}>
-        <mesh visible={false}>
-          <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, ISLAND_SIZE]} />
-        </mesh>
-      </RigidBody>
-    </>
+    <RigidBody type="fixed" colliders={false}>
+      <CuboidCollider args={[hz, hy, hx]} position={[0, WALL_Y, inset]} />
+      <CuboidCollider args={[hz, hy, hx]} position={[0, WALL_Y, -inset]} />
+      <CuboidCollider args={[hx, hy, hz]} position={[inset, WALL_Y, 0]} />
+      <CuboidCollider args={[hx, hy, hz]} position={[-inset, WALL_Y, 0]} />
+    </RigidBody>
   )
 }
 

@@ -7,6 +7,7 @@ import { findNearestGatherable } from '../systems/proximity'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { listGatherables } from '../world/gatherableRegistry'
+import { FALL_Y, clampToIsland } from '../world/bounds'
 
 const GATHER_RADIUS = 2.4
 
@@ -244,6 +245,18 @@ export function Player() {
       run: k.run,
       jump: false,
     })
+
+    const t = body.body.translation()
+    const clamped = clampToIsland(t.x, t.z)
+    const fell = t.y < FALL_Y
+    if (fell || clamped.x !== t.x || clamped.z !== t.z) {
+      body.body.setTranslation(
+        { x: fell ? 0 : clamped.x, y: fell ? 3 : t.y, z: fell ? 0 : clamped.z },
+        true,
+      )
+      const v = body.body.linvel()
+      body.body.setLinvel({ x: 0, y: fell ? 0 : v.y, z: 0 }, true)
+    }
   })
 
   return (
