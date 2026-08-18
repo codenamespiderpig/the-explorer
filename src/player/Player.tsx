@@ -4,7 +4,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
-import { gatePlacementFromLookYaw } from '../systems/gate'
+import { gatePlacementFromForward } from '../systems/gate'
+import { cameraLook, facingDirection } from '../systems/facing'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { listGatherables } from '../world/gatherableRegistry'
@@ -78,9 +79,11 @@ function useMovementKeys() {
 function FollowCamera({
   ecctrl,
   lookYaw,
+  lastFacing,
 }: {
   ecctrl: RefObject<EcctrlHandle | null>
   lookYaw: RefObject<number>
+  lastFacing: RefObject<{ x: number; z: number }>
 }) {
   const { camera, gl } = useThree()
   const yaw = lookYaw
@@ -88,7 +91,7 @@ function FollowCamera({
   const distance = useRef(8)
   const dragging = useRef(false)
   const ideal = useRef(new THREE.Vector3())
-  const look = useRef(new THREE.Vector3())
+  const lookTarget = useRef(new THREE.Vector3())
 
   useEffect(() => {
     const el = gl.domElement
@@ -104,6 +107,7 @@ function FollowCamera({
     const onPointerMove = (e: PointerEvent) => {
       if (!dragging.current) return
       yaw.current -= e.movementX * 0.005
+      lastFacing.current = cameraLook(yaw.current)
       pitch.current = THREE.MathUtils.clamp(pitch.current - e.movementY * 0.005, 0.15, 1.2)
     }
     const onWheel = (e: WheelEvent) => {
@@ -121,7 +125,7 @@ function FollowCamera({
       el.removeEventListener('pointermove', onPointerMove)
       el.removeEventListener('wheel', onWheel)
     }
-  }, [gl])
+  }, [gl, lastFacing, yaw])
 
   useFrame(() => {
     if (!ecctrl.current) return
@@ -134,8 +138,8 @@ function FollowCamera({
       pos.z + Math.cos(yaw.current) * cosPitch * d,
     )
     camera.position.lerp(ideal.current, 0.2)
-    look.current.set(pos.x, pos.y + 1.1, pos.z)
-    camera.lookAt(look.current)
+    lookTarget.current.set(pos.x, pos.y + 1.1, pos.z)
+    camera.lookAt(lookTarget.current)
   })
 
   return null
@@ -203,6 +207,14 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
 function useGatePlacement(
   ecctrl: RefObject<EcctrlHandle | null>,
   lookYaw: RefObject<number>,
+  keys: RefObject<{
+    forward: boolean
+    backward: boolean
+    leftward: boolean
+    rightward: boolean
+    run: boolean
+  }>,
+  lastFacing: RefObject<{ x: number; z: number }>,
 ) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -215,24 +227,30 @@ function useGatePlacement(
       }
       if (!ecctrl.current) return
       const pos = ecctrl.current.currPos
-      const { position, yaw } = gatePlacementFromLookYaw(pos, lookYaw.current, 2.8)
+      const k = keys.current
+      const moving = k.forward || k.backward || k.leftward || k.rightward
+      const forward = moving
+        ? facingDirection(lookYaw.current, k)
+        : lastFacing.current
+      const { position, yaw } = gatePlacementFromForward(pos, forward, 2.8)
       inv.setItems({ ...inv.items, 'wooden-gate': count - 1 })
       useGameStore.getState().placeGate(position, yaw)
       inv.setHint('Gate placed — it will block night slimes until broken')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [ecctrl, lookYaw])
+  }, [ecctrl, lookYaw, keys, lastFacing])
 }
 
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const lookYaw = useRef(0)
+  const lastFacing = useRef({ x: 0, z: -1 })
   const keys = useMovementKeys()
   const respawnToken = useGameStore((s) => s.respawnToken)
   useGatherInput()
   useProximityTracking(ecctrl)
-  useGatePlacement(ecctrl, lookYaw)
+  useGatePlacement(ecctrl, lookYaw, keys, lastFacing)
 
   useFrame(() => {
     const body = ecctrl.current
@@ -246,6 +264,9 @@ export function Player() {
       run: k.run,
       jump: false,
     })
+    if (k.forward || k.backward || k.leftward || k.rightward) {
+      lastFacing.current = facingDirection(lookYaw.current, k)
+    }
 
     const t = body.body.translation()
     const clamped = clampToIsland(t.x, t.z)
@@ -275,7 +296,7 @@ export function Player() {
       >
         <CharacterModel />
       </Ecctrl>
-      <FollowCamera lookYaw={lookYaw} ecctrl={ecctrl} />
+      <FollowCamera lookYaw={lookYaw} lastFacing={lastFacing} ecctrl={ecctrl} />
     </>
   )
 }

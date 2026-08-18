@@ -13,7 +13,7 @@
 - [x] Backpack (Q) with Craft + Learn above inventory; craft recipes and learn skills (hunt/build)
 - [x] Day/night cycle + night countdown HUD; night slimes; wooden gates; health/respawn; furnace recipe
 - [x] Invisible island barrier: thick Rapier walls + player position clamp so you cannot fall off
-- [x] Wider gates that face the camera look direction when placed
+- [x] Wider gates that face walk direction or camera look, with rotation baked into the mesh
 
 ## Now
 
