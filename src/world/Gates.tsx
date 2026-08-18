@@ -1,33 +1,32 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 
-function GateMesh({
-  position,
-  hp,
-  maxHp,
-}: {
-  position: [number, number, number]
-  hp: number
-  maxHp: number
-}) {
+const GATE_HALF_WIDTH = 2.6
+const GATE_HEIGHT = 1.5
+const GATE_HALF_THICKNESS = 0.18
+
+function GateMesh({ hp, maxHp }: { hp: number; maxHp: number }) {
   const healthRatio = hp / maxHp
   const color = healthRatio > 0.5 ? '#8b5a2b' : healthRatio > 0.25 ? '#a66a2a' : '#6b3a1a'
+  const postX = GATE_HALF_WIDTH - 0.15
+  const lintelWidth = GATE_HALF_WIDTH * 2
+  const boardWidth = lintelWidth - 0.5
   return (
-    <group position={position}>
-      <mesh castShadow position={[-0.7, 0.7, 0]}>
-        <boxGeometry args={[0.25, 1.4, 0.25]} />
+    <group>
+      <mesh castShadow position={[-postX, 0.75, 0]}>
+        <boxGeometry args={[0.3, 1.5, 0.3]} />
         <meshStandardMaterial color={color} />
       </mesh>
-      <mesh castShadow position={[0.7, 0.7, 0]}>
-        <boxGeometry args={[0.25, 1.4, 0.25]} />
+      <mesh castShadow position={[postX, 0.75, 0]}>
+        <boxGeometry args={[0.3, 1.5, 0.3]} />
         <meshStandardMaterial color={color} />
       </mesh>
-      <mesh castShadow position={[0, 1.2, 0]}>
-        <boxGeometry args={[1.6, 0.3, 0.2]} />
+      <mesh castShadow position={[0, 1.35, 0]}>
+        <boxGeometry args={[lintelWidth, 0.28, 0.28]} />
         <meshStandardMaterial color={color} />
       </mesh>
-      <mesh castShadow position={[0, 0.55, 0]}>
-        <boxGeometry args={[1.2, 0.9, 0.12]} />
+      <mesh castShadow position={[0, 0.6, 0]}>
+        <boxGeometry args={[boardWidth, 1.05, 0.14]} />
         <meshStandardMaterial color="#c4a574" />
       </mesh>
     </group>
@@ -39,9 +38,18 @@ export function Gates() {
   return (
     <>
       {gates.map((gate) => (
-        <RigidBody key={gate.id} type="fixed" position={gate.position} colliders={false}>
-          <CuboidCollider args={[0.9, 0.8, 0.25]} position={[0, 0.8, 0]} />
-          <GateMesh position={[0, 0, 0]} hp={gate.hp} maxHp={gate.maxHp} />
+        <RigidBody
+          key={gate.id}
+          type="fixed"
+          position={gate.position}
+          rotation={[0, gate.yaw, 0]}
+          colliders={false}
+        >
+          <CuboidCollider
+            args={[GATE_HALF_WIDTH, GATE_HEIGHT / 2, GATE_HALF_THICKNESS]}
+            position={[0, GATE_HEIGHT / 2, 0]}
+          />
+          <GateMesh hp={gate.hp} maxHp={gate.maxHp} />
         </RigidBody>
       ))}
     </>

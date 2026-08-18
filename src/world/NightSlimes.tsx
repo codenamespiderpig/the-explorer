@@ -6,7 +6,7 @@ import { isGateDestroyed } from '../systems/gate'
 
 const SLIME_SPEED = 2.2
 const ATTACK_RANGE = 1.4
-const GATE_RANGE = 2.5
+const GATE_RANGE = 3.4
 const ATTACK_COOLDOWN = 0.9
 const SLIME_DAMAGE = 8
 const GATE_DAMAGE = 10

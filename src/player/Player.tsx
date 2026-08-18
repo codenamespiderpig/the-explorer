@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
+import { gatePlacement } from '../systems/gate'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { listGatherables } from '../world/gatherableRegistry'
@@ -206,18 +207,9 @@ function useGatePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
       }
       if (!ecctrl.current) return
       const pos = ecctrl.current.currPos
-      const forward = new THREE.Vector3()
-      camera.getWorldDirection(forward)
-      forward.y = 0
-      if (forward.lengthSq() < 0.001) forward.set(0, 0, 1)
-      forward.normalize()
-      const placeAt: [number, number, number] = [
-        pos.x + forward.x * 2.2,
-        0,
-        pos.z + forward.z * 2.2,
-      ]
+      const { position, yaw } = gatePlacement(pos, camera.position, 2.8)
       inv.setItems({ ...inv.items, 'wooden-gate': count - 1 })
-      useGameStore.getState().placeGate(placeAt)
+      useGameStore.getState().placeGate(position, yaw)
       inv.setHint('Gate placed — it will block night slimes until broken')
     }
     window.addEventListener('keydown', onKey)

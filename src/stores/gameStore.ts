@@ -37,7 +37,7 @@ interface GameState {
   respawnToken: number
   tick: (deltaSec: number) => void
   setPlayerPos: (pos: [number, number, number]) => void
-  placeGate: (position: [number, number, number]) => boolean
+  placeGate: (position: [number, number, number], yaw?: number) => boolean
   damagePlayer: (amount: number) => void
   damageNearestGate: (from: [number, number, number], amount: number) => boolean
   spawnNightSlimes: () => void
@@ -86,9 +86,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setPlayerPos: (pos) => set({ playerPos: pos }),
 
-  placeGate: (position) => {
+  placeGate: (position, yaw = 0) => {
     gateSeq += 1
-    const gate = createGate(`gate-${gateSeq}`, position, 50)
+    const gate = createGate(`gate-${gateSeq}`, position, yaw, 50)
     set((s) => ({ gates: [...s.gates, gate] }))
     return true
   },
@@ -113,7 +113,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         best = g
       }
     }
-    if (bestD > 2.8 * 2.8) return false
+    if (bestD > 3.6 * 3.6) return false
     const updated = damageGate(best, amount)
     set((s) => ({
       gates: isGateDestroyed(updated)
