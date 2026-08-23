@@ -6,10 +6,14 @@ import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
 import { gatePlacementFromForward } from '../systems/gate'
 import { cameraLook, facingDirection } from '../systems/facing'
+import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
+import { toolForGather } from '../systems/toolSwing'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
+import { useToolActionStore } from '../stores/toolActionStore'
 import { listGatherables } from '../world/gatherableRegistry'
 import { FALL_Y, clampToIsland } from '../world/bounds'
+import { ToolSwing } from './ToolSwing'
 
 const GATHER_RADIUS = 2.4
 
@@ -23,6 +27,8 @@ const MOVE_KEYS = {
 
 /** Small backpack on the back with only tool handles barely poking out. */
 function BackpackGear() {
+  const swinging = useToolActionStore((s) => s.swinging)
+
   return (
     <group position={[0, 0.44, -0.32]} scale={0.9}>
       {/* Pack body */}
@@ -36,33 +42,36 @@ function BackpackGear() {
         <meshStandardMaterial color="#4a3015" />
       </mesh>
 
-      {/* Sword — hilt poking slightly above the flap */}
-      <group position={[0.04, 0.2, 0]} rotation={[0.08, 0, 0.04]}>
-        <mesh castShadow position={[0, 0.1, 0]}>
-          <boxGeometry args={[0.025, 0.2, 0.025]} />
-          <meshStandardMaterial color="#8a7a5a" />
-        </mesh>
-        <mesh castShadow position={[0, 0.01, 0]}>
-          <boxGeometry args={[0.07, 0.02, 0.03]} />
-          <meshStandardMaterial color="#b8b8b8" metalness={0.5} roughness={0.4} />
-        </mesh>
-      </group>
+      {swinging !== 'wooden-sword' ? (
+        <group position={[0.04, 0.2, 0]} rotation={[0.08, 0, 0.04]}>
+          <mesh castShadow position={[0, 0.1, 0]}>
+            <boxGeometry args={[0.025, 0.2, 0.025]} />
+            <meshStandardMaterial color="#8a7a5a" />
+          </mesh>
+          <mesh castShadow position={[0, 0.01, 0]}>
+            <boxGeometry args={[0.07, 0.02, 0.03]} />
+            <meshStandardMaterial color="#b8b8b8" metalness={0.5} roughness={0.4} />
+          </mesh>
+        </group>
+      ) : null}
 
-      {/* Axe — handle only, head tucked inside the pack */}
-      <group position={[-0.14, 0.04, 0.01]} rotation={[0.15, 0, 0.55]}>
-        <mesh castShadow position={[0, 0.14, 0]}>
-          <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
-          <meshStandardMaterial color="#4a3018" />
-        </mesh>
-      </group>
+      {swinging !== 'wooden-axe' ? (
+        <group position={[-0.14, 0.04, 0.01]} rotation={[0.15, 0, 0.55]}>
+          <mesh castShadow position={[0, 0.14, 0]}>
+            <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
+            <meshStandardMaterial color="#4a3018" />
+          </mesh>
+        </group>
+      ) : null}
 
-      {/* Pickaxe — handle only */}
-      <group position={[0.14, 0.02, 0.01]} rotation={[0.18, 0, -0.55]}>
-        <mesh castShadow position={[0, 0.14, 0]}>
-          <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
-          <meshStandardMaterial color="#4a3018" />
-        </mesh>
-      </group>
+      {swinging !== 'wooden-pickaxe' ? (
+        <group position={[0.14, 0.02, 0.01]} rotation={[0.18, 0, -0.55]}>
+          <mesh castShadow position={[0, 0.14, 0]}>
+            <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
+            <meshStandardMaterial color="#4a3018" />
+          </mesh>
+        </group>
+      ) : null}
     </group>
   )
 }
@@ -79,6 +88,7 @@ function CharacterModel() {
         <meshStandardMaterial color="#f0c7a0" />
       </mesh>
       <BackpackGear />
+      <ToolSwing />
     </group>
   )
 }
@@ -193,6 +203,8 @@ function FollowCamera({
 }
 
 function useGatherInput() {
+  const { clock } = useThree()
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'KeyE' || event.repeat) return
@@ -210,6 +222,8 @@ function useGatherInput() {
         )
         return
       }
+      if (useToolActionStore.getState().swinging) return
+      useToolActionStore.getState().beginSwing(toolForGather(nearbyResource), clock.elapsedTime)
       const { item, amount } = gatherYield(nearbyResource)
       state.addItem(item, amount)
       window.dispatchEvent(
@@ -220,7 +234,37 @@ function useGatherInput() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [clock])
+}
+
+function useAttackInput() {
+  const { clock } = useThree()
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== 'KeyF' || event.repeat) return
+      const inv = useInventoryStore.getState()
+      if (!inv.tools.includes('wooden-sword')) {
+        inv.setHint('You need a sword to attack')
+        return
+      }
+      if (useToolActionStore.getState().swinging) return
+
+      const game = useGameStore.getState()
+      const target = nearestTargetInRange(game.slimes, game.playerPos, ATTACK_RANGE)
+      useToolActionStore.getState().beginSwing('wooden-sword', clock.elapsedTime)
+
+      if (!target) {
+        inv.setHint('Nothing in range — press F near a slime at night')
+        return
+      }
+
+      game.hurtSlime(target.id, SWORD_DAMAGE)
+      inv.setHint('You swiped at a slime')
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [clock])
 }
 
 function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
@@ -296,6 +340,7 @@ export function Player() {
   const keys = useMovementKeys()
   const respawnToken = useGameStore((s) => s.respawnToken)
   useGatherInput()
+  useAttackInput()
   useProximityTracking(ecctrl)
   useGatePlacement(ecctrl, lookYaw, keys, lastFacing)
 

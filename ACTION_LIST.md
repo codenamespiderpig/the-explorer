@@ -16,6 +16,7 @@
 - [x] Wider gates that face walk direction or camera look, with rotation baked into the mesh
 - [x] Character backpack visual with sword, axe, and pickaxe sticking out
 - [x] Show attack key (F) in the health HUD panel
+- [x] Tool use animation: tool leaves backpack briefly with a swish on E gather and F attack
 
 ## Now
 
