@@ -36,10 +36,10 @@ function BackpackGear() {
         <meshStandardMaterial color="#4a3015" />
       </mesh>
 
-      {/* Sword — only a sliver of hilt visible above the flap */}
+      {/* Sword — hilt poking slightly above the flap */}
       <group position={[0.04, 0.2, 0]} rotation={[0.08, 0, 0.04]}>
-        <mesh castShadow position={[0, 0.06, 0]}>
-          <boxGeometry args={[0.025, 0.12, 0.025]} />
+        <mesh castShadow position={[0, 0.1, 0]}>
+          <boxGeometry args={[0.025, 0.2, 0.025]} />
           <meshStandardMaterial color="#8a7a5a" />
         </mesh>
         <mesh castShadow position={[0, 0.01, 0]}>
