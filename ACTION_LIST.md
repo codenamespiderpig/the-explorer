@@ -15,6 +15,7 @@
 - [x] Invisible island barrier: thick Rapier walls + player position clamp so you cannot fall off
 - [x] Wider gates that face walk direction or camera look, with rotation baked into the mesh
 - [x] Character backpack visual with sword, axe, and pickaxe sticking out
+- [x] Show attack key (F) in the health HUD panel
 
 ## Now
 

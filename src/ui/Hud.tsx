@@ -40,6 +40,7 @@ export function Hud() {
         <div>
           {Math.ceil(health.current)} / {max}
         </div>
+        <div className="hud-tools">F attack</div>
       </div>
 
       {hint ? <div className="hud-hint">{hint}</div> : null}
