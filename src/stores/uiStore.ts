@@ -6,17 +6,23 @@ type Tab = 'craft' | 'learn'
 interface UiState {
   backpackOpen: boolean
   backpackTab: Tab
+  merchantOpen: boolean
   toggleBackpack: () => void
   setBackpackOpen: (open: boolean) => void
   setBackpackTab: (tab: Tab) => void
+  toggleMerchant: () => void
+  setMerchantOpen: (open: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set) => ({
   backpackOpen: false,
   backpackTab: 'craft',
+  merchantOpen: false,
   toggleBackpack: () => set((s) => ({ backpackOpen: !s.backpackOpen })),
   setBackpackOpen: (open) => set({ backpackOpen: open }),
   setBackpackTab: (tab) => set({ backpackTab: tab }),
+  toggleMerchant: () => set((s) => ({ merchantOpen: !s.merchantOpen })),
+  setMerchantOpen: (open) => set({ merchantOpen: open }),
 }))
 
 interface ProgressState {

@@ -295,7 +295,7 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     } else {
       store.setNearby(null, null)
       store.setHint(
-        'WASD · look · E gather · Q backpack · G place gate',
+        'WASD · look · E gather · Q backpack · M merchant · G gate · C castle',
       )
     }
   })
@@ -367,6 +367,7 @@ export function Player() {
   const lastFacing = useRef({ x: 0, z: -1 })
   const keys = useMovementKeys()
   const respawnToken = useGameStore((s) => s.respawnToken)
+  const landTier = useGameStore((s) => s.landTier)
   useGatherInput()
   useAttackInput()
   useProximityTracking(ecctrl)
@@ -390,7 +391,7 @@ export function Player() {
     }
 
     const t = body.body.translation()
-    const clamped = clampToIsland(t.x, t.z)
+    const clamped = clampToIsland(t.x, t.z, landTier)
     const fell = t.y < FALL_Y
     if (fell || clamped.x !== t.x || clamped.z !== t.z) {
       body.body.setTranslation(

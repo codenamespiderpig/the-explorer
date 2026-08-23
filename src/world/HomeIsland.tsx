@@ -1,6 +1,7 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { useGameStore } from '../stores/gameStore'
 import { Gatherable } from './Gatherable'
-import { ISLAND_HALF, ISLAND_SIZE } from './bounds'
+import { islandSize } from './bounds'
 
 const ISLAND_THICKNESS = 2
 const WALL_HEIGHT = 12
@@ -41,15 +42,12 @@ const ROCKS: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'rock-12', position: [7, 0, -11] },
 ]
 
-/**
- * Thick inset colliders around the island. Mesh-derived walls were too thin
- * for the character controller and sat on the lip, so the player walked off.
- */
-function InvisibleWalls() {
+function InvisibleWalls({ size }: { size: number }) {
   const hx = WALL_THICKNESS / 2
   const hy = WALL_HEIGHT / 2
-  const hz = ISLAND_SIZE / 2 + hx
-  const inset = ISLAND_HALF - hx
+  const half = size / 2
+  const hz = size / 2 + hx
+  const inset = half - hx
 
   return (
     <RigidBody type="fixed" colliders={false}>
@@ -63,15 +61,18 @@ function InvisibleWalls() {
 
 /** Home island slab plus forageable trees and rocks. */
 export function HomeIsland() {
+  const landTier = useGameStore((s) => s.landTier)
+  const size = islandSize(landTier)
+
   return (
     <group>
       <RigidBody type="fixed" colliders="cuboid">
         <mesh receiveShadow position={[0, -ISLAND_THICKNESS / 2, 0]}>
-          <boxGeometry args={[ISLAND_SIZE, ISLAND_THICKNESS, ISLAND_SIZE]} />
+          <boxGeometry args={[size, ISLAND_THICKNESS, size]} />
           <meshStandardMaterial color="#6abe30" />
         </mesh>
       </RigidBody>
-      <InvisibleWalls />
+      <InvisibleWalls size={size} />
 
       {TREES.map((tree) => (
         <Gatherable key={tree.id} id={tree.id} resource="wood" position={tree.position} />

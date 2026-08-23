@@ -18,10 +18,11 @@
 - [x] Show attack key (F) in the health HUD panel
 - [x] Tool use animation: tool leaves backpack briefly with a swish on E gather and F attack
 - [x] Slime goop drops; hard slime-castle craft (Build); place with C; farm slimes that rot if left unkilled
+- [x] Traveling merchant at morning: M to trade; wood/stone 5 money, rare items 15; buy land upgrades
 
 ## Now
 
-- [ ] M3 remainder: traveling merchant + money (TDD systems layer)
+- [ ] M4 remainder: second island area unlock from land tier
 
 ## Next
 

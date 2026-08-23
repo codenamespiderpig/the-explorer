@@ -192,7 +192,7 @@ tests/                # Vitest unit tests for systems and stores
 6b. Slime goop drops + hard slime-castle craft/place (spawns farmable slimes that rot if left unkilled)
 7. Health 100 (max 145 with armour later); death respawns at start with no item loss
 8. Craftable furnace (Build skill, for later smelting) and placeable wooden gates (G)
-9. Traveling merchant + money HUD (merchant still pending)
+9. Traveling merchant + money HUD — day merchant buys wood/stone for 5, rare items for 15; sells land
 10. One island upgrade tier that unlocks a second area
 11. One dungeon: stairs → mob combat + light platforming (blocks) → reward chest → portal home
    - Overworld has no jump; dungeon platforming TBD if jump is re-enabled only in dungeons

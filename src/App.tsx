@@ -9,6 +9,7 @@ import { DayNightAtmosphere } from './world/DayNightAtmosphere'
 import { Gates } from './world/Gates'
 import { NightSlimes } from './world/NightSlimes'
 import { SlimeCastles } from './world/SlimeCastles'
+import { TravelingMerchant } from './world/TravelingMerchant'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <HomeIsland />
             <Gates />
             <SlimeCastles />
+            <TravelingMerchant />
             <NightSlimes />
             <Player />
           </Physics>

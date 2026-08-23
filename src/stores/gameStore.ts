@@ -30,6 +30,7 @@ import {
   type SlimeCastle,
 } from '../systems/slimeCastle'
 import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
+import { buyLandFromMerchant } from '../systems/land'
 
 export type SlimeSource = 'night' | 'castle'
 
@@ -45,6 +46,8 @@ export interface Slime {
 interface GameState {
   dayNight: DayNightState
   health: HealthState
+  money: number
+  landTier: number
   gates: Gate[]
   castles: SlimeCastle[]
   slimes: Slime[]
@@ -60,6 +63,8 @@ interface GameState {
   clearNightSlimes: () => void
   moveSlime: (id: string, position: [number, number, number]) => void
   hurtSlime: (id: string, amount: number) => SlimeDrop | null
+  buyLand: () => boolean
+  merchantPresent: () => boolean
   respawnPlayer: () => void
   phase: () => DayPhase
   nightCountdownLabel: () => string
@@ -71,13 +76,14 @@ let gateSeq = 0
 let castleSeq = 0
 let wasNight = false
 
-function edgeSpawn(): [number, number, number] {
+function edgeSpawn(landTier: number): [number, number, number] {
+  const half = 12 + landTier * 4
   const side = Math.floor(Math.random() * 4)
-  const t = (Math.random() - 0.5) * 20
-  if (side === 0) return [t, 0.6, -12]
-  if (side === 1) return [t, 0.6, 12]
-  if (side === 2) return [-12, 0.6, t]
-  return [12, 0.6, t]
+  const t = (Math.random() - 0.5) * (half * 1.6)
+  if (side === 0) return [t, 0.6, -half]
+  if (side === 1) return [t, 0.6, half]
+  if (side === 2) return [-half, 0.6, t]
+  return [half, 0.6, t]
 }
 
 function countCastleSlimesNear(
@@ -94,6 +100,8 @@ function countCastleSlimesNear(
 export const useGameStore = create<GameState>((set, get) => ({
   dayNight: createDayNightState(),
   health: createHealthState(),
+  money: 0,
+  landTier: 0,
   gates: [],
   castles: [],
   slimes: [],
@@ -198,11 +206,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   spawnNightSlimes: () => {
+    const tier = get().landTier
     const pack: Slime[] = Array.from({ length: 4 }, () => {
       slimeSeq += 1
       return {
         id: `slime-${slimeSeq}`,
-        position: edgeSpawn(),
+        position: edgeSpawn(tier),
         hp: 20,
         source: 'night' as const,
         ageSec: 0,
@@ -234,6 +243,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({ slimes: s.slimes.filter((sl) => sl.id !== id) }))
     return rollSlimeDrop()
   },
+
+  buyLand: () => {
+    const { money, landTier, dayNight } = get()
+    const result = buyLandFromMerchant(money, landTier, dayNight.phase === 'day')
+    if (!result.ok) return false
+    set({ money: result.money, landTier: result.landTier })
+    return true
+  },
+
+  merchantPresent: () => get().dayNight.phase === 'day',
 
   respawnPlayer: () => {
     set((s) => ({
