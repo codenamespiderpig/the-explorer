@@ -21,6 +21,81 @@ const MOVE_KEYS = {
   run: new Set(['ShiftLeft', 'ShiftRight']),
 }
 
+/** Backpack on the back with sword, axe, and pickaxe hilts sticking out. */
+function BackpackGear() {
+  return (
+    <group position={[0, 0.42, 0.34]}>
+      {/* Pack body */}
+      <mesh castShadow>
+        <boxGeometry args={[0.38, 0.42, 0.22]} />
+        <meshStandardMaterial color="#6b4423" />
+      </mesh>
+      {/* Flap */}
+      <mesh castShadow position={[0, 0.18, 0.02]}>
+        <boxGeometry args={[0.4, 0.12, 0.24]} />
+        <meshStandardMaterial color="#5a381c" />
+      </mesh>
+      {/* Strap buckles */}
+      <mesh position={[-0.12, 0.05, -0.12]}>
+        <boxGeometry args={[0.06, 0.08, 0.04]} />
+        <meshStandardMaterial color="#c9a227" metalness={0.4} roughness={0.5} />
+      </mesh>
+      <mesh position={[0.12, 0.05, -0.12]}>
+        <boxGeometry args={[0.06, 0.08, 0.04]} />
+        <meshStandardMaterial color="#c9a227" metalness={0.4} roughness={0.5} />
+      </mesh>
+
+      {/* Sword — hilt sticking up from the top */}
+      <group position={[0.02, 0.28, 0.02]} rotation={[0.15, 0, 0.08]}>
+        <mesh castShadow position={[0, 0.22, 0]}>
+          <boxGeometry args={[0.04, 0.55, 0.04]} />
+          <meshStandardMaterial color="#8a7a5a" />
+        </mesh>
+        <mesh castShadow position={[0, 0.02, 0]}>
+          <boxGeometry args={[0.16, 0.04, 0.05]} />
+          <meshStandardMaterial color="#b0b0b0" metalness={0.6} roughness={0.35} />
+        </mesh>
+        <mesh castShadow position={[0, -0.06, 0]}>
+          <boxGeometry args={[0.05, 0.12, 0.05]} />
+          <meshStandardMaterial color="#4a3020" />
+        </mesh>
+      </group>
+
+      {/* Axe — head and haft angled out the left */}
+      <group position={[-0.12, 0.12, 0.04]} rotation={[0.35, 0, 0.55]}>
+        <mesh castShadow position={[0, 0.28, 0]}>
+          <cylinderGeometry args={[0.025, 0.03, 0.55, 6]} />
+          <meshStandardMaterial color="#5c3a1e" />
+        </mesh>
+        <mesh castShadow position={[0.06, 0.52, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <boxGeometry args={[0.14, 0.2, 0.05]} />
+          <meshStandardMaterial color="#8d9199" metalness={0.55} roughness={0.4} />
+        </mesh>
+      </group>
+
+      {/* Pickaxe — angled out the right */}
+      <group position={[0.12, 0.1, 0.04]} rotation={[0.4, 0, -0.6]}>
+        <mesh castShadow position={[0, 0.28, 0]}>
+          <cylinderGeometry args={[0.025, 0.03, 0.55, 6]} />
+          <meshStandardMaterial color="#5c3a1e" />
+        </mesh>
+        <mesh castShadow position={[0, 0.52, 0]}>
+          <boxGeometry args={[0.28, 0.06, 0.05]} />
+          <meshStandardMaterial color="#7a8088" metalness={0.55} roughness={0.4} />
+        </mesh>
+        <mesh castShadow position={[-0.12, 0.5, 0]} rotation={[0, 0, 0.4]}>
+          <boxGeometry args={[0.08, 0.1, 0.04]} />
+          <meshStandardMaterial color="#7a8088" metalness={0.55} roughness={0.4} />
+        </mesh>
+        <mesh castShadow position={[0.12, 0.5, 0]} rotation={[0, 0, -0.4]}>
+          <boxGeometry args={[0.08, 0.1, 0.04]} />
+          <meshStandardMaterial color="#7a8088" metalness={0.55} roughness={0.4} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
 function CharacterModel() {
   return (
     <group>
@@ -32,6 +107,7 @@ function CharacterModel() {
         <sphereGeometry args={[0.22, 16, 16]} />
         <meshStandardMaterial color="#f0c7a0" />
       </mesh>
+      <BackpackGear />
     </group>
   )
 }
