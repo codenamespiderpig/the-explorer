@@ -64,8 +64,8 @@ export function Merchant() {
   const money = useGameStore((s) => s.money)
   const landTier = useGameStore((s) => s.landTier)
   const merchantPresent = useGameStore((s) => s.merchantPresent())
+  const merchantCountdown = useGameStore((s) => s.merchantCountdownLabel())
   const buyLand = useGameStore((s) => s.buyLand)
-  const phase = useGameStore((s) => s.dayNight.phase)
 
   useEffect(() => {
     if (!open) return
@@ -112,7 +112,9 @@ export function Merchant() {
         <div className="bp-section">
           <div className="bp-row-meta">
             Your money: <strong>{money}</strong>
-            {phase === 'day' ? ' · Merchant is here until night' : ' · Merchant has left'}
+            {merchantPresent
+              ? ` · Merchant leaving in ${merchantCountdown}`
+              : ' · Merchant has left'}
           </div>
           <div className="bp-row-meta" style={{ marginTop: 6 }}>
             Wood & stone: {COMMON_MERCHANT_PRICE} money · Rarer items: {RARE_MERCHANT_PRICE}{' '}
@@ -128,7 +130,11 @@ export function Merchant() {
               <div className="bp-row-meta">
                 {atMaxLand
                   ? 'Island fully expanded'
-                  : `Cost: ${nextLandCost} money · Current tier ${landTier}`}
+                  : landTier === 0
+                    ? `Cost: ${nextLandCost} money · Unlocks water world`
+                    : landTier === 1
+                      ? `Cost: ${nextLandCost} money · Unlocks lava world`
+                      : `Cost: ${nextLandCost} money · Expands home island`}
               </div>
             </div>
             <button

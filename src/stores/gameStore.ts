@@ -31,6 +31,13 @@ import {
 } from '../systems/slimeCastle'
 import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
 import { buyLandFromMerchant } from '../systems/land'
+import {
+  MERCHANT_VISIT_SEC,
+  advanceMerchantTimer,
+  isMerchantVisiting,
+  merchantSpawnPosition,
+} from '../systems/merchant'
+import type { WorldId } from '../systems/worlds'
 
 export type SlimeSource = 'night' | 'castle'
 
@@ -48,6 +55,9 @@ interface GameState {
   health: HealthState
   money: number
   landTier: number
+  merchantTimeLeft: number
+  merchantPosition: [number, number, number]
+  merchantWorld: WorldId
   gates: Gate[]
   castles: SlimeCastle[]
   slimes: Slime[]
@@ -65,6 +75,7 @@ interface GameState {
   hurtSlime: (id: string, amount: number) => SlimeDrop | null
   buyLand: () => boolean
   merchantPresent: () => boolean
+  merchantCountdownLabel: () => string
   respawnPlayer: () => void
   phase: () => DayPhase
   nightCountdownLabel: () => string
@@ -102,6 +113,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   health: createHealthState(),
   money: 0,
   landTier: 0,
+  merchantTimeLeft: MERCHANT_VISIT_SEC,
+  merchantPosition: merchantSpawnPosition(0).position,
+  merchantWorld: 'home',
   gates: [],
   castles: [],
   slimes: [],
@@ -122,8 +136,21 @@ export const useGameStore = create<GameState>((set, get) => ({
     ) {
       get().spawnNightSlimes()
     }
-    if (enteredDay) get().clearNightSlimes()
+    if (enteredDay) {
+      get().clearNightSlimes()
+      const spawn = merchantSpawnPosition(get().landTier)
+      set({
+        merchantTimeLeft: MERCHANT_VISIT_SEC,
+        merchantPosition: spawn.position,
+        merchantWorld: spawn.world,
+      })
+    }
     wasNight = next.phase === 'night'
+
+    if (isMerchantVisiting(get().merchantTimeLeft)) {
+      const left = advanceMerchantTimer(get().merchantTimeLeft, deltaSec)
+      if (left !== get().merchantTimeLeft) set({ merchantTimeLeft: left })
+    }
 
     set((s) => {
       let slimes = s.slimes
@@ -245,14 +272,23 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   buyLand: () => {
-    const { money, landTier, dayNight } = get()
-    const result = buyLandFromMerchant(money, landTier, dayNight.phase === 'day')
+    const { money, landTier, merchantTimeLeft } = get()
+    const result = buyLandFromMerchant(money, landTier, isMerchantVisiting(merchantTimeLeft))
     if (!result.ok) return false
     set({ money: result.money, landTier: result.landTier })
     return true
   },
 
-  merchantPresent: () => get().dayNight.phase === 'day',
+  merchantPresent: () => isMerchantVisiting(get().merchantTimeLeft),
+
+  merchantCountdownLabel: () => {
+    const left = get().merchantTimeLeft
+    if (!isMerchantVisiting(left)) return 'Merchant gone'
+    const s = Math.max(0, Math.ceil(left))
+    const m = Math.floor(s / 60)
+    const r = s % 60
+    return `${m}:${r.toString().padStart(2, '0')} left`
+  },
 
   respawnPlayer: () => {
     set((s) => ({

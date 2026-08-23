@@ -19,10 +19,11 @@
 - [x] Tool use animation: tool leaves backpack briefly with a swish on E gather and F attack
 - [x] Slime goop drops; hard slime-castle craft (Build); place with C; farm slimes that rot if left unkilled
 - [x] Traveling merchant at morning: M to trade; wood/stone 5 money, rare items 15; buy land upgrades
+- [x] Merchant stays 90s at a hidden spot; water world (tier 1) and lava world (tier 2)
 
 ## Now
 
-- [ ] M4 remainder: second island area unlock from land tier
+- [ ] M6 remainder: local saves + onboarding hints
 
 ## Next
 

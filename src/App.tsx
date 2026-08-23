@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
+import { WaterWorld, LavaWorld } from './world/BiomeWorlds'
 import { Player } from './player/Player'
 import { Hud } from './ui/Hud'
 import { DayNightClock } from './world/DayNightClock'
@@ -20,6 +21,8 @@ export default function App() {
           <Physics>
             <DayNightClock />
             <HomeIsland />
+            <WaterWorld />
+            <LavaWorld />
             <Gates />
             <SlimeCastles />
             <TravelingMerchant />

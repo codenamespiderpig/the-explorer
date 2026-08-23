@@ -1,19 +1,14 @@
 import { useGameStore } from '../stores/gameStore'
-import { islandSize } from './bounds'
+import { isMerchantVisiting } from '../systems/merchant'
 
-/** Wandering vendor cart — visible during the day only. */
+/** Wandering vendor — only visible for 90s each morning, at a hidden spot. */
 export function TravelingMerchant() {
-  const phase = useGameStore((s) => s.dayNight.phase)
-  const landTier = useGameStore((s) => s.landTier)
-  if (phase !== 'day') return null
-
-  const half = islandSize(landTier) / 2
-  const x = half * 0.35
-  const z = half * 0.55
+  const timeLeft = useGameStore((s) => s.merchantTimeLeft)
+  const position = useGameStore((s) => s.merchantPosition)
+  if (!isMerchantVisiting(timeLeft)) return null
 
   return (
-    <group position={[x, 0, z]} rotation={[0, -0.6, 0]}>
-      {/* Cart */}
+    <group position={position} rotation={[0, -0.6, 0]}>
       <mesh castShadow position={[0, 0.45, 0]}>
         <boxGeometry args={[1.6, 0.35, 1.1]} />
         <meshStandardMaterial color="#8b5a2b" />
@@ -26,7 +21,6 @@ export function TravelingMerchant() {
         <cylinderGeometry args={[0.35, 0.35, 0.12, 12]} />
         <meshStandardMaterial color="#5a3818" />
       </mesh>
-      {/* Awning */}
       <mesh castShadow position={[0, 1.05, 0]} rotation={[0.08, 0, 0]}>
         <boxGeometry args={[1.8, 0.08, 1.4]} />
         <meshStandardMaterial color="#c0392b" />
@@ -39,7 +33,6 @@ export function TravelingMerchant() {
         <cylinderGeometry args={[0.04, 0.04, 0.9, 6]} />
         <meshStandardMaterial color="#4a3018" />
       </mesh>
-      {/* Goods */}
       <mesh castShadow position={[-0.35, 0.72, 0.15]}>
         <boxGeometry args={[0.35, 0.25, 0.35]} />
         <meshStandardMaterial color="#d4a574" />
@@ -48,7 +41,6 @@ export function TravelingMerchant() {
         <sphereGeometry args={[0.18, 10, 10]} />
         <meshStandardMaterial color="#6abe30" />
       </mesh>
-      {/* Merchant */}
       <mesh castShadow position={[0, 1.05, 0.85]}>
         <capsuleGeometry args={[0.22, 0.45, 4, 8]} />
         <meshStandardMaterial color="#6b4c9a" />

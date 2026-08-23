@@ -2,9 +2,16 @@ import { useEffect, useRef } from 'react'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { effectiveMaxHealth } from '../systems/health'
+import { isMerchantVisiting } from '../systems/merchant'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
 import { useUiStore } from '../stores/uiStore'
+
+const WORLD_HINT: Record<string, string> = {
+  home: 'somewhere on the home island',
+  water: 'somewhere in the water world',
+  lava: 'somewhere in the lava world',
+}
 
 export function Hud() {
   const wood = useInventoryStore((s) => s.items.wood ?? 0)
@@ -15,19 +22,25 @@ export function Hud() {
   const phase = useGameStore((s) => s.dayNight.phase)
   const elapsed = useGameStore((s) => s.dayNight.elapsed)
   const money = useGameStore((s) => s.money)
+  const landTier = useGameStore((s) => s.landTier)
   const health = useGameStore((s) => s.health)
+  const merchantTimeLeft = useGameStore((s) => s.merchantTimeLeft)
+  const merchantWorld = useGameStore((s) => s.merchantWorld)
+  const merchantCountdown = useGameStore((s) => s.merchantCountdownLabel())
   const countdown = useGameStore((s) => s.nightCountdownLabel())
   const toggleMerchant = useUiStore((s) => s.toggleMerchant)
   const setMerchantOpen = useUiStore((s) => s.setMerchantOpen)
   const prevPhase = useRef(phase)
-  // re-subscribe when elapsed changes so countdown text updates
+  const prevMerchantLeft = useRef(merchantTimeLeft)
   void elapsed
+
+  const merchantHere = isMerchantVisiting(merchantTimeLeft)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'KeyM' || e.repeat) return
-      if (useGameStore.getState().dayNight.phase !== 'day') {
-        setHint('The traveling merchant only visits during the day')
+      if (!isMerchantVisiting(useGameStore.getState().merchantTimeLeft)) {
+        setHint('The merchant only stays 90 seconds at dawn — find them next morning')
         return
       }
       toggleMerchant()
@@ -38,7 +51,10 @@ export function Hud() {
 
   useEffect(() => {
     if (prevPhase.current === 'night' && phase === 'day') {
-      setHint('Traveling merchant arrived — press M to trade')
+      const world = useGameStore.getState().merchantWorld
+      setHint(
+        `Merchant is hiding ${WORLD_HINT[world] ?? 'nearby'} — 1:30 to trade (M)`,
+      )
     }
     if (prevPhase.current === 'day' && phase === 'night') {
       setMerchantOpen(false)
@@ -46,6 +62,18 @@ export function Hud() {
     }
     prevPhase.current = phase
   }, [phase, setHint, setMerchantOpen])
+
+  useEffect(() => {
+    if (
+      prevMerchantLeft.current > 0 &&
+      merchantTimeLeft <= 0 &&
+      phase === 'day'
+    ) {
+      setMerchantOpen(false)
+      setHint('The merchant packed up — come back tomorrow at dawn')
+    }
+    prevMerchantLeft.current = merchantTimeLeft
+  }, [merchantTimeLeft, phase, setHint, setMerchantOpen])
 
   const max = effectiveMaxHealth(health)
   const hpPct = Math.max(0, (health.current / max) * 100)
@@ -59,18 +87,28 @@ export function Hud() {
         <div>Stone: {stone}</div>
         <div>Slime Goop: {goop}</div>
         <div className="hud-tools">
-          Q backpack · M merchant (day) · G gate · C slime castle
+          Q backpack · M merchant · G gate · C castle
         </div>
       </div>
 
       <div className="hud-panel hud-time">
         <div className="hud-title">{phase === 'day' ? 'Daytime' : 'Night'}</div>
         <div className={phase === 'night' ? 'hud-danger' : ''}>{countdown}</div>
-        {phase === 'day' ? (
-          <div className="hud-tools">Traveling merchant is here</div>
+        {merchantHere ? (
+          <div className="hud-tools">
+            Merchant nearby? {merchantCountdown} · check {WORLD_HINT[merchantWorld]}
+          </div>
+        ) : phase === 'day' ? (
+          <div className="hud-tools">Merchant already left today</div>
         ) : (
           <div className="hud-tools">Slimes are hunting you</div>
         )}
+        {landTier >= 1 ? (
+          <div className="hud-tools">Water world unlocked — walk north</div>
+        ) : null}
+        {landTier >= 2 ? (
+          <div className="hud-tools">Lava world unlocked — walk east</div>
+        ) : null}
       </div>
 
       <div className="hud-panel hud-health">
