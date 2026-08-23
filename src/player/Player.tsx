@@ -24,7 +24,7 @@ const MOVE_KEYS = {
 /** Small backpack on the back with only tool handles barely poking out. */
 function BackpackGear() {
   return (
-    <group position={[0, 0.42, -0.28]} scale={0.55}>
+    <group position={[0, 0.44, -0.32]} scale={0.9}>
       {/* Pack body */}
       <mesh castShadow>
         <boxGeometry args={[0.38, 0.42, 0.2]} />
