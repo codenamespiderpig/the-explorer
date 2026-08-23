@@ -8,6 +8,7 @@ import { DayNightClock } from './world/DayNightClock'
 import { DayNightAtmosphere } from './world/DayNightAtmosphere'
 import { Gates } from './world/Gates'
 import { NightSlimes } from './world/NightSlimes'
+import { SlimeCastles } from './world/SlimeCastles'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
             <DayNightClock />
             <HomeIsland />
             <Gates />
+            <SlimeCastles />
             <NightSlimes />
             <Player />
           </Physics>

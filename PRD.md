@@ -189,6 +189,7 @@ tests/                # Vitest unit tests for systems and stores
 4. Backpack (Q) with Craft + Learn tabs above inventory
 5. Craft builds items from recipes; Learn unlocks skills (hunt, build) that gate advanced recipes
 6. Day/night cycle with countdown to night; night slimes attack player and break gates
+6b. Slime goop drops + hard slime-castle craft/place (spawns farmable slimes that rot if left unkilled)
 7. Health 100 (max 145 with armour later); death respawns at start with no item loss
 8. Craftable furnace (Build skill, for later smelting) and placeable wooden gates (G)
 9. Traveling merchant + money HUD (merchant still pending)
@@ -254,6 +255,7 @@ Exact recipes, prices, upgrade costs, dungeon layouts, and biome list will be de
 | Dungeon failure | Death respawns player at home, inventory intact, dungeon resets | Default |
 | Day/night | 5 min day / 1 min night; countdown HUD; night spawns slimes | User |
 | Night threats | Slimes spawn, attack player, damage/break gates | User |
+| Slime farming | Slimes sometimes drop slime goop; slime castle (hard craft) spawns farmable slimes that rot if left unkilled | User |
 | Health | Start 100 HP; absolute max 145 via armour later; death = respawn at start, keep inventory | User |
 | Furnace | Craftable with Build skill for later smelting | User |
 | Art direction | Low-poly flat stylized (Forager-adjacent, cheap to author) | Default |

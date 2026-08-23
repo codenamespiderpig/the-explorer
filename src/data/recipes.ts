@@ -8,6 +8,7 @@ export type RecipeId =
   | 'hunting-spear'
   | 'furnace'
   | 'wooden-gate'
+  | 'slime-castle'
 
 export interface Recipe {
   id: RecipeId
@@ -65,6 +66,15 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     output: 'hunting-spear',
     cost: { wood: 4, stone: 1 },
     requiresSkill: 'hunt',
+  },
+  'slime-castle': {
+    id: 'slime-castle',
+    name: 'Slime Castle',
+    description:
+      'Very hard to build. Place with C — spawns farmable slimes that rot if left unkilled.',
+    output: 'slime-castle',
+    cost: { 'slime-goop': 28, wood: 45, stone: 35 },
+    requiresSkill: 'build',
   },
 }
 

@@ -8,6 +8,7 @@ import { gatePlacementFromForward } from '../systems/gate'
 import { cameraLook, facingDirection } from '../systems/facing'
 import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
 import { toolForGather } from '../systems/toolSwing'
+import { ITEMS } from '../data/items'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { useToolActionStore } from '../stores/toolActionStore'
@@ -255,12 +256,17 @@ function useAttackInput() {
       useToolActionStore.getState().beginSwing('wooden-sword', clock.elapsedTime)
 
       if (!target) {
-        inv.setHint('Nothing in range — press F near a slime at night')
+        inv.setHint('Nothing in range — press F near a slime')
         return
       }
 
-      game.hurtSlime(target.id, SWORD_DAMAGE)
-      inv.setHint('You swiped at a slime')
+      const drop = game.hurtSlime(target.id, SWORD_DAMAGE)
+      if (drop) {
+        inv.addItem(drop.item, drop.amount)
+        inv.setHint(`Slime dropped ${drop.amount} ${ITEMS[drop.item].name}`)
+      } else {
+        inv.setHint('You swiped at a slime')
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -333,6 +339,28 @@ function useGatePlacement(
   }, [ecctrl, lookYaw, keys, lastFacing])
 }
 
+function useSlimeCastlePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyC' || e.repeat) return
+      const inv = useInventoryStore.getState()
+      const count = inv.items['slime-castle'] ?? 0
+      if (count < 1) {
+        inv.setHint('Craft a Slime Castle first (needs lots of slime goop + Build)')
+        return
+      }
+      if (!ecctrl.current) return
+      const pos = ecctrl.current.currPos
+      const placement: [number, number, number] = [pos.x, 0, pos.z + 2.5]
+      inv.setItems({ ...inv.items, 'slime-castle': count - 1 })
+      useGameStore.getState().placeSlimeCastle(placement)
+      inv.setHint('Slime Castle placed — kill spawned slimes before they rot')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [ecctrl])
+}
+
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const lookYaw = useRef(0)
@@ -343,6 +371,7 @@ export function Player() {
   useAttackInput()
   useProximityTracking(ecctrl)
   useGatePlacement(ecctrl, lookYaw, keys, lastFacing)
+  useSlimeCastlePlacement(ecctrl)
 
   useFrame(() => {
     const body = ecctrl.current

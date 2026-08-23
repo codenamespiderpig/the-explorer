@@ -6,6 +6,7 @@ import { Backpack } from './Backpack'
 export function Hud() {
   const wood = useInventoryStore((s) => s.items.wood ?? 0)
   const stone = useInventoryStore((s) => s.items.stone ?? 0)
+  const goop = useInventoryStore((s) => s.items['slime-goop'] ?? 0)
   const hint = useInventoryStore((s) => s.hint)
   const phase = useGameStore((s) => s.dayNight.phase)
   const elapsed = useGameStore((s) => s.dayNight.elapsed)
@@ -23,7 +24,8 @@ export function Hud() {
         <div className="hud-title">Resources</div>
         <div>Wood: {wood}</div>
         <div>Stone: {stone}</div>
-        <div className="hud-tools">Q backpack · G place gate</div>
+        <div>Slime Goop: {goop}</div>
+        <div className="hud-tools">Q backpack · G place gate · C place slime castle</div>
       </div>
 
       <div className="hud-panel hud-time">

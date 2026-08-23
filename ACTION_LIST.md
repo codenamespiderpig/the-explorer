@@ -17,6 +17,7 @@
 - [x] Character backpack visual with sword, axe, and pickaxe sticking out
 - [x] Show attack key (F) in the health HUD panel
 - [x] Tool use animation: tool leaves backpack briefly with a swish on E gather and F attack
+- [x] Slime goop drops; hard slime-castle craft (Build); place with C; farm slimes that rot if left unkilled
 
 ## Now
 

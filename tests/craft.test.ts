@@ -40,4 +40,32 @@ describe('craft', () => {
     const result = craft(RECIPES.campfire, { wood: 1, stone: 0 })
     expect(result.ok).toBe(false)
   })
+
+  it('crafts a slime castle only with rare goop and build skill', () => {
+    expect(
+      canCraft(
+        RECIPES['slime-castle'],
+        { 'slime-goop': 28, wood: 45, stone: 35 },
+        new Set(),
+      ),
+    ).toBe(false)
+    expect(
+      canCraft(
+        RECIPES['slime-castle'],
+        { 'slime-goop': 28, wood: 45, stone: 35 },
+        new Set(['build']),
+      ),
+    ).toBe(true)
+    const result = craft(RECIPES['slime-castle'], {
+      'slime-goop': 30,
+      wood: 50,
+      stone: 40,
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.item).toBe('slime-castle')
+      expect(result.remaining['slime-goop']).toBe(2)
+      expect(result.remaining['slime-castle']).toBe(1)
+    }
+  })
 })

@@ -21,29 +21,45 @@ import {
   isGateDestroyed,
   type Gate,
 } from '../systems/gate'
+import {
+  CASTLE_MAX_SLIMES,
+  advanceCastleSpawnTimer,
+  castleSpawnPosition,
+  createSlimeCastle,
+  isCastleSlimeRotten,
+  type SlimeCastle,
+} from '../systems/slimeCastle'
+import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
+
+export type SlimeSource = 'night' | 'castle'
 
 export interface Slime {
   id: string
   position: [number, number, number]
   hp: number
+  source: SlimeSource
+  /** Age in seconds — castle slimes rot when left unkilled. */
+  ageSec: number
 }
 
 interface GameState {
   dayNight: DayNightState
   health: HealthState
   gates: Gate[]
+  castles: SlimeCastle[]
   slimes: Slime[]
   playerPos: [number, number, number]
   respawnToken: number
   tick: (deltaSec: number) => void
   setPlayerPos: (pos: [number, number, number]) => void
   placeGate: (position: [number, number, number], yaw?: number) => boolean
+  placeSlimeCastle: (position: [number, number, number]) => boolean
   damagePlayer: (amount: number) => void
   damageNearestGate: (from: [number, number, number], amount: number) => boolean
   spawnNightSlimes: () => void
-  clearSlimes: () => void
+  clearNightSlimes: () => void
   moveSlime: (id: string, position: [number, number, number]) => void
-  hurtSlime: (id: string, amount: number) => void
+  hurtSlime: (id: string, amount: number) => SlimeDrop | null
   respawnPlayer: () => void
   phase: () => DayPhase
   nightCountdownLabel: () => string
@@ -52,6 +68,7 @@ interface GameState {
 
 let slimeSeq = 0
 let gateSeq = 0
+let castleSeq = 0
 let wasNight = false
 
 function edgeSpawn(): [number, number, number] {
@@ -63,10 +80,22 @@ function edgeSpawn(): [number, number, number] {
   return [12, 0.6, t]
 }
 
+function countCastleSlimesNear(
+  slimes: readonly Slime[],
+  castlePos: readonly [number, number, number],
+): number {
+  return slimes.filter(
+    (sl) =>
+      sl.source === 'castle' &&
+      Math.hypot(sl.position[0] - castlePos[0], sl.position[2] - castlePos[2]) < 8,
+  ).length
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
   dayNight: createDayNightState(),
   health: createHealthState(),
   gates: [],
+  castles: [],
   slimes: [],
   playerPos: [0, 1, 0],
   respawnToken: 0,
@@ -77,11 +106,49 @@ export const useGameStore = create<GameState>((set, get) => ({
     const enteredNight = prev.phase === 'day' && next.phase === 'night'
     const enteredDay = prev.phase === 'night' && next.phase === 'day'
     set({ dayNight: next })
-    if (enteredNight || (next.phase === 'night' && !wasNight && get().slimes.length === 0)) {
+    if (
+      enteredNight ||
+      (next.phase === 'night' &&
+        !wasNight &&
+        get().slimes.filter((s) => s.source === 'night').length === 0)
+    ) {
       get().spawnNightSlimes()
     }
-    if (enteredDay) get().clearSlimes()
+    if (enteredDay) get().clearNightSlimes()
     wasNight = next.phase === 'night'
+
+    set((s) => {
+      let slimes = s.slimes
+        .map((sl) =>
+          sl.source === 'castle' ? { ...sl, ageSec: sl.ageSec + deltaSec } : sl,
+        )
+        .filter((sl) => !(sl.source === 'castle' && isCastleSlimeRotten(sl.ageSec)))
+
+      const castles: SlimeCastle[] = []
+      for (const castle of s.castles) {
+        const advanced = advanceCastleSpawnTimer(castle, deltaSec)
+        castles.push({
+          id: advanced.id,
+          position: advanced.position,
+          spawnTimer: advanced.spawnTimer,
+        })
+        if (!advanced.shouldSpawn) continue
+        if (countCastleSlimesNear(slimes, castle.position) >= CASTLE_MAX_SLIMES) continue
+        slimeSeq += 1
+        slimes = [
+          ...slimes,
+          {
+            id: `slime-${slimeSeq}`,
+            position: castleSpawnPosition(castle.position),
+            hp: 20,
+            source: 'castle' as const,
+            ageSec: 0,
+          },
+        ]
+      }
+
+      return { castles, slimes }
+    })
   },
 
   setPlayerPos: (pos) => set({ playerPos: pos }),
@@ -90,6 +157,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     gateSeq += 1
     const gate = createGate(`gate-${gateSeq}`, position, yaw, 50)
     set((s) => ({ gates: [...s.gates, gate] }))
+    return true
+  },
+
+  placeSlimeCastle: (position) => {
+    castleSeq += 1
+    const castle = createSlimeCastle(`castle-${castleSeq}`, position)
+    set((s) => ({ castles: [...s.castles, castle] }))
     return true
   },
 
@@ -126,24 +200,40 @@ export const useGameStore = create<GameState>((set, get) => ({
   spawnNightSlimes: () => {
     const pack: Slime[] = Array.from({ length: 4 }, () => {
       slimeSeq += 1
-      return { id: `slime-${slimeSeq}`, position: edgeSpawn(), hp: 20 }
+      return {
+        id: `slime-${slimeSeq}`,
+        position: edgeSpawn(),
+        hp: 20,
+        source: 'night' as const,
+        ageSec: 0,
+      }
     })
-    set({ slimes: pack })
+    set((s) => ({
+      slimes: [...s.slimes.filter((sl) => sl.source !== 'night'), ...pack],
+    }))
   },
 
-  clearSlimes: () => set({ slimes: [] }),
+  clearNightSlimes: () =>
+    set((s) => ({ slimes: s.slimes.filter((sl) => sl.source !== 'night') })),
 
   moveSlime: (id, position) =>
     set((s) => ({
       slimes: s.slimes.map((sl) => (sl.id === id ? { ...sl, position } : sl)),
     })),
 
-  hurtSlime: (id, amount) =>
-    set((s) => ({
-      slimes: s.slimes
-        .map((sl) => (sl.id === id ? { ...sl, hp: sl.hp - amount } : sl))
-        .filter((sl) => sl.hp > 0),
-    })),
+  hurtSlime: (id, amount) => {
+    const target = get().slimes.find((sl) => sl.id === id)
+    if (!target) return null
+    const hp = target.hp - amount
+    if (hp > 0) {
+      set((s) => ({
+        slimes: s.slimes.map((sl) => (sl.id === id ? { ...sl, hp } : sl)),
+      }))
+      return null
+    }
+    set((s) => ({ slimes: s.slimes.filter((sl) => sl.id !== id) }))
+    return rollSlimeDrop()
+  },
 
   respawnPlayer: () => {
     set((s) => ({
