@@ -21,75 +21,46 @@ const MOVE_KEYS = {
   run: new Set(['ShiftLeft', 'ShiftRight']),
 }
 
-/** Backpack on the character's back (-Z) with tools sticking out. */
+/** Small backpack on the back with only tool handles barely poking out. */
 function BackpackGear() {
   return (
-    <group position={[0, 0.48, -0.36]} scale={1.25}>
+    <group position={[0, 0.42, -0.28]} scale={0.55}>
       {/* Pack body */}
       <mesh castShadow>
-        <boxGeometry args={[0.42, 0.48, 0.26]} />
+        <boxGeometry args={[0.38, 0.42, 0.2]} />
         <meshStandardMaterial color="#7a4f28" />
       </mesh>
-      {/* Side panels for depth */}
-      <mesh castShadow position={[-0.2, 0, 0]}>
-        <boxGeometry args={[0.06, 0.44, 0.28]} />
-        <meshStandardMaterial color="#5a3818" />
-      </mesh>
-      <mesh castShadow position={[0.2, 0, 0]}>
-        <boxGeometry args={[0.06, 0.44, 0.28]} />
-        <meshStandardMaterial color="#5a3818" />
-      </mesh>
       {/* Top flap */}
-      <mesh castShadow position={[0, 0.22, -0.02]}>
-        <boxGeometry args={[0.44, 0.14, 0.28]} />
+      <mesh castShadow position={[0, 0.18, -0.01]}>
+        <boxGeometry args={[0.4, 0.1, 0.22]} />
         <meshStandardMaterial color="#4a3015" />
       </mesh>
 
-      {/* Sword hilt — sticks up from the pack top */}
-      <group position={[0, 0.32, 0]} rotation={[0.1, 0, 0]}>
-        <mesh castShadow position={[0, 0.28, 0]}>
-          <boxGeometry args={[0.05, 0.62, 0.05]} />
-          <meshStandardMaterial color="#9a8a6a" />
+      {/* Sword — only a sliver of hilt visible above the flap */}
+      <group position={[0.04, 0.2, 0]} rotation={[0.08, 0, 0.04]}>
+        <mesh castShadow position={[0, 0.06, 0]}>
+          <boxGeometry args={[0.025, 0.12, 0.025]} />
+          <meshStandardMaterial color="#8a7a5a" />
         </mesh>
-        <mesh castShadow position={[0, 0.02, 0]}>
-          <boxGeometry args={[0.2, 0.05, 0.06]} />
-          <meshStandardMaterial color="#d4d4d4" metalness={0.7} roughness={0.25} />
-        </mesh>
-        <mesh castShadow position={[0, -0.08, 0]}>
-          <boxGeometry args={[0.06, 0.14, 0.06]} />
-          <meshStandardMaterial color="#3d2818" />
+        <mesh castShadow position={[0, 0.01, 0]}>
+          <boxGeometry args={[0.07, 0.02, 0.03]} />
+          <meshStandardMaterial color="#b8b8b8" metalness={0.5} roughness={0.4} />
         </mesh>
       </group>
 
-      {/* Axe — left side, haft + head poking out */}
-      <group position={[-0.22, 0.08, 0.02]} rotation={[0.2, 0, 0.75]}>
-        <mesh castShadow position={[0, 0.32, 0]}>
-          <cylinderGeometry args={[0.03, 0.035, 0.62, 6]} />
+      {/* Axe — handle only, head tucked inside the pack */}
+      <group position={[-0.14, 0.04, 0.01]} rotation={[0.15, 0, 0.55]}>
+        <mesh castShadow position={[0, 0.14, 0]}>
+          <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
           <meshStandardMaterial color="#4a3018" />
-        </mesh>
-        <mesh castShadow position={[0.08, 0.58, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <boxGeometry args={[0.16, 0.24, 0.06]} />
-          <meshStandardMaterial color="#a8adb5" metalness={0.65} roughness={0.35} />
         </mesh>
       </group>
 
-      {/* Pickaxe — right side */}
-      <group position={[0.22, 0.06, 0.02]} rotation={[0.25, 0, -0.75]}>
-        <mesh castShadow position={[0, 0.32, 0]}>
-          <cylinderGeometry args={[0.03, 0.035, 0.62, 6]} />
+      {/* Pickaxe — handle only */}
+      <group position={[0.14, 0.02, 0.01]} rotation={[0.18, 0, -0.55]}>
+        <mesh castShadow position={[0, 0.14, 0]}>
+          <cylinderGeometry args={[0.018, 0.02, 0.28, 5]} />
           <meshStandardMaterial color="#4a3018" />
-        </mesh>
-        <mesh castShadow position={[0, 0.58, 0]}>
-          <boxGeometry args={[0.32, 0.07, 0.06]} />
-          <meshStandardMaterial color="#959aa3" metalness={0.65} roughness={0.35} />
-        </mesh>
-        <mesh castShadow position={[-0.14, 0.56, 0]} rotation={[0, 0, 0.45]}>
-          <boxGeometry args={[0.1, 0.12, 0.05]} />
-          <meshStandardMaterial color="#959aa3" metalness={0.65} roughness={0.35} />
-        </mesh>
-        <mesh castShadow position={[0.14, 0.56, 0]} rotation={[0, 0, -0.45]}>
-          <boxGeometry args={[0.1, 0.12, 0.05]} />
-          <meshStandardMaterial color="#959aa3" metalness={0.65} roughness={0.35} />
         </mesh>
       </group>
     </group>
