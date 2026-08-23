@@ -2,9 +2,10 @@ import {
   unlockedWorlds,
   worldCenter,
   worldPlayableHalf,
+  WORLD_ISLAND_SIZE,
   type WorldId,
 } from '../systems/worlds'
-import { playableHalf } from '../systems/land'
+import { islandSize, playableHalf } from '../systems/land'
 
 export {
   unlockedWorlds,
@@ -21,6 +22,8 @@ export const ISLAND_HALF = 18
 export const PLAYABLE_HALF = playableHalf(0)
 
 export const FALL_Y = -2
+/** Half-width of the bridge corridor used by clamps and wall gaps. */
+export const BRIDGE_HALF_WIDTH = 2.2
 
 function homeClamp(x: number, z: number, landTier: number) {
   const half = playableHalf(landTier)
@@ -46,36 +49,45 @@ function biomeClamp(
   }
 }
 
-function onBridge(
+/** True when standing on the north bridge toward the water world. */
+export function onWaterBridge(x: number, z: number, landTier: number): boolean {
+  if (landTier < 1) return false
+  const homeEdge = islandSize(landTier) / 2
+  const [, , wz] = worldCenter('water', landTier)
+  const waterEdge = wz - WORLD_ISLAND_SIZE / 2
+  return Math.abs(x) <= BRIDGE_HALF_WIDTH && z >= homeEdge - 1.5 && z <= waterEdge + 1.5
+}
+
+/** True when standing on the east bridge toward the lava world. */
+export function onLavaBridge(x: number, z: number, landTier: number): boolean {
+  if (landTier < 2) return false
+  const homeEdge = islandSize(landTier) / 2
+  const [lx] = worldCenter('lava', landTier)
+  const lavaEdge = lx - WORLD_ISLAND_SIZE / 2
+  return Math.abs(z) <= BRIDGE_HALF_WIDTH && x >= homeEdge - 1.5 && x <= lavaEdge + 1.5
+}
+
+function bridgeClamp(
   x: number,
   z: number,
   landTier: number,
 ): { x: number; z: number } | null {
-  const homeHalf = playableHalf(landTier)
-  if (landTier >= 1) {
-    const [, , wz] = worldCenter('water', landTier)
-    const waterSouth = wz - worldPlayableHalf('water')
-    if (Math.abs(x) < 1.3 && z > homeHalf - 2 && z < waterSouth + 2) {
-      return { x: Math.min(1.3, Math.max(-1.3, x)), z: Math.min(waterSouth + 1.5, Math.max(homeHalf - 1.5, z)) }
-    }
+  if (onWaterBridge(x, z, landTier)) {
+    return { x: Math.min(BRIDGE_HALF_WIDTH, Math.max(-BRIDGE_HALF_WIDTH, x)), z }
   }
-  if (landTier >= 2) {
-    const [lx] = worldCenter('lava', landTier)
-    const lavaWest = lx - worldPlayableHalf('lava')
-    if (Math.abs(z) < 1.3 && x > homeHalf - 2 && x < lavaWest + 2) {
-      return { x: Math.min(lavaWest + 1.5, Math.max(homeHalf - 1.5, x)), z: Math.min(1.3, Math.max(-1.3, z)) }
-    }
+  if (onLavaBridge(x, z, landTier)) {
+    return { x, z: Math.min(BRIDGE_HALF_WIDTH, Math.max(-BRIDGE_HALF_WIDTH, z)) }
   }
   return null
 }
 
-/** Clamp onto home or any unlocked biome the player has walked into. */
+/** Clamp onto home, a bridge, or an unlocked biome. */
 export function clampToIsland(
   x: number,
   z: number,
   landTier = 0,
 ): { x: number; z: number } {
-  const bridge = onBridge(x, z, landTier)
+  const bridge = bridgeClamp(x, z, landTier)
   if (bridge) return bridge
 
   const worlds = unlockedWorlds(landTier)
@@ -83,7 +95,7 @@ export function clampToIsland(
     if (world === 'home') continue
     const [cx, , cz] = worldCenter(world, landTier)
     const half = worldPlayableHalf(world)
-    if (Math.abs(x - cx) <= half + 0.5 && Math.abs(z - cz) <= half + 0.5) {
+    if (Math.abs(x - cx) <= half + 0.75 && Math.abs(z - cz) <= half + 0.75) {
       return biomeClamp(x, z, world, landTier)
     }
   }

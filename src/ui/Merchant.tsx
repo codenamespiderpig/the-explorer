@@ -91,7 +91,14 @@ export function Merchant() {
       return
     }
     if (buyLand()) {
-      setHint(`Bought land — island expanded (tier ${landTier + 1})`)
+      const next = landTier + 1
+      setHint(
+        next === 1
+          ? 'Water world unlocked — walk north through the blue arch'
+          : next === 2
+            ? 'Lava world unlocked — walk east through the orange arch'
+            : `Bought land — island expanded (tier ${next})`,
+      )
     } else if (atMaxLand) {
       setHint('No more land to buy here')
     } else {

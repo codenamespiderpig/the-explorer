@@ -104,10 +104,10 @@ export function Hud() {
           <div className="hud-tools">Slimes are hunting you</div>
         )}
         {landTier >= 1 ? (
-          <div className="hud-tools">Water world unlocked — walk north</div>
+          <div className="hud-tools">Water world: walk through the blue arch (north)</div>
         ) : null}
         {landTier >= 2 ? (
-          <div className="hud-tools">Lava world unlocked — walk east</div>
+          <div className="hud-tools">Lava world: walk through the orange arch (east)</div>
         ) : null}
       </div>
 

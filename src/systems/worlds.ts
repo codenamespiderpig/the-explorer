@@ -22,7 +22,8 @@ export function worldCenter(
   landTier: number,
 ): [number, number, number] {
   const homeHalf = (36 + landTier * 8) / 2
-  const gap = 6
+  /** Short gap so bridges are short and easy to find. */
+  const gap = 3
   if (world === 'water') return [0, 0, homeHalf + gap + WORLD_ISLAND_SIZE / 2]
   if (world === 'lava') return [homeHalf + gap + WORLD_ISLAND_SIZE / 2, 0, 0]
   return [0, 0, 0]

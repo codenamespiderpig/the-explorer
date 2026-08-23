@@ -1,12 +1,14 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 import { Gatherable } from './Gatherable'
-import { islandSize } from './bounds'
+import { BRIDGE_HALF_WIDTH, islandSize } from './bounds'
 
 const ISLAND_THICKNESS = 2
 const WALL_HEIGHT = 12
 const WALL_THICKNESS = 2
 const WALL_Y = WALL_HEIGHT / 2 - 0.5
+/** Opening in island walls so bridges can be crossed. */
+const GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
 
 const TREES: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'tree-1', position: [-6, 0, -5] },
@@ -42,19 +44,49 @@ const ROCKS: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'rock-12', position: [7, 0, -11] },
 ]
 
-function InvisibleWalls({ size }: { size: number }) {
+function InvisibleWalls({
+  size,
+  openNorth,
+  openEast,
+}: {
+  size: number
+  openNorth: boolean
+  openEast: boolean
+}) {
   const hx = WALL_THICKNESS / 2
   const hy = WALL_HEIGHT / 2
   const half = size / 2
-  const hz = size / 2 + hx
   const inset = half - hx
+  const span = size / 2 + hx
+
+  // Split a wall into left/right (or top/bottom) segments with a center gap.
+  const wing = (half - GATE_HALF) / 2
+  const wingCenter = GATE_HALF + wing
 
   return (
-    <RigidBody type="fixed" colliders={false}>
-      <CuboidCollider args={[hz, hy, hx]} position={[0, WALL_Y, inset]} />
-      <CuboidCollider args={[hz, hy, hx]} position={[0, WALL_Y, -inset]} />
-      <CuboidCollider args={[hx, hy, hz]} position={[inset, WALL_Y, 0]} />
-      <CuboidCollider args={[hx, hy, hz]} position={[-inset, WALL_Y, 0]} />
+    <RigidBody type="fixed" colliders={false} key={`walls-${size}-${openNorth}-${openEast}`}>
+      {/* North (+Z) */}
+      {openNorth ? (
+        <>
+          <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, inset]} />
+          <CuboidCollider args={[wing, hy, hx]} position={[wingCenter, WALL_Y, inset]} />
+        </>
+      ) : (
+        <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, inset]} />
+      )}
+      {/* South (-Z) */}
+      <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, -inset]} />
+      {/* East (+X) */}
+      {openEast ? (
+        <>
+          <CuboidCollider args={[hx, hy, wing]} position={[inset, WALL_Y, -wingCenter]} />
+          <CuboidCollider args={[hx, hy, wing]} position={[inset, WALL_Y, wingCenter]} />
+        </>
+      ) : (
+        <CuboidCollider args={[hx, hy, span]} position={[inset, WALL_Y, 0]} />
+      )}
+      {/* West (-X) */}
+      <CuboidCollider args={[hx, hy, span]} position={[-inset, WALL_Y, 0]} />
     </RigidBody>
   )
 }
@@ -66,13 +98,14 @@ export function HomeIsland() {
 
   return (
     <group>
-      <RigidBody type="fixed" colliders="cuboid">
+      {/* key forces Rapier to rebuild the floor when the island grows */}
+      <RigidBody key={`home-floor-${size}`} type="fixed" colliders="cuboid">
         <mesh receiveShadow position={[0, -ISLAND_THICKNESS / 2, 0]}>
           <boxGeometry args={[size, ISLAND_THICKNESS, size]} />
           <meshStandardMaterial color="#6abe30" />
         </mesh>
       </RigidBody>
-      <InvisibleWalls size={size} />
+      <InvisibleWalls size={size} openNorth={landTier >= 1} openEast={landTier >= 2} />
 
       {TREES.map((tree) => (
         <Gatherable key={tree.id} id={tree.id} resource="wood" position={tree.position} />
