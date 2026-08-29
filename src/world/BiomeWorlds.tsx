@@ -8,14 +8,14 @@ import {
   waterBridgeEndpoints,
   worldCenter,
 } from '../systems/worlds'
-import { BRIDGE_HALF_WIDTH } from './bounds'
+import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH } from './bounds'
 import { Gatherable } from './Gatherable'
 
 const THICK = 2.4
 const WALL_H = 12
 const WALL_T = 2
 const WALL_Y = WALL_H / 2 - 0.5
-const GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
+const GATE_HALF = BRIDGE_GATE_HALF
 
 function BiomeWalls({
   cx,

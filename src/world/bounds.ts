@@ -1,4 +1,5 @@
 import {
+  homeHalf,
   lavaBridgeEndpoints,
   unlockedWorlds,
   waterBridgeEndpoints,
@@ -22,6 +23,8 @@ export const PLAYABLE_HALF = playableHalf(0)
 
 export const FALL_Y = -2
 export const BRIDGE_HALF_WIDTH = 2.4
+/** Matches invisible wall gate opening (±2.8). */
+export const BRIDGE_GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
 
 function homeClamp(x: number, z: number) {
   const half = playableHalf(0)
@@ -42,12 +45,46 @@ function biomeClamp(x: number, z: number, world: WorldId): { x: number; z: numbe
   }
 }
 
+function onNorthDock(x: number, z: number, landTier: number): boolean {
+  if (landTier < 1) return false
+  const half = playableHalf(0)
+  const northMax = homeHalf() - 0.5
+  return Math.abs(x) <= BRIDGE_GATE_HALF && z >= half && z <= northMax
+}
+
+function onEastDock(x: number, z: number, landTier: number): boolean {
+  if (landTier < 2) return false
+  const half = playableHalf(0)
+  const eastMax = homeHalf() - 0.5
+  return Math.abs(z) <= BRIDGE_GATE_HALF && x >= half && x <= eastMax
+}
+
+function dockClamp(x: number, z: number, landTier: number): { x: number; z: number } | null {
+  if (onNorthDock(x, z, landTier)) {
+    const half = playableHalf(0)
+    const northMax = homeHalf() - 0.5
+    return {
+      x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
+      z: Math.min(northMax, Math.max(half, z)),
+    }
+  }
+  if (onEastDock(x, z, landTier)) {
+    const half = playableHalf(0)
+    const eastMax = homeHalf() - 0.5
+    return {
+      x: Math.min(eastMax, Math.max(half, x)),
+      z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),
+    }
+  }
+  return null
+}
+
 export function onWaterBridge(x: number, z: number, landTier: number): boolean {
   if (landTier < 1) return false
   const { home, island } = waterBridgeEndpoints()
   const zMin = Math.min(home[2], island[2])
   const zMax = Math.max(home[2], island[2])
-  return Math.abs(x) <= BRIDGE_HALF_WIDTH && z >= zMin - 1 && z <= zMax + 1
+  return Math.abs(x) <= BRIDGE_GATE_HALF && z >= zMin - 1 && z <= zMax + 1
 }
 
 export function onLavaBridge(x: number, z: number, landTier: number): boolean {
@@ -55,7 +92,7 @@ export function onLavaBridge(x: number, z: number, landTier: number): boolean {
   const { home, island } = lavaBridgeEndpoints()
   const xMin = Math.min(home[0], island[0])
   const xMax = Math.max(home[0], island[0])
-  return Math.abs(z) <= BRIDGE_HALF_WIDTH && x >= xMin - 1 && x <= xMax + 1
+  return Math.abs(z) <= BRIDGE_GATE_HALF && x >= xMin - 1 && x <= xMax + 1
 }
 
 function bridgeClamp(x: number, z: number, landTier: number): { x: number; z: number } | null {
@@ -64,7 +101,7 @@ function bridgeClamp(x: number, z: number, landTier: number): { x: number; z: nu
     const zMin = Math.min(home[2], island[2])
     const zMax = Math.max(home[2], island[2])
     return {
-      x: Math.min(BRIDGE_HALF_WIDTH, Math.max(-BRIDGE_HALF_WIDTH, x)),
+      x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
       z: Math.min(zMax + 0.5, Math.max(zMin - 0.5, z)),
     }
   }
@@ -74,7 +111,7 @@ function bridgeClamp(x: number, z: number, landTier: number): { x: number; z: nu
     const xMax = Math.max(home[0], island[0])
     return {
       x: Math.min(xMax + 0.5, Math.max(xMin - 0.5, x)),
-      z: Math.min(BRIDGE_HALF_WIDTH, Math.max(-BRIDGE_HALF_WIDTH, z)),
+      z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),
     }
   }
   return null
@@ -88,6 +125,9 @@ export function clampToIsland(
 ): { x: number; z: number } {
   const bridge = bridgeClamp(x, z, landTier)
   if (bridge) return bridge
+
+  const dock = dockClamp(x, z, landTier)
+  if (dock) return dock
 
   const worlds = unlockedWorlds(landTier)
   for (const world of worlds) {

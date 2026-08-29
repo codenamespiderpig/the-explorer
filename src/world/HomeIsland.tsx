@@ -1,13 +1,13 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 import { Gatherable } from './Gatherable'
-import { BRIDGE_HALF_WIDTH, islandSize } from './bounds'
+import { BRIDGE_GATE_HALF, islandSize, playableHalf } from './bounds'
+import { homeHalf } from '../systems/worlds'
 
 const ISLAND_THICKNESS = 2
 const WALL_HEIGHT = 12
 const WALL_THICKNESS = 2
 const WALL_Y = WALL_HEIGHT / 2 - 0.5
-const GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
 
 const TREES: Array<{ id: string; position: [number, number, number] }> = [
   { id: 'tree-1', position: [-6, 0, -5] },
@@ -57,8 +57,8 @@ function InvisibleWalls({
   const half = size / 2
   const inset = half - hx
   const span = size / 2 + hx
-  const wing = (half - GATE_HALF) / 2
-  const wingCenter = GATE_HALF + wing
+  const wing = (half - BRIDGE_GATE_HALF) / 2
+  const wingCenter = BRIDGE_GATE_HALF + wing
 
   return (
     <RigidBody type="fixed" colliders={false} key={`walls-${openNorth}-${openEast}`}>
@@ -84,6 +84,37 @@ function InvisibleWalls({
   )
 }
 
+function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
+  const half = playableHalf(0)
+  const edge = homeHalf()
+  const halfW = BRIDGE_GATE_HALF
+  const halfH = 0.4
+  const halfLen = (edge - half) / 2
+  const center = half + halfLen
+
+  if (axis === 'north') {
+    return (
+      <RigidBody type="fixed" colliders={false} position={[0, 0, center]}>
+        <CuboidCollider args={[halfW, halfH, halfLen]} position={[0, halfH, 0]} />
+        <mesh receiveShadow castShadow position={[0, halfH, 0]}>
+          <boxGeometry args={[halfW * 2, halfH * 2, halfLen * 2]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      </RigidBody>
+    )
+  }
+
+  return (
+    <RigidBody type="fixed" colliders={false} position={[center, 0, 0]}>
+      <CuboidCollider args={[halfLen, halfH, halfW]} position={[0, halfH, 0]} />
+      <mesh receiveShadow castShadow position={[0, halfH, 0]}>
+        <boxGeometry args={[halfLen * 2, halfH * 2, halfW * 2]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </RigidBody>
+  )
+}
+
 /** Home island — fixed size; upgrades unlock separate islands instead. */
 export function HomeIsland() {
   const landTier = useGameStore((s) => s.landTier)
@@ -98,6 +129,8 @@ export function HomeIsland() {
         </mesh>
       </RigidBody>
       <InvisibleWalls size={size} openNorth={landTier >= 1} openEast={landTier >= 2} />
+      {landTier >= 1 ? <HomeDock axis="north" color="#6ec4ff" /> : null}
+      {landTier >= 2 ? <HomeDock axis="east" color="#aa5533" /> : null}
 
       {TREES.map((tree) => (
         <Gatherable key={tree.id} id={tree.id} resource="wood" position={tree.position} />

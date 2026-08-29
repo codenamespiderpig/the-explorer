@@ -44,7 +44,7 @@ export function waterBridgeEndpoints(): {
 } {
   const [, , wz] = worldCenter('water')
   return {
-    home: [0, 0, homeHalf() - 0.5],
+    home: [0, 0, homeHalf() - 2],
     island: [0, 0, wz - biomeHalf() + 0.5],
   }
 }
@@ -55,7 +55,7 @@ export function lavaBridgeEndpoints(): {
 } {
   const [lx] = worldCenter('lava')
   return {
-    home: [homeHalf() - 0.5, 0, 0],
+    home: [homeHalf() - 2, 0, 0],
     island: [lx - biomeHalf() + 0.5, 0, 0],
   }
 }

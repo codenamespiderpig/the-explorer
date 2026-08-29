@@ -36,4 +36,22 @@ describe('clampToIsland', () => {
     expect(onLavaBridge(midX, 0, 2)).toBe(true)
     expect(clampToIsland(midX, 0, 2)).toEqual({ x: midX, z: 0 })
   })
+
+  it('allows off-center water gate entry without snapping back', () => {
+    expect(onWaterBridge(2.6, 17, 1)).toBe(true)
+    expect(clampToIsland(2.6, 17, 1)).toEqual({ x: 2.6, z: 17 })
+  })
+
+  it('allows north dock approach before the pier', () => {
+    expect(clampToIsland(0, 16.8, 1)).toEqual({ x: 0, z: 16.8 })
+  })
+
+  it('allows off-center lava gate entry without snapping back', () => {
+    expect(onLavaBridge(17, 2.6, 2)).toBe(true)
+    expect(clampToIsland(17, 2.6, 2)).toEqual({ x: 17, z: 2.6 })
+  })
+
+  it('allows east dock approach before the lava pier', () => {
+    expect(clampToIsland(16.8, 0, 2)).toEqual({ x: 16.8, z: 0 })
+  })
 })
