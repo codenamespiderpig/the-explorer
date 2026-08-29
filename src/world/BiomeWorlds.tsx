@@ -8,7 +8,7 @@ import {
   waterBridgeEndpoints,
   worldCenter,
 } from '../systems/worlds'
-import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH } from './bounds'
+import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
 
 const THICK = 2.4
@@ -93,17 +93,20 @@ function LongBridge({
   const dz = to[2] - from[2]
   const len = Math.max(4, Math.hypot(dx, dz))
   const yaw = Math.atan2(dx, dz)
-  const halfW = BRIDGE_HALF_WIDTH
-  const halfH = 0.4
+  const halfW = BRIDGE_GATE_HALF
+  const deckHalfH = 0.4
   const halfL = len / 2
   const segments = Math.max(3, Math.ceil(len / 14))
 
   return (
     <group position={[mx, 0, mz]} rotation={[0, yaw, 0]}>
       <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider args={[halfW, halfH, halfL]} position={[0, halfH, 0]} />
-        <mesh receiveShadow castShadow position={[0, halfH, 0]}>
-          <boxGeometry args={[halfW * 2, halfH * 2, len]} />
+        <CuboidCollider
+          args={[halfW, WALK_COLLIDER_HALF_H, halfL]}
+          position={[0, -WALK_COLLIDER_HALF_H, 0]}
+        />
+        <mesh receiveShadow castShadow position={[0, deckHalfH, 0]}>
+          <boxGeometry args={[BRIDGE_HALF_WIDTH * 2, deckHalfH * 2, len]} />
           <meshStandardMaterial color={deckColor} />
         </mesh>
         {Array.from({ length: segments }, (_, i) => {
@@ -115,11 +118,11 @@ function LongBridge({
             </mesh>
           )
         })}
-        <mesh position={[-halfW + 0.1, 1, 0]}>
+        <mesh position={[-BRIDGE_HALF_WIDTH + 0.1, 1, 0]}>
           <boxGeometry args={[0.14, 0.8, len]} />
           <meshStandardMaterial color={railColor} />
         </mesh>
-        <mesh position={[halfW - 0.1, 1, 0]}>
+        <mesh position={[BRIDGE_HALF_WIDTH - 0.1, 1, 0]}>
           <boxGeometry args={[0.14, 0.8, len]} />
           <meshStandardMaterial color={railColor} />
         </mesh>

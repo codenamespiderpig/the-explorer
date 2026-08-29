@@ -25,6 +25,8 @@ export const FALL_Y = -2
 export const BRIDGE_HALF_WIDTH = 2.4
 /** Matches invisible wall gate opening (±2.8). */
 export const BRIDGE_GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
+/** Walk collider half-height — top flush with home island at y=0. */
+export const WALK_COLLIDER_HALF_H = 0.15
 
 function homeClamp(x: number, z: number) {
   const half = playableHalf(0)
@@ -48,21 +50,21 @@ function biomeClamp(x: number, z: number, world: WorldId): { x: number; z: numbe
 function onNorthDock(x: number, z: number, landTier: number): boolean {
   if (landTier < 1) return false
   const half = playableHalf(0)
-  const northMax = homeHalf() - 0.5
+  const northMax = homeHalf()
   return Math.abs(x) <= BRIDGE_GATE_HALF && z >= half && z <= northMax
 }
 
 function onEastDock(x: number, z: number, landTier: number): boolean {
   if (landTier < 2) return false
   const half = playableHalf(0)
-  const eastMax = homeHalf() - 0.5
+  const eastMax = homeHalf()
   return Math.abs(z) <= BRIDGE_GATE_HALF && x >= half && x <= eastMax
 }
 
 function dockClamp(x: number, z: number, landTier: number): { x: number; z: number } | null {
   if (onNorthDock(x, z, landTier)) {
     const half = playableHalf(0)
-    const northMax = homeHalf() - 0.5
+    const northMax = homeHalf()
     return {
       x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
       z: Math.min(northMax, Math.max(half, z)),
@@ -70,7 +72,7 @@ function dockClamp(x: number, z: number, landTier: number): { x: number; z: numb
   }
   if (onEastDock(x, z, landTier)) {
     const half = playableHalf(0)
-    const eastMax = homeHalf() - 0.5
+    const eastMax = homeHalf()
     return {
       x: Math.min(eastMax, Math.max(half, x)),
       z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),

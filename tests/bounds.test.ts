@@ -46,6 +46,10 @@ describe('clampToIsland', () => {
     expect(clampToIsland(0, 16.8, 1)).toEqual({ x: 0, z: 16.8 })
   })
 
+  it('allows walking through the full north gate depth', () => {
+    expect(clampToIsland(0, 17.8, 1)).toEqual({ x: 0, z: 17.8 })
+  })
+
   it('allows off-center lava gate entry without snapping back', () => {
     expect(onLavaBridge(17, 2.6, 2)).toBe(true)
     expect(clampToIsland(17, 2.6, 2)).toEqual({ x: 17, z: 2.6 })

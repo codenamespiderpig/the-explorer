@@ -1,7 +1,7 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 import { Gatherable } from './Gatherable'
-import { BRIDGE_GATE_HALF, islandSize, playableHalf } from './bounds'
+import { BRIDGE_GATE_HALF, islandSize, playableHalf, WALK_COLLIDER_HALF_H } from './bounds'
 import { homeHalf } from '../systems/worlds'
 
 const ISLAND_THICKNESS = 2
@@ -88,16 +88,19 @@ function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
   const half = playableHalf(0)
   const edge = homeHalf()
   const halfW = BRIDGE_GATE_HALF
-  const halfH = 0.4
+  const deckHalfH = 0.4
   const halfLen = (edge - half) / 2
   const center = half + halfLen
 
   if (axis === 'north') {
     return (
       <RigidBody type="fixed" colliders={false} position={[0, 0, center]}>
-        <CuboidCollider args={[halfW, halfH, halfLen]} position={[0, halfH, 0]} />
-        <mesh receiveShadow castShadow position={[0, halfH, 0]}>
-          <boxGeometry args={[halfW * 2, halfH * 2, halfLen * 2]} />
+        <CuboidCollider
+          args={[halfW, WALK_COLLIDER_HALF_H, halfLen]}
+          position={[0, -WALK_COLLIDER_HALF_H, 0]}
+        />
+        <mesh receiveShadow castShadow position={[0, deckHalfH, 0]}>
+          <boxGeometry args={[halfW * 2, deckHalfH * 2, halfLen * 2]} />
           <meshStandardMaterial color={color} />
         </mesh>
       </RigidBody>
@@ -106,9 +109,12 @@ function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
 
   return (
     <RigidBody type="fixed" colliders={false} position={[center, 0, 0]}>
-      <CuboidCollider args={[halfLen, halfH, halfW]} position={[0, halfH, 0]} />
-      <mesh receiveShadow castShadow position={[0, halfH, 0]}>
-        <boxGeometry args={[halfLen * 2, halfH * 2, halfW * 2]} />
+      <CuboidCollider
+        args={[halfLen, WALK_COLLIDER_HALF_H, halfW]}
+        position={[0, -WALK_COLLIDER_HALF_H, 0]}
+      />
+      <mesh receiveShadow castShadow position={[0, deckHalfH, 0]}>
+        <boxGeometry args={[halfLen * 2, deckHalfH * 2, halfW * 2]} />
         <meshStandardMaterial color={color} />
       </mesh>
     </RigidBody>

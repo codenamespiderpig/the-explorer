@@ -24,6 +24,7 @@
 - [x] Land upgrades unlock full distant islands (water north, lava east) instead of shrinking home growth
 - [x] Crab pots craft/place near water; catch fish; eat fish (R) to heal wounds
 - [x] Fix north pier gate bounce — align clamp corridor with wall opening and add home docks
+- [x] Fix north gate entry physics — flush walkway colliders match home floor height
 
 ## Now
 
