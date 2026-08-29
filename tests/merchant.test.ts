@@ -4,6 +4,8 @@ import {
   advanceMerchantTimer,
   formatMerchantCountdown,
   isMerchantVisiting,
+} from '../src/systems/merchant'
+import {
   merchantSpawnPosition,
   unlockedWorlds,
   worldCenter,
@@ -44,7 +46,7 @@ describe('world unlocks', () => {
     const rng = () => [0, 0.6, 0.1][i++] ?? 0
     const spawn = merchantSpawnPosition(2, rng)
     expect(['home', 'water', 'lava']).toContain(spawn.world)
-    const [cx, , cz] = worldCenter(spawn.world, 2)
+    const [cx, , cz] = worldCenter(spawn.world)
     expect(Math.hypot(spawn.position[0] - cx, spawn.position[2] - cz)).toBeGreaterThan(5)
   })
 })

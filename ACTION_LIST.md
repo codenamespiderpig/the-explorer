@@ -21,6 +21,7 @@
 - [x] Traveling merchant at morning: M to trade; wood/stone 5 money, rare items 15; buy land upgrades
 - [x] Merchant stays 90s at a hidden spot; water world (tier 1) and lava world (tier 2)
 - [x] Fix land-upgrade fall-through (rebuild floor collider) and open wall gaps for biome bridges
+- [x] Land upgrades unlock full distant islands (water north, lava east) instead of shrinking home growth
 
 ## Now
 

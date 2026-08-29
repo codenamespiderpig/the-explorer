@@ -88,7 +88,7 @@ let castleSeq = 0
 let wasNight = false
 
 function edgeSpawn(landTier: number): [number, number, number] {
-  const half = 12 + landTier * 4
+  const half = 12 + (landTier >= 1 ? 4 : 0)
   const side = Math.floor(Math.random() * 4)
   const t = (Math.random() - 0.5) * (half * 1.6)
   if (side === 0) return [t, 0.6, -half]

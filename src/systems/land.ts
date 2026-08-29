@@ -1,14 +1,14 @@
+/** Home island never grows — upgrades unlock whole new islands instead. */
 export const BASE_ISLAND_SIZE = 36
-export const ISLAND_GROWTH_PER_TIER = 8
-export const MAX_LAND_TIER = 3
-export const LAND_UPGRADE_COSTS = [50, 100, 150] as const
+export const MAX_LAND_TIER = 2
+export const LAND_UPGRADE_COSTS = [50, 100] as const
 
-export function islandSize(landTier: number): number {
-  return BASE_ISLAND_SIZE + landTier * ISLAND_GROWTH_PER_TIER
+export function islandSize(_landTier = 0): number {
+  return BASE_ISLAND_SIZE
 }
 
-export function playableHalf(landTier: number): number {
-  return islandSize(landTier) / 2 - 1.5
+export function playableHalf(_landTier = 0): number {
+  return BASE_ISLAND_SIZE / 2 - 1.5
 }
 
 export function landUpgradeCost(landTier: number): number | null {
@@ -30,4 +30,10 @@ export function buyLandFromMerchant(
   if (cost === null) return { ok: false, reason: 'max-tier' }
   if (money < cost) return { ok: false, reason: 'not-enough-money' }
   return { ok: true, money: money - cost, landTier: landTier + 1 }
+}
+
+export function landUpgradeLabel(landTier: number): string {
+  if (landTier >= MAX_LAND_TIER) return 'All islands unlocked'
+  if (landTier === 0) return 'Unlock the Water Island (north)'
+  return 'Unlock the Lava Island (east)'
 }

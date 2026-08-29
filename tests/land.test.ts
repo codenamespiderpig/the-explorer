@@ -4,23 +4,24 @@ import {
   buyLandFromMerchant,
   islandSize,
   landUpgradeCost,
-  playableHalf,
+  landUpgradeLabel,
 } from '../src/systems/land'
 
 describe('land upgrades', () => {
-  it('grows the island each tier', () => {
+  it('keeps the home island the same size', () => {
     expect(islandSize(0)).toBe(BASE_ISLAND_SIZE)
-    expect(islandSize(1)).toBe(BASE_ISLAND_SIZE + 8)
-    expect(playableHalf(1)).toBeGreaterThan(playableHalf(0))
+    expect(islandSize(2)).toBe(BASE_ISLAND_SIZE)
   })
 
-  it('charges increasing prices for land', () => {
+  it('charges for whole-island unlocks', () => {
     expect(landUpgradeCost(0)).toBe(50)
-    expect(landUpgradeCost(2)).toBe(150)
-    expect(landUpgradeCost(3)).toBeNull()
+    expect(landUpgradeCost(1)).toBe(100)
+    expect(landUpgradeCost(2)).toBeNull()
+    expect(landUpgradeLabel(0)).toContain('Water')
+    expect(landUpgradeLabel(1)).toContain('Lava')
   })
 
-  it('buys land when the merchant is here and you can afford it', () => {
+  it('buys a new island when the merchant is here and you can afford it', () => {
     expect(buyLandFromMerchant(60, 0, true)).toEqual({
       ok: true,
       money: 10,

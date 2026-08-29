@@ -7,7 +7,19 @@ export interface MerchantSpawn {
   position: [number, number, number]
 }
 
-const WORLD_ISLAND_SIZE = 28
+/** Full-size biome islands — same scale as home, not tiny add-ons. */
+export const BIOME_ISLAND_SIZE = 44
+/** Open ocean between home edge and the next island. */
+export const OCEAN_GAP = 48
+export const HOME_ISLAND_SIZE = 36
+
+export function homeHalf(): number {
+  return HOME_ISLAND_SIZE / 2
+}
+
+export function biomeHalf(): number {
+  return BIOME_ISLAND_SIZE / 2
+}
 
 /** Worlds unlocked at each land tier (tier 1 = water, tier 2 = lava). */
 export function unlockedWorlds(landTier: number): WorldId[] {
@@ -17,20 +29,39 @@ export function unlockedWorlds(landTier: number): WorldId[] {
   return worlds
 }
 
-export function worldCenter(
-  world: WorldId,
-  landTier: number,
-): [number, number, number] {
-  const homeHalf = (36 + landTier * 8) / 2
-  /** Short gap so bridges are short and easy to find. */
-  const gap = 3
-  if (world === 'water') return [0, 0, homeHalf + gap + WORLD_ISLAND_SIZE / 2]
-  if (world === 'lava') return [homeHalf + gap + WORLD_ISLAND_SIZE / 2, 0, 0]
+export function worldCenter(world: WorldId, _landTier = 0): [number, number, number] {
+  const h = homeHalf()
+  const b = biomeHalf()
+  if (world === 'water') return [0, 0, h + OCEAN_GAP + b]
+  if (world === 'lava') return [h + OCEAN_GAP + b, 0, 0]
   return [0, 0, 0]
 }
 
+/** Bridge endpoints: home dock → remote island dock. */
+export function waterBridgeEndpoints(): {
+  home: [number, number, number]
+  island: [number, number, number]
+} {
+  const [, , wz] = worldCenter('water')
+  return {
+    home: [0, 0, homeHalf() - 0.5],
+    island: [0, 0, wz - biomeHalf() + 0.5],
+  }
+}
+
+export function lavaBridgeEndpoints(): {
+  home: [number, number, number]
+  island: [number, number, number]
+} {
+  const [lx] = worldCenter('lava')
+  return {
+    home: [homeHalf() - 0.5, 0, 0],
+    island: [lx - biomeHalf() + 0.5, 0, 0],
+  }
+}
+
 export function worldPlayableHalf(_world: WorldId): number {
-  return WORLD_ISLAND_SIZE / 2 - 1.5
+  return biomeHalf() - 1.5
 }
 
 /** Pick a far edge spot so the merchant is hard to stumble onto. */
@@ -40,8 +71,8 @@ export function merchantSpawnPosition(
 ): MerchantSpawn {
   const worlds = unlockedWorlds(landTier)
   const world = worlds[Math.floor(rng() * worlds.length)] ?? 'home'
-  const [cx, , cz] = worldCenter(world, landTier)
-  const half = worldPlayableHalf(world)
+  const [cx, , cz] = worldCenter(world)
+  const half = world === 'home' ? homeHalf() - 2 : worldPlayableHalf(world)
   const angle = rng() * Math.PI * 2
   const dist = half * (0.78 + rng() * 0.2)
   return {
@@ -65,4 +96,5 @@ export function formatMerchantCountdown(timeLeft: number): string {
   return `${m}:${r.toString().padStart(2, '0')}`
 }
 
-export { WORLD_ISLAND_SIZE }
+/** @deprecated use BIOME_ISLAND_SIZE */
+export const WORLD_ISLAND_SIZE = BIOME_ISLAND_SIZE

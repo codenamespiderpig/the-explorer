@@ -7,7 +7,6 @@ const ISLAND_THICKNESS = 2
 const WALL_HEIGHT = 12
 const WALL_THICKNESS = 2
 const WALL_Y = WALL_HEIGHT / 2 - 0.5
-/** Opening in island walls so bridges can be crossed. */
 const GATE_HALF = BRIDGE_HALF_WIDTH + 0.4
 
 const TREES: Array<{ id: string; position: [number, number, number] }> = [
@@ -58,14 +57,11 @@ function InvisibleWalls({
   const half = size / 2
   const inset = half - hx
   const span = size / 2 + hx
-
-  // Split a wall into left/right (or top/bottom) segments with a center gap.
   const wing = (half - GATE_HALF) / 2
   const wingCenter = GATE_HALF + wing
 
   return (
-    <RigidBody type="fixed" colliders={false} key={`walls-${size}-${openNorth}-${openEast}`}>
-      {/* North (+Z) */}
+    <RigidBody type="fixed" colliders={false} key={`walls-${openNorth}-${openEast}`}>
       {openNorth ? (
         <>
           <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, inset]} />
@@ -74,9 +70,7 @@ function InvisibleWalls({
       ) : (
         <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, inset]} />
       )}
-      {/* South (-Z) */}
       <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, -inset]} />
-      {/* East (+X) */}
       {openEast ? (
         <>
           <CuboidCollider args={[hx, hy, wing]} position={[inset, WALL_Y, -wingCenter]} />
@@ -85,21 +79,19 @@ function InvisibleWalls({
       ) : (
         <CuboidCollider args={[hx, hy, span]} position={[inset, WALL_Y, 0]} />
       )}
-      {/* West (-X) */}
       <CuboidCollider args={[hx, hy, span]} position={[-inset, WALL_Y, 0]} />
     </RigidBody>
   )
 }
 
-/** Home island slab plus forageable trees and rocks. */
+/** Home island — fixed size; upgrades unlock separate islands instead. */
 export function HomeIsland() {
   const landTier = useGameStore((s) => s.landTier)
-  const size = islandSize(landTier)
+  const size = islandSize()
 
   return (
     <group>
-      {/* key forces Rapier to rebuild the floor when the island grows */}
-      <RigidBody key={`home-floor-${size}`} type="fixed" colliders="cuboid">
+      <RigidBody type="fixed" colliders="cuboid">
         <mesh receiveShadow position={[0, -ISLAND_THICKNESS / 2, 0]}>
           <boxGeometry args={[size, ISLAND_THICKNESS, size]} />
           <meshStandardMaterial color="#6abe30" />
