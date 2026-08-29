@@ -26,6 +26,7 @@
 - [x] Fix north pier gate bounce — align clamp corridor with wall opening and add home docks
 - [x] Fix north gate entry physics — flush walkway colliders match home floor height
 - [x] Water Island archipelago — land islets, plank paths, deep water between
+- [x] Fix bridge exit clamp + bigger blue landing dock on Water Island
 
 ## Now
 

@@ -10,6 +10,7 @@ import {
 import { playableHalf } from '../systems/land'
 import {
   clampToWalkableRects,
+  isPointOnWaterIslandWalkable,
   waterIslandWalkRects,
 } from '../systems/waterIsland'
 
@@ -97,6 +98,7 @@ function dockClamp(x: number, z: number, landTier: number): { x: number; z: numb
 
 export function onWaterBridge(x: number, z: number, landTier: number): boolean {
   if (landTier < 1) return false
+  if (isPointOnWaterIslandWalkable(x, z)) return false
   const { home, island } = waterBridgeEndpoints()
   const zMin = Math.min(home[2], island[2])
   const zMax = Math.max(home[2], island[2])
@@ -139,11 +141,15 @@ export function clampToIsland(
   z: number,
   landTier = 0,
 ): { x: number; z: number } {
-  const bridge = bridgeClamp(x, z, landTier)
-  if (bridge) return bridge
+  if (landTier >= 1 && isPointOnWaterIslandWalkable(x, z)) {
+    return waterBiomeClamp(x, z)
+  }
 
   const dock = dockClamp(x, z, landTier)
   if (dock) return dock
+
+  const bridge = bridgeClamp(x, z, landTier)
+  if (bridge) return bridge
 
   const worlds = unlockedWorlds(landTier)
   for (const world of worlds) {

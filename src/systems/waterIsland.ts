@@ -13,13 +13,13 @@ export interface WalkRect {
 
 /** Island-local walkable rectangles (origin = worldCenter('water')). */
 export const WATER_ISLAND_RECTS: WalkRect[] = [
-  { id: 'dock', kind: 'islet', xMin: -4, xMax: 4, zMin: -22, zMax: -14 },
+  { id: 'dock', kind: 'islet', xMin: -7, xMax: 7, zMin: -22, zMax: -12 },
   { id: 'central', kind: 'islet', xMin: -7, xMax: 7, zMin: -6, zMax: 6 },
   { id: 'west', kind: 'islet', xMin: -18, xMax: -10, zMin: -4, zMax: 4 },
   { id: 'east', kind: 'islet', xMin: 10, xMax: 18, zMin: -4, zMax: 4 },
   { id: 'northeast', kind: 'islet', xMin: 8, xMax: 16, zMin: 8, zMax: 16 },
   { id: 'north', kind: 'islet', xMin: -4, xMax: 4, zMin: 10, zMax: 18 },
-  { id: 'walk-dock-central', kind: 'walkway', xMin: -1.2, xMax: 1.2, zMin: -14, zMax: -6 },
+  { id: 'walk-dock-central', kind: 'walkway', xMin: -1.2, xMax: 1.2, zMin: -12, zMax: -6 },
   { id: 'walk-central-west', kind: 'walkway', xMin: -10, xMax: -7, zMin: -1.2, zMax: 1.2 },
   { id: 'walk-central-east', kind: 'walkway', xMin: 7, xMax: 10, zMin: -1.2, zMax: 1.2 },
   { id: 'walk-central-north', kind: 'walkway', xMin: -1.2, xMax: 1.2, zMin: 6, zMax: 10 },

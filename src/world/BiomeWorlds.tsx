@@ -227,11 +227,11 @@ function WalkRectPlatform({ rect }: { rect: WalkRect }) {
       />
       <mesh receiveShadow castShadow position={[0, -landHalfH, 0]}>
         <boxGeometry args={[halfW * 2, landHalfH * 2, halfL * 2]} />
-        <meshStandardMaterial color="#c9b57a" />
+        <meshStandardMaterial color="#2a6a9a" />
       </mesh>
       <mesh receiveShadow position={[0, 0.02, 0]}>
         <boxGeometry args={[halfW * 2 - 0.4, 0.06, halfL * 2 - 0.4]} />
-        <meshStandardMaterial color="#6abe30" />
+        <meshStandardMaterial color="#5ec4ff" />
       </mesh>
     </RigidBody>
   )
@@ -271,7 +271,7 @@ export function WaterWorld() {
       ].map(([ox, oz], i) => (
         <mesh key={i} position={[cx + ox, 0.35, cz + oz]}>
           <coneGeometry args={[0.55, 1.4, 6]} />
-          <meshStandardMaterial color="#2d8a4a" />
+          <meshStandardMaterial color="#2d6a8a" />
         </mesh>
       ))}
     </group>

@@ -64,4 +64,16 @@ describe('clampToIsland', () => {
   it('allows east dock approach before the lava pier', () => {
     expect(clampToIsland(16.8, 0, 2)).toEqual({ x: 16.8, z: 0 })
   })
+
+  it('allows stepping off the pier onto the wide water landing', () => {
+    expect(clampToIsland(3.5, 68, 1)).toEqual({ x: 3.5, z: 68 })
+  })
+
+  it('prefers home north dock over pier clamp near the gate', () => {
+    expect(clampToIsland(0, 17.8, 1)).toEqual({ x: 0, z: 17.8 })
+  })
+
+  it('still allows mid-pier travel', () => {
+    expect(clampToIsland(0, 40, 1)).toEqual({ x: 0, z: 40 })
+  })
 })
