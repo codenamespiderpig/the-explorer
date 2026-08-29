@@ -30,6 +30,12 @@ describe('clampToIsland', () => {
     expect(clampToIsland(cx, cz, 1)).toEqual({ x: cx, z: cz })
   })
 
+  it('clamps open water on Water Island to nearest islet', () => {
+    const [cx, , cz] = worldCenter('water')
+    const clamped = clampToIsland(cx + 20, cz, 1)
+    expect(clamped).not.toEqual({ x: cx + 20, z: cz })
+  })
+
   it('allows the long lava pier after tier 2', () => {
     const { home, island } = lavaBridgeEndpoints()
     const midX = (home[0] + island[0]) / 2

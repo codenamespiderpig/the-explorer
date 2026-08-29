@@ -8,6 +8,10 @@ import {
   type WorldId,
 } from '../systems/worlds'
 import { playableHalf } from '../systems/land'
+import {
+  clampToWalkableRects,
+  waterIslandWalkRects,
+} from '../systems/waterIsland'
 
 export {
   unlockedWorlds,
@@ -36,7 +40,17 @@ function homeClamp(x: number, z: number) {
   }
 }
 
+function waterBiomeClamp(x: number, z: number): { x: number; z: number } {
+  const [cx, , cz] = worldCenter('water')
+  const half = worldPlayableHalf('water')
+  if (Math.abs(x - cx) > half + 1 || Math.abs(z - cz) > half + 1) {
+    return { x, z }
+  }
+  return clampToWalkableRects(x, z, waterIslandWalkRects())
+}
+
 function biomeClamp(x: number, z: number, world: WorldId): { x: number; z: number } {
+  if (world === 'water') return waterBiomeClamp(x, z)
   const [cx, , cz] = worldCenter(world)
   const half = worldPlayableHalf(world)
   const lx = x - cx
