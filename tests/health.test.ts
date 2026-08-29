@@ -7,6 +7,7 @@ import {
   respawnHealth,
   takeDamage,
 } from '../src/systems/health'
+import { FISH_HEAL_AMOUNT, canHeal, heal } from '../src/systems/heal'
 
 describe('health', () => {
   it('starts at 100 with base max 100', () => {
@@ -36,5 +37,16 @@ describe('health', () => {
     expect(h.dead).toBe(false)
     expect(h.current).toBe(effectiveMaxHealth(h))
     expect(h.armourBonus).toBe(20)
+  })
+
+  it('heals wounds up to max health', () => {
+    let h = createHealthState()
+    h = takeDamage(h, 40)
+    expect(canHeal(h)).toBe(true)
+    h = heal(h, FISH_HEAL_AMOUNT)
+    expect(h.current).toBe(90)
+    h = heal(h, 999)
+    expect(h.current).toBe(BASE_MAX_HEALTH)
+    expect(canHeal(h)).toBe(false)
   })
 })

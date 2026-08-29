@@ -5,7 +5,7 @@ export const COMMON_MERCHANT_PRICE = 5
 /** Rarer inventory items sell for this much each. */
 export const RARE_MERCHANT_PRICE = 15
 
-const COMMON_ITEMS = new Set<ItemId>(['wood', 'stone'])
+const COMMON_ITEMS = new Set<ItemId>(['wood', 'stone', 'fish'])
 
 const RARE_ITEMS = new Set<ItemId>([
   'slime-goop',

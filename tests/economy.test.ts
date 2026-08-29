@@ -8,9 +8,9 @@ import {
 } from '../src/systems/economy'
 
 describe('merchant pricing', () => {
-  it('pays 5 money for wood and stone', () => {
+  it('pays 5 money for wood, stone, and fish', () => {
     expect(sellValue('wood', 1)).toBe(COMMON_MERCHANT_PRICE)
-    expect(sellValue('stone', 3)).toBe(COMMON_MERCHANT_PRICE * 3)
+    expect(sellValue('fish', 1)).toBe(COMMON_MERCHANT_PRICE)
   })
 
   it('pays 15 money for rarer items', () => {

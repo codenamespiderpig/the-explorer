@@ -8,7 +8,8 @@ export type CraftedItemId =
   | 'furnace'
   | 'wooden-gate'
   | 'slime-castle'
-export type ItemId = ResourceId | 'dungeon-relic' | 'slime-goop' | ToolId | CraftedItemId
+  | 'crab-pot'
+export type ItemId = ResourceId | 'dungeon-relic' | 'slime-goop' | 'fish' | ToolId | CraftedItemId
 
 export interface ItemDef {
   id: ItemId
@@ -22,6 +23,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   stone: { id: 'stone', name: 'Stone', sellValue: 2 },
   'dungeon-relic': { id: 'dungeon-relic', name: 'Dungeon Relic', sellValue: 25 },
   'slime-goop': { id: 'slime-goop', name: 'Slime Goop', sellValue: 4 },
+  fish: { id: 'fish', name: 'Fish', sellValue: 5 },
   'wooden-sword': { id: 'wooden-sword', name: 'Wooden Sword', sellValue: 5 },
   'wooden-pickaxe': { id: 'wooden-pickaxe', name: 'Wooden Pickaxe', sellValue: 5 },
   'wooden-axe': { id: 'wooden-axe', name: 'Wooden Axe', sellValue: 5 },
@@ -36,6 +38,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     name: 'Slime Castle',
     sellValue: 80,
   },
+  'crab-pot': { id: 'crab-pot', name: 'Crab Pot', sellValue: 8 },
 }
 
 export const STARTING_TOOLS: ToolId[] = [

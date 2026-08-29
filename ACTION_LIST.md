@@ -22,6 +22,7 @@
 - [x] Merchant stays 90s at a hidden spot; water world (tier 1) and lava world (tier 2)
 - [x] Fix land-upgrade fall-through (rebuild floor collider) and open wall gaps for biome bridges
 - [x] Land upgrades unlock full distant islands (water north, lava east) instead of shrinking home growth
+- [x] Crab pots craft/place near water; catch fish; eat fish (R) to heal wounds
 
 ## Now
 

@@ -7,6 +7,8 @@ import { findNearestGatherable } from '../systems/proximity'
 import { gatePlacementFromForward } from '../systems/gate'
 import { cameraLook, facingDirection } from '../systems/facing'
 import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
+import { isNearWater, nearestPot, nearestPotWithFish } from '../systems/crabPot'
+import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { toolForGather } from '../systems/toolSwing'
 import { ITEMS } from '../data/items'
 import { useInventoryStore } from '../stores/inventoryStore'
@@ -210,9 +212,22 @@ function useGatherInput() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'KeyE' || event.repeat) return
       const state = useInventoryStore.getState()
+      const game = useGameStore.getState()
+      const playerPos = game.playerPos
+
+      const pot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
+      if (pot) {
+        const collected = game.collectFromCrabPot(pot.id)
+        if (collected > 0) {
+          state.addItem('fish', collected)
+          state.setHint(`Collected ${collected} fish from the crab pot`)
+        }
+        return
+      }
+
       const { nearbyNodeId, nearbyResource, tools } = state
       if (!nearbyNodeId || !nearbyResource) {
-        state.setHint('Walk closer to a tree or rock, then press E')
+        state.setHint('Walk closer to a tree, rock, or crab pot with fish')
         return
       }
       if (!canGather(nearbyResource, tools)) {
@@ -280,22 +295,41 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     if (!ecctrl.current) return
     const pos = ecctrl.current.currPos
     useGameStore.getState().setPlayerPos([pos.x, pos.y, pos.z])
+    const store = useInventoryStore.getState()
+    const game = useGameStore.getState()
+    const playerPos: [number, number, number] = [pos.x, pos.y, pos.z]
+
+    const fishPot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
+    if (fishPot) {
+      store.setHint(`Press E to collect ${fishPot.storedFish} fish from crab pot`)
+      lastId.current = null
+      store.setNearby(null, null)
+      return
+    }
+
+    const waitingPot = nearestPot(game.crabPots, playerPos, 2.8)
+    if (waitingPot) {
+      store.setHint('Crab pot is fishing — check back later')
+      lastId.current = null
+      store.setNearby(null, null)
+      return
+    }
+
     const nearest = findNearestGatherable(
       listGatherables(),
-      [pos.x, pos.y, pos.z],
+      playerPos,
       GATHER_RADIUS,
     )
     const nextId = nearest?.id ?? null
     if (nextId === lastId.current) return
     lastId.current = nextId
-    const store = useInventoryStore.getState()
     if (nearest) {
       store.setNearby(nearest.id, nearest.resource)
       store.setHint(`Press E to gather ${nearest.resource}`)
     } else {
       store.setNearby(null, null)
       store.setHint(
-        'WASD · look · E gather · Q backpack · M merchant · G gate · C castle',
+        'WASD · look · E gather · R eat fish · Q backpack · M merchant · P crab pot',
       )
     }
   })
@@ -361,6 +395,56 @@ function useSlimeCastlePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
   }, [ecctrl])
 }
 
+function useCrabPotPlacement(ecctrl: RefObject<EcctrlHandle | null>) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyP' || e.repeat) return
+      const inv = useInventoryStore.getState()
+      const count = inv.items['crab-pot'] ?? 0
+      if (count < 1) {
+        inv.setHint('Craft a Crab Pot in your backpack first (Q)')
+        return
+      }
+      if (!ecctrl.current) return
+      const pos = ecctrl.current.currPos
+      const landTier = useGameStore.getState().landTier
+      if (!isNearWater(pos.x, pos.z, landTier)) {
+        inv.setHint('Place crab pots on the Water Island or near the north pier')
+        return
+      }
+      const placement: [number, number, number] = [pos.x, 0, pos.z]
+      inv.setItems({ ...inv.items, 'crab-pot': count - 1 })
+      useGameStore.getState().placeCrabPot(placement)
+      inv.setHint('Crab pot placed — it will catch fish over time')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [ecctrl])
+}
+
+function useEatFishInput() {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyR' || e.repeat) return
+      const inv = useInventoryStore.getState()
+      const fish = inv.items.fish ?? 0
+      if (fish < 1) {
+        inv.setHint('No fish — craft a crab pot and place it near water')
+        return
+      }
+      const game = useGameStore.getState()
+      if (!game.healPlayer(FISH_HEAL_AMOUNT)) {
+        inv.setHint('You are already at full health')
+        return
+      }
+      inv.setItems({ ...inv.items, fish: fish - 1 })
+      inv.setHint(`Ate fish — healed ${FISH_HEAL_AMOUNT} HP`)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+}
+
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const lookYaw = useRef(0)
@@ -373,6 +457,8 @@ export function Player() {
   useProximityTracking(ecctrl)
   useGatePlacement(ecctrl, lookYaw, keys, lastFacing)
   useSlimeCastlePlacement(ecctrl)
+  useCrabPotPlacement(ecctrl)
+  useEatFishInput()
 
   useFrame(() => {
     const body = ecctrl.current

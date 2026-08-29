@@ -32,6 +32,13 @@ import {
 import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
 import { buyLandFromMerchant } from '../systems/land'
 import {
+  advanceCrabPotCatch,
+  collectFishFromPot,
+  createCrabPot,
+  type CrabPot,
+} from '../systems/crabPot'
+import { heal as applyHeal } from '../systems/heal'
+import {
   MERCHANT_VISIT_SEC,
   advanceMerchantTimer,
   isMerchantVisiting,
@@ -60,6 +67,7 @@ interface GameState {
   merchantWorld: WorldId
   gates: Gate[]
   castles: SlimeCastle[]
+  crabPots: CrabPot[]
   slimes: Slime[]
   playerPos: [number, number, number]
   respawnToken: number
@@ -67,6 +75,9 @@ interface GameState {
   setPlayerPos: (pos: [number, number, number]) => void
   placeGate: (position: [number, number, number], yaw?: number) => boolean
   placeSlimeCastle: (position: [number, number, number]) => boolean
+  placeCrabPot: (position: [number, number, number]) => boolean
+  collectFromCrabPot: (potId: string) => number
+  healPlayer: (amount: number) => boolean
   damagePlayer: (amount: number) => void
   damageNearestGate: (from: [number, number, number], amount: number) => boolean
   spawnNightSlimes: () => void
@@ -85,6 +96,7 @@ interface GameState {
 let slimeSeq = 0
 let gateSeq = 0
 let castleSeq = 0
+let crabPotSeq = 0
 let wasNight = false
 
 function edgeSpawn(landTier: number): [number, number, number] {
@@ -118,6 +130,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   merchantWorld: 'home',
   gates: [],
   castles: [],
+  crabPots: [],
   slimes: [],
   playerPos: [0, 1, 0],
   respawnToken: 0,
@@ -184,6 +197,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       return { castles, slimes }
     })
+
+    set((s) => ({
+      crabPots: s.crabPots.map((pot) => advanceCrabPotCatch(pot, deltaSec)),
+    }))
   },
 
   setPlayerPos: (pos) => set({ playerPos: pos }),
@@ -199,6 +216,32 @@ export const useGameStore = create<GameState>((set, get) => ({
     castleSeq += 1
     const castle = createSlimeCastle(`castle-${castleSeq}`, position)
     set((s) => ({ castles: [...s.castles, castle] }))
+    return true
+  },
+
+  placeCrabPot: (position) => {
+    crabPotSeq += 1
+    const pot = createCrabPot(`crab-pot-${crabPotSeq}`, position)
+    set((s) => ({ crabPots: [...s.crabPots, pot] }))
+    return true
+  },
+
+  collectFromCrabPot: (potId) => {
+    const pot = get().crabPots.find((p) => p.id === potId)
+    if (!pot) return 0
+    const { pot: next, collected } = collectFishFromPot(pot)
+    if (collected <= 0) return 0
+    set((s) => ({
+      crabPots: s.crabPots.map((p) => (p.id === potId ? next : p)),
+    }))
+    return collected
+  },
+
+  healPlayer: (amount) => {
+    const health = get().health
+    const next = applyHeal(health, amount)
+    if (next.current === health.current) return false
+    set({ health: next })
     return true
   },
 

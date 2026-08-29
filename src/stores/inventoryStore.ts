@@ -24,7 +24,7 @@ interface InventoryState {
 const initialItems: Counts = { wood: 0, stone: 0 }
 
 const DEFAULT_HINT =
-  'WASD · look · E gather · Q backpack · M merchant (day) · G gate · C castle'
+  'WASD · look · E gather · R eat fish · Q backpack · M merchant · P crab pot'
 
 export const createInventoryStore = create<InventoryState>((set) => ({
   tools: [...STARTING_TOOLS],

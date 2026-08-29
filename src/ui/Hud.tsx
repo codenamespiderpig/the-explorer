@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { effectiveMaxHealth } from '../systems/health'
+import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { isMerchantVisiting } from '../systems/merchant'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
@@ -17,6 +18,7 @@ export function Hud() {
   const wood = useInventoryStore((s) => s.items.wood ?? 0)
   const stone = useInventoryStore((s) => s.items.stone ?? 0)
   const goop = useInventoryStore((s) => s.items['slime-goop'] ?? 0)
+  const fish = useInventoryStore((s) => s.items.fish ?? 0)
   const hint = useInventoryStore((s) => s.hint)
   const setHint = useInventoryStore((s) => s.setHint)
   const phase = useGameStore((s) => s.dayNight.phase)
@@ -86,8 +88,9 @@ export function Hud() {
         <div>Wood: {wood}</div>
         <div>Stone: {stone}</div>
         <div>Slime Goop: {goop}</div>
+        <div>Fish: {fish}</div>
         <div className="hud-tools">
-          Q backpack · M merchant · G gate · C castle
+          Q backpack · M merchant · P crab pot · R eat fish · G gate · C castle
         </div>
       </div>
 
@@ -123,7 +126,7 @@ export function Hud() {
         <div>
           {Math.ceil(health.current)} / {max}
         </div>
-        <div className="hud-tools">F attack</div>
+        <div className="hud-tools">F attack · R eat fish (+{FISH_HEAL_AMOUNT} HP)</div>
       </div>
 
       {hint ? <div className="hud-hint">{hint}</div> : null}
