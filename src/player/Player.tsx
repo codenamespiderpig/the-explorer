@@ -5,9 +5,10 @@ import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
 import { gatePlacementFromForward } from '../systems/gate'
+import { pickPlaceableToPlace, placeableHint } from '../systems/place'
 import { cameraLook, facingDirection } from '../systems/facing'
 import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
-import { isNearWater, nearestPot, nearestPotWithFish } from '../systems/crabPot'
+import { nearestPot, nearestPotWithFish } from '../systems/crabPot'
 import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { toolForGather } from '../systems/toolSwing'
 import { ITEMS } from '../data/items'
@@ -329,13 +330,13 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     } else {
       store.setNearby(null, null)
       store.setHint(
-        'WASD · look · E gather · R eat fish · Q backpack · M merchant · P crab pot',
+        'WASD · look · E gather · R eat fish · Q backpack · M merchant · G place',
       )
     }
   })
 }
 
-function useGatePlacement(
+function usePlaceablePlacement(
   ecctrl: RefObject<EcctrlHandle | null>,
   lookYaw: RefObject<number>,
   keys: RefObject<{
@@ -350,76 +351,40 @@ function useGatePlacement(
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'KeyG' || e.repeat) return
+      if (!ecctrl.current) return
+
       const inv = useInventoryStore.getState()
-      const count = inv.items['wooden-gate'] ?? 0
-      if (count < 1) {
-        inv.setHint('Craft a Wooden Gate in your backpack first')
+      const pos = ecctrl.current.currPos
+      const landTier = useGameStore.getState().landTier
+      const pick = pickPlaceableToPlace(inv.items, landTier, pos.x, pos.z)
+
+      if (!pick.ok) {
+        inv.setHint(placeableHint(pick))
         return
       }
-      if (!ecctrl.current) return
-      const pos = ecctrl.current.currPos
-      const k = keys.current
-      const moving = k.forward || k.backward || k.leftward || k.rightward
-      const forward = moving
-        ? facingDirection(lookYaw.current, k)
-        : lastFacing.current
-      const { position, yaw } = gatePlacementFromForward(pos, forward, 2.8)
-      inv.setItems({ ...inv.items, 'wooden-gate': count - 1 })
-      useGameStore.getState().placeGate(position, yaw)
-      inv.setHint('Gate placed — it will block night slimes until broken')
+
+      const count = inv.items[pick.item] ?? 0
+      inv.setItems({ ...inv.items, [pick.item]: count - 1 })
+
+      if (pick.item === 'wooden-gate') {
+        const k = keys.current
+        const moving = k.forward || k.backward || k.leftward || k.rightward
+        const forward = moving
+          ? facingDirection(lookYaw.current, k)
+          : lastFacing.current
+        const { position, yaw } = gatePlacementFromForward(pos, forward, 2.8)
+        useGameStore.getState().placeGate(position, yaw)
+      } else if (pick.item === 'slime-castle') {
+        useGameStore.getState().placeSlimeCastle([pos.x, 0, pos.z + 2.5])
+      } else {
+        useGameStore.getState().placeCrabPot([pos.x, 0, pos.z])
+      }
+
+      inv.setHint(placeableHint(pick))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [ecctrl, lookYaw, keys, lastFacing])
-}
-
-function useSlimeCastlePlacement(ecctrl: RefObject<EcctrlHandle | null>) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'KeyC' || e.repeat) return
-      const inv = useInventoryStore.getState()
-      const count = inv.items['slime-castle'] ?? 0
-      if (count < 1) {
-        inv.setHint('Craft a Slime Castle first (needs lots of slime goop + Build)')
-        return
-      }
-      if (!ecctrl.current) return
-      const pos = ecctrl.current.currPos
-      const placement: [number, number, number] = [pos.x, 0, pos.z + 2.5]
-      inv.setItems({ ...inv.items, 'slime-castle': count - 1 })
-      useGameStore.getState().placeSlimeCastle(placement)
-      inv.setHint('Slime Castle placed — kill spawned slimes before they rot')
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [ecctrl])
-}
-
-function useCrabPotPlacement(ecctrl: RefObject<EcctrlHandle | null>) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'KeyP' || e.repeat) return
-      const inv = useInventoryStore.getState()
-      const count = inv.items['crab-pot'] ?? 0
-      if (count < 1) {
-        inv.setHint('Craft a Crab Pot in your backpack first (Q)')
-        return
-      }
-      if (!ecctrl.current) return
-      const pos = ecctrl.current.currPos
-      const landTier = useGameStore.getState().landTier
-      if (!isNearWater(pos.x, pos.z, landTier)) {
-        inv.setHint('Place crab pots on the Water Island or near the north pier')
-        return
-      }
-      const placement: [number, number, number] = [pos.x, 0, pos.z]
-      inv.setItems({ ...inv.items, 'crab-pot': count - 1 })
-      useGameStore.getState().placeCrabPot(placement)
-      inv.setHint('Crab pot placed — it will catch fish over time')
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [ecctrl])
 }
 
 function useEatFishInput() {
@@ -455,9 +420,7 @@ export function Player() {
   useGatherInput()
   useAttackInput()
   useProximityTracking(ecctrl)
-  useGatePlacement(ecctrl, lookYaw, keys, lastFacing)
-  useSlimeCastlePlacement(ecctrl)
-  useCrabPotPlacement(ecctrl)
+  usePlaceablePlacement(ecctrl, lookYaw, keys, lastFacing)
   useEatFishInput()
 
   useFrame(() => {
