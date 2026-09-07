@@ -28,6 +28,7 @@
 - [x] Water Island archipelago — land islets, plank paths, deep water between
 - [x] Fix bridge exit clamp + bigger blue landing dock on Water Island
 - [x] Unified G key to place gates, slime castles, and crab pots
+- [x] Fix lava pier exit — prefer lava island clamp over bridge corridor
 
 ## Now
 

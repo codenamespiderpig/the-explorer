@@ -105,8 +105,15 @@ export function onWaterBridge(x: number, z: number, landTier: number): boolean {
   return Math.abs(x) <= BRIDGE_GATE_HALF && z >= zMin - 1 && z <= zMax + 1
 }
 
+function isPointOnLavaIsland(x: number, z: number): boolean {
+  const [cx, , cz] = worldCenter('lava')
+  const half = worldPlayableHalf('lava')
+  return Math.abs(x - cx) <= half + 1 && Math.abs(z - cz) <= half + 1
+}
+
 export function onLavaBridge(x: number, z: number, landTier: number): boolean {
   if (landTier < 2) return false
+  if (isPointOnLavaIsland(x, z)) return false
   const { home, island } = lavaBridgeEndpoints()
   const xMin = Math.min(home[0], island[0])
   const xMax = Math.max(home[0], island[0])
@@ -143,6 +150,10 @@ export function clampToIsland(
 ): { x: number; z: number } {
   if (landTier >= 1 && isPointOnWaterIslandWalkable(x, z)) {
     return waterBiomeClamp(x, z)
+  }
+
+  if (landTier >= 2 && isPointOnLavaIsland(x, z)) {
+    return biomeClamp(x, z, 'lava')
   }
 
   const dock = dockClamp(x, z, landTier)

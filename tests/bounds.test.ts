@@ -76,4 +76,17 @@ describe('clampToIsland', () => {
   it('still allows mid-pier travel', () => {
     expect(clampToIsland(0, 40, 1)).toEqual({ x: 0, z: 40 })
   })
+
+  it('allows stepping off the lava pier onto the lava island', () => {
+    const [cx, , cz] = worldCenter('lava')
+    expect(clampToIsland(cx - 10, cz + 5, 2)).toEqual({ x: cx - 10, z: cz + 5 })
+  })
+
+  it('prefers home east dock over lava pier clamp near the gate', () => {
+    expect(clampToIsland(17.8, 0, 2)).toEqual({ x: 17.8, z: 0 })
+  })
+
+  it('still allows mid lava pier travel', () => {
+    expect(clampToIsland(40, 0, 2)).toEqual({ x: 40, z: 0 })
+  })
 })
