@@ -1,5 +1,6 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
+import { HOME_LAKES } from '../data/homeLakes'
 import { Gatherable } from './Gatherable'
 import { BRIDGE_GATE_HALF, islandSize, playableHalf, WALK_COLLIDER_HALF_H } from './bounds'
 import { homeHalf } from '../systems/worlds'
@@ -121,6 +122,31 @@ function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
   )
 }
 
+function HomePond({
+  position,
+  radius,
+}: {
+  position: [number, number, number]
+  radius: number
+}) {
+  return (
+    <group position={position}>
+      <mesh receiveShadow position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[radius + 0.35, 24]} />
+        <meshStandardMaterial color="#4a7a3a" />
+      </mesh>
+      <mesh receiveShadow position={[0, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[radius, 24]} />
+        <meshStandardMaterial color="#5ec4ff" transparent opacity={0.92} />
+      </mesh>
+      <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[radius * 0.55, 16]} />
+        <meshStandardMaterial color="#2a8fc4" transparent opacity={0.55} />
+      </mesh>
+    </group>
+  )
+}
+
 /** Home island — fixed size; upgrades unlock separate islands instead. */
 export function HomeIsland() {
   const landTier = useGameStore((s) => s.landTier)
@@ -137,6 +163,10 @@ export function HomeIsland() {
       <InvisibleWalls size={size} openNorth={landTier >= 1} openEast={landTier >= 2} />
       {landTier >= 1 ? <HomeDock axis="north" color="#6ec4ff" /> : null}
       {landTier >= 2 ? <HomeDock axis="east" color="#aa5533" /> : null}
+
+      {HOME_LAKES.map((lake) => (
+        <HomePond key={lake.id} position={lake.position} radius={lake.radius} />
+      ))}
 
       {TREES.map((tree) => (
         <Gatherable key={tree.id} id={tree.id} resource="wood" position={tree.position} />

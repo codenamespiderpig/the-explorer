@@ -17,7 +17,7 @@ export const SKILLS: Record<SkillId, Skill> = {
   build: {
     id: 'build',
     name: 'Build',
-    description: 'Learn to craft advanced buildings like a workbench.',
+    description: 'Learn to craft a workbench for advanced buildings.',
     cost: { stone: 5 },
   },
 }

@@ -8,14 +8,33 @@ import {
   isNearWater,
   nearestPotWithFish,
 } from '../src/systems/crabPot'
+import { HOME_LAKES } from '../src/data/homeLakes'
 import { worldCenter } from '../src/systems/worlds'
 import { WATER_UNLOCK_INDEX } from '../src/systems/plots'
+import { pickPlaceableToPlace } from '../src/systems/place'
 
 describe('crabPot', () => {
-  it('only allows placement near water after the water island unlocks', () => {
+  it('allows placement at home ponds before the water island unlocks', () => {
     expect(isNearWater(0, 0, 0)).toBe(false)
+    const lake = HOME_LAKES[0]!
+    expect(isNearWater(lake.position[0], lake.position[2], 0)).toBe(true)
+  })
+
+  it('allows placement near the water island after it unlocks', () => {
     const [cx, , cz] = worldCenter('water')
     expect(isNearWater(cx, cz, WATER_UNLOCK_INDEX)).toBe(true)
+  })
+
+  it('places a crab pot at a home pond with G', () => {
+    const lake = HOME_LAKES[0]!
+    expect(
+      pickPlaceableToPlace(
+        { 'crab-pot': 1 },
+        0,
+        lake.position[0],
+        lake.position[2],
+      ),
+    ).toEqual({ ok: true, item: 'crab-pot' })
   })
 
   it('catches fish over time up to the storage cap', () => {

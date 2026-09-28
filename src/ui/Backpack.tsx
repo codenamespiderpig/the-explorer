@@ -4,7 +4,9 @@ import { RECIPE_LIST, type Recipe } from '../data/recipes'
 import { SKILL_LIST, type Skill } from '../data/skills'
 import { canCraft, craft } from '../systems/craft'
 import { canLearn, learn } from '../systems/learn'
+import { hasPlacedBuilding } from '../systems/building'
 import { useInventoryStore } from '../stores/inventoryStore'
+import { useGameStore } from '../stores/gameStore'
 import { useProgressStore, useUiStore } from '../stores/uiStore'
 
 function formatCost(cost: Partial<Record<ItemId, number>>): string {
@@ -19,13 +21,17 @@ function CraftPanel() {
   const setHint = useInventoryStore((s) => s.setHint)
   const learned = useProgressStore((s) => s.learned)
   const learnedSet = new Set(learned)
+  const buildings = useGameStore((s) => s.buildings)
+  const hasWorkbench = hasPlacedBuilding(buildings, 'workbench')
 
   const tryCraft = (recipe: Recipe) => {
-    if (!canCraft(recipe, items, learnedSet)) {
+    if (!canCraft(recipe, items, learnedSet, hasWorkbench)) {
       setHint(
         recipe.requiresSkill && !learnedSet.has(recipe.requiresSkill)
           ? `Learn ${recipe.requiresSkill} first`
-          : 'Not enough materials',
+          : recipe.requiresWorkbench && !hasWorkbench
+            ? 'Place a workbench with G first'
+            : 'Not enough materials',
       )
       return
     }
@@ -38,11 +44,22 @@ function CraftPanel() {
   return (
     <div className="bp-section">
       <div className="bp-section-title">Build & craft</div>
+      {!hasWorkbench ? (
+        <div className="bp-row-meta" style={{ marginBottom: 8 }}>
+          Place a workbench to unlock advanced crafts
+        </div>
+      ) : (
+        <div className="bp-row-meta" style={{ marginBottom: 8 }}>
+          Workbench ready — advanced crafts unlocked
+        </div>
+      )}
       <ul className="bp-list">
         {RECIPE_LIST.map((recipe) => {
-          const locked =
+          const skillLocked =
             !!recipe.requiresSkill && !learnedSet.has(recipe.requiresSkill)
-          const affordable = canCraft(recipe, items, learnedSet)
+          const benchLocked = !!recipe.requiresWorkbench && !hasWorkbench
+          const locked = skillLocked || benchLocked
+          const affordable = canCraft(recipe, items, learnedSet, hasWorkbench)
           return (
             <li key={recipe.id} className="bp-row">
               <div>
@@ -52,6 +69,7 @@ function CraftPanel() {
                   {recipe.requiresSkill
                     ? ` · Needs: ${recipe.requiresSkill}`
                     : ''}
+                  {recipe.requiresWorkbench ? ' · Needs: workbench' : ''}
                 </div>
               </div>
               <button

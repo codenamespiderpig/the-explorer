@@ -24,14 +24,16 @@ export function canCraft(
   recipe: Recipe,
   items: Counts,
   learned: ReadonlySet<SkillId>,
+  hasWorkbench = false,
 ): boolean {
   if (recipe.requiresSkill && !learned.has(recipe.requiresSkill)) return false
+  if (recipe.requiresWorkbench && !hasWorkbench) return false
   return hasMaterials(recipe.cost, items)
 }
 
 export type CraftResult =
   | { ok: true; item: ItemId; amount: number; remaining: Counts }
-  | { ok: false; reason: 'missing-materials' | 'missing-skill' }
+  | { ok: false; reason: 'missing-materials' | 'missing-skill' | 'missing-workbench' }
 
 export function craft(recipe: Recipe, items: Counts): CraftResult {
   if (!hasMaterials(recipe.cost, items)) {

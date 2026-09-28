@@ -20,13 +20,15 @@ export interface Recipe {
   cost: Partial<Record<ItemId, number>>
   /** If set, player must have learned this skill first. */
   requiresSkill?: SkillId
+  /** If true, a workbench must be placed in the world. */
+  requiresWorkbench?: boolean
 }
 
 export const RECIPES: Record<RecipeId, Recipe> = {
   workbench: {
     id: 'workbench',
     name: 'Workbench',
-    description: 'Build more advanced structures. Place with G.',
+    description: 'Place with G to unlock advanced crafts (furnace, slime castle).',
     output: 'workbench',
     cost: { wood: 5, stone: 3 },
     requiresSkill: 'build',
@@ -34,10 +36,11 @@ export const RECIPES: Record<RecipeId, Recipe> = {
   furnace: {
     id: 'furnace',
     name: 'Furnace',
-    description: 'Smelt ores later in the game. Place with G. Requires Build.',
+    description: 'Advanced — craft at a placed workbench. Place with G.',
     output: 'furnace',
     cost: { wood: 4, stone: 10 },
     requiresSkill: 'build',
+    requiresWorkbench: true,
   },
   campfire: {
     id: 'campfire',
@@ -72,15 +75,16 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     id: 'slime-castle',
     name: 'Slime Castle',
     description:
-      'Very hard to build. Place with G — spawns farmable slimes that rot if left unkilled.',
+      'Advanced — craft at a placed workbench. Place with G; farm slimes before they rot.',
     output: 'slime-castle',
     cost: { 'slime-goop': 28, wood: 45, stone: 35 },
     requiresSkill: 'build',
+    requiresWorkbench: true,
   },
   'crab-pot': {
     id: 'crab-pot',
     name: 'Crab Pot',
-    description: 'Place with G near water — catches fish you can eat to heal (R).',
+    description: 'Place with G by a home pond or Water Island — catch fish to eat (R).',
     output: 'crab-pot',
     cost: { wood: 4, stone: 2 },
   },

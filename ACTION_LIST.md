@@ -32,6 +32,8 @@
 - [x] Fix lava→home exit; infinite land: water→lava first, then reef/crag extras
 - [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
 - [x] Top-right minimap — click to open full world overview
+- [x] Workbench unlocks advanced crafts (furnace, slime castle)
+- [x] Home grassland ponds — place crab pots on the banks
 
 ## Now
 

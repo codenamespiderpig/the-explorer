@@ -23,3 +23,10 @@ export function createBuilding(
 ): PlacedBuilding {
   return { id, kind, position, yaw }
 }
+
+export function hasPlacedBuilding(
+  buildings: readonly PlacedBuilding[],
+  kind: BuildingKind,
+): boolean {
+  return buildings.some((b) => b.kind === kind)
+}

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { canCraft, craft } from '../src/systems/craft'
 import { RECIPES } from '../src/data/recipes'
+import { hasPlacedBuilding } from '../src/systems/building'
+import { createBuilding } from '../src/systems/building'
 
 describe('canCraft', () => {
   it('allows a recipe when the player has enough materials', () => {
@@ -23,6 +25,12 @@ describe('canCraft', () => {
       canCraft(RECIPES.workbench, { wood: 10, stone: 10 }, new Set(['build'])),
     ).toBe(true)
   })
+
+  it('blocks advanced recipes until a workbench is placed', () => {
+    const mats = { wood: 20, stone: 20 }
+    expect(canCraft(RECIPES.furnace, mats, new Set(['build']), false)).toBe(false)
+    expect(canCraft(RECIPES.furnace, mats, new Set(['build']), true)).toBe(true)
+  })
 })
 
 describe('craft', () => {
@@ -41,21 +49,15 @@ describe('craft', () => {
     expect(result.ok).toBe(false)
   })
 
-  it('crafts a slime castle only with rare goop and build skill', () => {
-    expect(
-      canCraft(
-        RECIPES['slime-castle'],
-        { 'slime-goop': 28, wood: 45, stone: 35 },
-        new Set(),
-      ),
-    ).toBe(false)
-    expect(
-      canCraft(
-        RECIPES['slime-castle'],
-        { 'slime-goop': 28, wood: 45, stone: 35 },
-        new Set(['build']),
-      ),
-    ).toBe(true)
+  it('crafts a slime castle only with goop, build skill, and a workbench', () => {
+    const mats = { 'slime-goop': 28, wood: 45, stone: 35 }
+    expect(canCraft(RECIPES['slime-castle'], mats, new Set(), true)).toBe(false)
+    expect(canCraft(RECIPES['slime-castle'], mats, new Set(['build']), false)).toBe(
+      false,
+    )
+    expect(canCraft(RECIPES['slime-castle'], mats, new Set(['build']), true)).toBe(
+      true,
+    )
     const result = craft(RECIPES['slime-castle'], {
       'slime-goop': 30,
       wood: 50,
@@ -67,5 +69,17 @@ describe('craft', () => {
       expect(result.remaining['slime-goop']).toBe(2)
       expect(result.remaining['slime-castle']).toBe(1)
     }
+  })
+})
+
+describe('hasPlacedBuilding', () => {
+  it('detects a placed workbench', () => {
+    expect(hasPlacedBuilding([], 'workbench')).toBe(false)
+    expect(
+      hasPlacedBuilding(
+        [createBuilding('b1', 'workbench', [0, 0, 0])],
+        'workbench',
+      ),
+    ).toBe(true)
   })
 })

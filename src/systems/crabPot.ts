@@ -1,4 +1,5 @@
 import { onWaterBridge } from '../world/bounds'
+import { isNearHomeLake } from '../data/homeLakes'
 import { biomeHalf, worldCenter } from './worlds'
 import { waterUnlocked } from './plots'
 
@@ -26,8 +27,9 @@ export function createCrabPot(
   }
 }
 
-/** True when the spot is on the water island, pier, or close to the water biome. */
+/** True near a home pond, the water island, pier, or water biome edge. */
 export function isNearWater(x: number, z: number, landTier: number): boolean {
+  if (isNearHomeLake(x, z)) return true
   if (!waterUnlocked(landTier)) return false
   if (onWaterBridge(x, z, landTier)) return true
   const [cx, , cz] = worldCenter('water')

@@ -68,7 +68,7 @@ export function placeableHint(result: PickPlaceableResult): string {
     return 'Crab pot placed — it will catch fish over time'
   }
   if (result.reason === 'crab-pot-needs-water') {
-    return 'Place crab pots on the Water Island or near the north pier (G)'
+    return 'Place crab pots by a home pond or on the Water Island (G)'
   }
   return 'Craft something to place in your backpack first (Q) — workbench, gate, castle, or crab pot'
 }
