@@ -88,6 +88,102 @@ body,
   white-space: nowrap;
 }
 
+.hud-minimap {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  margin: 0;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.hud-minimap:hover {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.hud-minimap-caption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.world-map-svg {
+  display: block;
+  border-radius: 6px;
+}
+
+.world-map-ocean {
+  fill: #6aa8d4;
+}
+
+.world-map-bridge-water {
+  stroke: #d8ecff;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.world-map-bridge-lava {
+  stroke: #f0a060;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.world-map-player {
+  fill: #ff3b3b;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.world-map-label {
+  fill: #1a1a1a;
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.world-map-you {
+  fill: #b01010;
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.world-map-panel {
+  width: min(520px, 94vw);
+}
+
+.world-map-help {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  opacity: 0.85;
+}
+
+.world-map-frame {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 10px;
+  border: 1px solid rgba(61, 47, 30, 0.2);
+}
+
+.world-map-frame .world-map-svg {
+  width: min(420px, 82vw);
+  height: auto;
+  max-width: 100%;
+}
+
 .bp-overlay {
   position: absolute;
   inset: 0;

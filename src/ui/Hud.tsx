@@ -7,6 +7,7 @@ import { isMerchantVisiting } from '../systems/merchant'
 import { lavaUnlocked, nextPlot, waterUnlocked } from '../systems/plots'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
+import { Minimap } from './Minimap'
 import { useUiStore } from '../stores/uiStore'
 
 const WORLD_HINT: Record<string, string> = {
@@ -91,7 +92,7 @@ export function Hud() {
         <div>Slime Goop: {goop}</div>
         <div>Fish: {fish}</div>
         <div className="hud-tools">
-          Q backpack · M merchant · G place · R eat fish
+          Q backpack · M merchant · G place · R eat fish · click map
         </div>
       </div>
 
@@ -131,6 +132,7 @@ export function Hud() {
       </div>
 
       {hint ? <div className="hud-hint">{hint}</div> : null}
+      <Minimap />
       <Backpack />
       <Merchant />
     </div>
