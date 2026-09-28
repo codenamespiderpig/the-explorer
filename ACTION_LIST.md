@@ -31,7 +31,7 @@
 - [x] Fix lava pier exit — prefer lava island clamp over bridge corridor
 - [x] Fix lava→home exit; infinite land: water→lava first, then reef/crag extras
 - [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
-- [x] Corner minimap — click to open full world overview
+- [x] Top-right minimap — click to open full world overview
 
 ## Now
 

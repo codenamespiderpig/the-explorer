@@ -36,6 +36,7 @@ body,
 .hud-time {
   left: auto;
   right: 16px;
+  top: 178px;
   text-align: right;
 }
 
@@ -91,7 +92,7 @@ body,
 .hud-minimap {
   position: absolute;
   right: 16px;
-  bottom: 16px;
+  top: 16px;
   pointer-events: auto;
   display: flex;
   flex-direction: column;
