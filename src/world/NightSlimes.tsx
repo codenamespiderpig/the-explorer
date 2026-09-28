@@ -10,6 +10,11 @@ import {
   enemyVisual,
   type EnemyKind,
 } from '../systems/enemies'
+import {
+  DUNGEON_ENEMY_COOLDOWN,
+  DUNGEON_ENEMY_DAMAGE,
+  DUNGEON_ENEMY_SPEED,
+} from '../systems/dungeon'
 
 const SLIME_SPEED = 2.2
 const ATTACK_RANGE = 1.4
@@ -73,6 +78,9 @@ function SlimeEntity({
     const isDungeon = slime.source === 'dungeon'
     const isBiome = slime.source === 'biome'
     const bodyY = isDungeon ? localPos.current[1] : ENEMY_BODY_Y
+    const moveSpeed = isDungeon ? DUNGEON_ENEMY_SPEED : SLIME_SPEED
+    const hitDamage = isDungeon ? DUNGEON_ENEMY_DAMAGE : SLIME_DAMAGE
+    const hitCooldown = isDungeon ? DUNGEON_ENEMY_COOLDOWN : ATTACK_COOLDOWN
     if (!isBiome && !isDungeon && store.phase() !== 'night') return
 
     cooldown.current = Math.max(0, cooldown.current - delta)
@@ -87,7 +95,7 @@ function SlimeEntity({
         const hdz = homePos.current[2] - localPos.current[2]
         const hdist = Math.hypot(hdx, hdz) || 1
         if (hdist > 0.4) {
-          const step = SLIME_SPEED * 0.55 * delta
+          const step = moveSpeed * 0.55 * delta
           localPos.current = [
             localPos.current[0] + (hdx / hdist) * step,
             bodyY,
@@ -127,7 +135,7 @@ function SlimeEntity({
     const dz = target[2] - localPos.current[2]
     const dist = Math.hypot(dx, dz) || 1
     if (dist > ATTACK_RANGE) {
-      const step = SLIME_SPEED * delta
+      const step = moveSpeed * delta
       localPos.current = [
         localPos.current[0] + (dx / dist) * step,
         bodyY,
@@ -140,14 +148,14 @@ function SlimeEntity({
       })
       store.moveSlime(id, localPos.current)
     } else if (cooldown.current <= 0) {
-      cooldown.current = ATTACK_COOLDOWN
+      cooldown.current = hitCooldown
       if (targetingGate && nearestGateDist <= GATE_RANGE) {
         store.damageNearestGate(localPos.current, GATE_DAMAGE)
       } else {
         const pdx = player[0] - localPos.current[0]
         const pdz = player[2] - localPos.current[2]
         if (Math.hypot(pdx, pdz) <= ATTACK_RANGE + 0.4) {
-          store.damagePlayer(SLIME_DAMAGE)
+          store.damagePlayer(hitDamage)
         }
       }
     }

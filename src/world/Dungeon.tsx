@@ -101,12 +101,12 @@ function DungeonInterior() {
 
       {/* Entry floor — thick so you don't fall through on spawn */}
       <Platform position={[sx, sy - 1.2, sz]} size={[12, 2.4, 12]} color="#2e2a24" />
-      {/* Gap platforms for light jumping */}
-      <Platform position={[0, sy - 0.4, 8]} size={[3.2, 0.8, 3.2]} />
-      <Platform position={[2.4, sy + 0.3, 13]} size={[2.6, 0.8, 2.6]} color="#4a4035" />
-      <Platform position={[-2.2, sy + 0.8, 17.5]} size={[2.6, 0.8, 2.6]} color="#4a4035" />
-      <Platform position={[0, sy - 0.4, 23]} size={[8, 0.8, 8]} color="#2e2a24" />
-      <Platform position={[0, sy - 0.4, 30]} size={[8, 0.8, 8]} color="#2e2a24" />
+      {/* Wider stepping stones — easier jumps */}
+      <Platform position={[0, sy - 0.4, 8]} size={[4.5, 0.8, 4]} />
+      <Platform position={[1.2, sy + 0.1, 13.5]} size={[4, 0.8, 3.5]} color="#4a4035" />
+      <Platform position={[-0.8, sy + 0.35, 18.5]} size={[4, 0.8, 3.5]} color="#4a4035" />
+      <Platform position={[0, sy - 0.4, 24]} size={[10, 0.8, 8]} color="#2e2a24" />
+      <Platform position={[0, sy - 0.4, 31]} size={[10, 0.8, 8]} color="#2e2a24" />
 
       {/* Chest */}
       <group position={[cx, cy, cz]}>

@@ -102,6 +102,8 @@ interface GameState {
   respawnToken: number
   inDungeon: boolean
   dungeonChestOpened: boolean
+  /** Timestamp (ms) until which the player ignores damage. */
+  invulnerableUntil: number
   tick: (deltaSec: number) => void
   setPlayerPos: (pos: [number, number, number]) => void
   placeGate: (position: [number, number, number], yaw?: number) => boolean
@@ -196,6 +198,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   respawnToken: 0,
   inDungeon: false,
   dungeonChestOpened: false,
+  invulnerableUntil: 0,
 
   tick: (deltaSec) => {
     const prev = get().dayNight
@@ -316,8 +319,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   damagePlayer: (amount) => {
+    if (performance.now() < get().invulnerableUntil) return
     const health = takeDamage(get().health, amount)
-    set({ health })
+    set({
+      health,
+      invulnerableUntil: performance.now() + 800,
+    })
     if (health.dead) get().respawnPlayer()
   },
 
@@ -393,7 +400,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       return {
         id: `slime-${slimeSeq}`,
         position,
-        hp: 22,
+        hp: 18,
         source: 'dungeon' as const,
         kind: 'slime' as const,
         ageSec: 0,
@@ -402,6 +409,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({
       inDungeon: true,
       dungeonChestOpened: false,
+      health: respawnHealth(s.health),
+      invulnerableUntil: performance.now() + 2000,
       playerSpawn: [...DUNGEON_SPAWN] as [number, number, number],
       playerPos: [...DUNGEON_SPAWN] as [number, number, number],
       respawnToken: s.respawnToken + 1,

@@ -28,10 +28,14 @@ export const DUNGEON_CHEST_LOOT: { item: ItemId; amount: number } = {
 }
 
 export const DUNGEON_MOB_POSITIONS: Array<[number, number, number]> = [
-  [0, -43.55, 10],
-  [2.2, -43.55, 18],
-  [-2.2, -43.55, 22],
+  [0, -42.9, 16],
+  [1.5, -42.9, 24],
 ]
+
+/** Damage dealt by dungeon enemies (lighter than night slimes). */
+export const DUNGEON_ENEMY_DAMAGE = 4
+export const DUNGEON_ENEMY_COOLDOWN = 1.5
+export const DUNGEON_ENEMY_SPEED = 1.45
 
 export function canEnterDungeon(landTier: number): boolean {
   return landTier >= DUNGEON_MIN_LAND_TIER
