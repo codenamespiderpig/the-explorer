@@ -9,12 +9,13 @@ import {
   nearestPotWithFish,
 } from '../src/systems/crabPot'
 import { worldCenter } from '../src/systems/worlds'
+import { WATER_UNLOCK_INDEX } from '../src/systems/plots'
 
 describe('crabPot', () => {
   it('only allows placement near water after the water island unlocks', () => {
     expect(isNearWater(0, 0, 0)).toBe(false)
     const [cx, , cz] = worldCenter('water')
-    expect(isNearWater(cx, cz, 1)).toBe(true)
+    expect(isNearWater(cx, cz, WATER_UNLOCK_INDEX)).toBe(true)
   })
 
   it('catches fish over time up to the storage cap', () => {

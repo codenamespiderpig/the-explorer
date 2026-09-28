@@ -4,6 +4,7 @@ import { useGameStore } from '../stores/gameStore'
 import { effectiveMaxHealth } from '../systems/health'
 import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { isMerchantVisiting } from '../systems/merchant'
+import { lavaUnlocked, nextPlot, waterUnlocked } from '../systems/plots'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
 import { useUiStore } from '../stores/uiStore'
@@ -106,15 +107,15 @@ export function Hud() {
         ) : (
           <div className="hud-tools">Slimes are hunting you</div>
         )}
-        {landTier >= 1 ? (
-          <div className="hud-tools">Walk north through the gate onto the blue pier</div>
+        {waterUnlocked(landTier) ? (
+          <div className="hud-tools">Water Island unlocked — follow the north path</div>
         ) : (
-          <div className="hud-tools">Buy land to unlock the distant Water Island</div>
+          <div className="hud-tools">Next land: {nextPlot(landTier).label}</div>
         )}
-        {landTier >= 2 ? (
-          <div className="hud-tools">Lava Island: long orange pier east</div>
-        ) : landTier >= 1 ? (
-          <div className="hud-tools">Buy land again to unlock the Lava Island</div>
+        {lavaUnlocked(landTier) ? (
+          <div className="hud-tools">Lava Island unlocked — follow the east path</div>
+        ) : waterUnlocked(landTier) ? (
+          <div className="hud-tools">Keep buying land to reach the Lava Island</div>
         ) : null}
       </div>
 

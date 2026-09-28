@@ -1,4 +1,16 @@
 import { randomPointInRect, waterIslandIsletRects } from './waterIsland'
+import {
+  BIOME_ISLAND_SIZE,
+  HOME_ISLAND_SIZE,
+  OCEAN_GAP,
+  lavaHubCenter,
+  lavaUnlocked,
+  unlockedPlots,
+  waterHubCenter,
+  waterUnlocked,
+} from './plots'
+
+export { BIOME_ISLAND_SIZE, HOME_ISLAND_SIZE, OCEAN_GAP }
 
 export const MERCHANT_VISIT_SEC = 90
 
@@ -9,12 +21,6 @@ export interface MerchantSpawn {
   position: [number, number, number]
 }
 
-/** Full-size biome islands — same scale as home, not tiny add-ons. */
-export const BIOME_ISLAND_SIZE = 44
-/** Open ocean between home edge and the next island. */
-export const OCEAN_GAP = 48
-export const HOME_ISLAND_SIZE = 36
-
 export function homeHalf(): number {
   return HOME_ISLAND_SIZE / 2
 }
@@ -23,23 +29,21 @@ export function biomeHalf(): number {
   return BIOME_ISLAND_SIZE / 2
 }
 
-/** Worlds unlocked at each land tier (tier 1 = water, tier 2 = lava). */
+/** Worlds unlocked at each land tier. */
 export function unlockedWorlds(landTier: number): WorldId[] {
   const worlds: WorldId[] = ['home']
-  if (landTier >= 1) worlds.push('water')
-  if (landTier >= 2) worlds.push('lava')
+  if (waterUnlocked(landTier)) worlds.push('water')
+  if (lavaUnlocked(landTier)) worlds.push('lava')
   return worlds
 }
 
 export function worldCenter(world: WorldId, _landTier = 0): [number, number, number] {
-  const h = homeHalf()
-  const b = biomeHalf()
-  if (world === 'water') return [0, 0, h + OCEAN_GAP + b]
-  if (world === 'lava') return [h + OCEAN_GAP + b, 0, 0]
+  if (world === 'water') return waterHubCenter()
+  if (world === 'lava') return lavaHubCenter()
   return [0, 0, 0]
 }
 
-/** Bridge endpoints: home dock → remote island dock. */
+/** Bridge endpoints: home dock → remote island dock (via meadow when present). */
 export function waterBridgeEndpoints(): {
   home: [number, number, number]
   island: [number, number, number]
@@ -80,6 +84,20 @@ export function merchantSpawnPosition(
     if (rect) {
       const point = randomPointInRect(rect, rng)
       return { world, position: [point.x, 0, point.z] }
+    }
+  }
+
+  // Prefer spawning on an unlocked outpost plot when available.
+  const plots = unlockedPlots(landTier).filter((p) => p.kind === 'outpost')
+  if (plots.length > 0 && rng() > 0.35) {
+    const plot = plots[Math.floor(rng() * plots.length)]!
+    const [cx, , cz] = plot.center
+    const half = plot.size / 2 - 2
+    const angle = rng() * Math.PI * 2
+    const dist = half * (0.5 + rng() * 0.4)
+    return {
+      world: plot.biome === 'lava' ? 'lava' : plot.biome === 'water' ? 'water' : 'home',
+      position: [cx + Math.cos(angle) * dist, 0, cz + Math.sin(angle) * dist],
     }
   }
 

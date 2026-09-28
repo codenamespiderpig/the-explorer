@@ -5,7 +5,8 @@ import {
   onWaterBridge,
   PLAYABLE_HALF,
 } from '../src/world/bounds'
-import { waterBridgeEndpoints, lavaBridgeEndpoints, worldCenter } from '../src/systems/worlds'
+import { lavaBridgeEndpoints, waterBridgeEndpoints, worldCenter } from '../src/systems/worlds'
+import { LAVA_UNLOCK_INDEX, WATER_UNLOCK_INDEX } from '../src/systems/plots'
 
 describe('clampToIsland', () => {
   it('leaves in-bounds home positions alone', () => {
@@ -18,29 +19,31 @@ describe('clampToIsland', () => {
     expect(clampToIsland(-17, 15)).toEqual({ x: -PLAYABLE_HALF, z: 15 })
   })
 
-  it('allows the long water pier after tier 1', () => {
-    const { home, island } = waterBridgeEndpoints()
-    const midZ = (home[2] + island[2]) / 2
+  it('allows the north path after the first meadow unlock', () => {
+    const midZ = 30
     expect(onWaterBridge(0, midZ, 1)).toBe(true)
     expect(clampToIsland(0, midZ, 1)).toEqual({ x: 0, z: midZ })
   })
 
-  it('allows standing on the full water island', () => {
+  it('allows standing on the water island after water unlock', () => {
     const [cx, , cz] = worldCenter('water')
-    expect(clampToIsland(cx, cz, 1)).toEqual({ x: cx, z: cz })
+    expect(clampToIsland(cx, cz, WATER_UNLOCK_INDEX)).toEqual({ x: cx, z: cz })
   })
 
   it('clamps open water on Water Island to nearest islet', () => {
     const [cx, , cz] = worldCenter('water')
-    const clamped = clampToIsland(cx + 20, cz, 1)
+    const clamped = clampToIsland(cx + 20, cz, WATER_UNLOCK_INDEX)
     expect(clamped).not.toEqual({ x: cx + 20, z: cz })
   })
 
-  it('allows the long lava pier after tier 2', () => {
-    const { home, island } = lavaBridgeEndpoints()
-    const midX = (home[0] + island[0]) / 2
-    expect(onLavaBridge(midX, 0, 2)).toBe(true)
-    expect(clampToIsland(midX, 0, 2)).toEqual({ x: midX, z: 0 })
+  it('allows the long lava pier after lava unlock', () => {
+    // Between east meadow and lava hub (not on either plot).
+    const midOceanX = 100
+    expect(onLavaBridge(midOceanX, 0, LAVA_UNLOCK_INDEX)).toBe(true)
+    expect(clampToIsland(midOceanX, 0, LAVA_UNLOCK_INDEX)).toEqual({
+      x: midOceanX,
+      z: 0,
+    })
   })
 
   it('allows off-center water gate entry without snapping back', () => {
@@ -66,20 +69,27 @@ describe('clampToIsland', () => {
   })
 
   it('allows stepping off the pier onto the wide water landing', () => {
-    expect(clampToIsland(3.5, 68, 1)).toEqual({ x: 3.5, z: 68 })
+    const { island } = waterBridgeEndpoints()
+    expect(clampToIsland(3.5, island[2], WATER_UNLOCK_INDEX)).toEqual({
+      x: 3.5,
+      z: island[2],
+    })
   })
 
   it('prefers home north dock over pier clamp near the gate', () => {
     expect(clampToIsland(0, 17.8, 1)).toEqual({ x: 0, z: 17.8 })
   })
 
-  it('still allows mid-pier travel', () => {
-    expect(clampToIsland(0, 40, 1)).toEqual({ x: 0, z: 40 })
+  it('still allows mid-pier travel on the north chain', () => {
+    expect(clampToIsland(0, 30, 1)).toEqual({ x: 0, z: 30 })
   })
 
   it('allows stepping off the lava pier onto the lava island', () => {
     const [cx, , cz] = worldCenter('lava')
-    expect(clampToIsland(cx - 10, cz + 5, 2)).toEqual({ x: cx - 10, z: cz + 5 })
+    expect(clampToIsland(cx - 10, cz + 5, LAVA_UNLOCK_INDEX)).toEqual({
+      x: cx - 10,
+      z: cz + 5,
+    })
   })
 
   it('prefers home east dock over lava pier clamp near the gate', () => {
@@ -88,5 +98,10 @@ describe('clampToIsland', () => {
 
   it('still allows mid lava pier travel', () => {
     expect(clampToIsland(40, 0, 2)).toEqual({ x: 40, z: 0 })
+  })
+
+  it('allows walking from the lava pier onto home island', () => {
+    expect(clampToIsland(15, 0, LAVA_UNLOCK_INDEX)).toEqual({ x: 15, z: 0 })
+    expect(onLavaBridge(15, 0, LAVA_UNLOCK_INDEX)).toBe(false)
   })
 })

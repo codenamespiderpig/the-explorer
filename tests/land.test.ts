@@ -6,6 +6,7 @@ import {
   landUpgradeCost,
   landUpgradeLabel,
 } from '../src/systems/land'
+import { LAVA_UNLOCK_INDEX, WATER_UNLOCK_INDEX, nextPlot, plotAtIndex } from '../src/systems/plots'
 
 describe('land upgrades', () => {
   it('keeps the home island the same size', () => {
@@ -13,15 +14,16 @@ describe('land upgrades', () => {
     expect(islandSize(2)).toBe(BASE_ISLAND_SIZE)
   })
 
-  it('charges for whole-island unlocks', () => {
+  it('always offers a next plot with rising cost', () => {
     expect(landUpgradeCost(0)).toBe(50)
     expect(landUpgradeCost(1)).toBe(100)
-    expect(landUpgradeCost(2)).toBeNull()
-    expect(landUpgradeLabel(0)).toContain('Water')
-    expect(landUpgradeLabel(1)).toContain('Lava')
+    expect(landUpgradeCost(2)).toBe(150)
+    expect(landUpgradeCost(10)).toBe(550)
+    expect(landUpgradeLabel(0)).toContain('North Meadow')
+    expect(landUpgradeLabel(2)).toContain('Water')
   })
 
-  it('buys a new island when the merchant is here and you can afford it', () => {
+  it('buys land forever when the merchant is here and you can afford it', () => {
     expect(buyLandFromMerchant(60, 0, true)).toEqual({
       ok: true,
       money: 10,
@@ -35,5 +37,12 @@ describe('land upgrades', () => {
       ok: false,
       reason: 'merchant-gone',
     })
+    expect(buyLandFromMerchant(1000, 5, true).ok).toBe(true)
+  })
+
+  it('gates water and lava behind meadow upgrades', () => {
+    expect(plotAtIndex(WATER_UNLOCK_INDEX).id).toBe('water-hub')
+    expect(plotAtIndex(LAVA_UNLOCK_INDEX).id).toBe('lava-hub')
+    expect(nextPlot(5).biome).toMatch(/water|lava/)
   })
 })

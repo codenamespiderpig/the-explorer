@@ -1,5 +1,6 @@
 import { onWaterBridge } from '../world/bounds'
 import { biomeHalf, worldCenter } from './worlds'
+import { waterUnlocked } from './plots'
 
 export const CRAB_POT_CATCH_INTERVAL = 45
 export const CRAB_POT_MAX_FISH = 2
@@ -27,7 +28,7 @@ export function createCrabPot(
 
 /** True when the spot is on the water island, pier, or close to the water biome. */
 export function isNearWater(x: number, z: number, landTier: number): boolean {
-  if (landTier < 1) return false
+  if (!waterUnlocked(landTier)) return false
   if (onWaterBridge(x, z, landTier)) return true
   const [cx, , cz] = worldCenter('water')
   const half = biomeHalf()

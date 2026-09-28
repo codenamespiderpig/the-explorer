@@ -7,7 +7,8 @@ import {
   merchantPrice,
   sellToMerchant,
 } from '../systems/economy'
-import { landUpgradeCost, landUpgradeLabel, MAX_LAND_TIER } from '../systems/land'
+import { landUpgradeCost, landUpgradeLabel } from '../systems/land'
+import { nextPlot } from '../systems/plots'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { useUiStore } from '../stores/uiStore'
@@ -83,7 +84,6 @@ export function Merchant() {
     .sort(([a], [b]) => a.localeCompare(b))
 
   const nextLandCost = landUpgradeCost(landTier)
-  const atMaxLand = landTier >= MAX_LAND_TIER
 
   const tryBuyLand = () => {
     if (!merchantPresent) {
@@ -91,14 +91,7 @@ export function Merchant() {
       return
     }
     if (buyLand()) {
-      const next = landTier + 1
-      setHint(
-        next === 1
-          ? 'Water Island unlocked — long blue pier to the north!'
-          : 'Lava Island unlocked — long orange pier to the east!',
-      )
-    } else if (atMaxLand) {
-      setHint('No more land to buy here')
+      setHint(`${nextPlot(landTier).label.replace('Unlock', 'Unlocked')}!`)
     } else {
       setHint(`Need ${nextLandCost} money for the next land upgrade`)
     }
@@ -133,13 +126,13 @@ export function Merchant() {
             <div>
               <div className="bp-row-name">New island</div>
               <div className="bp-row-meta">
-                {atMaxLand ? 'All islands unlocked' : `${landUpgradeLabel(landTier)} · ${nextLandCost} money`}
+                {`${landUpgradeLabel(landTier)} · ${nextLandCost} money`}
               </div>
             </div>
             <button
               type="button"
               className="bp-btn"
-              disabled={!merchantPresent || atMaxLand || money < (nextLandCost ?? Infinity)}
+              disabled={!merchantPresent || money < nextLandCost}
               onClick={tryBuyLand}
             >
               Buy land

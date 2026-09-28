@@ -8,6 +8,7 @@ import {
   waterBridgeEndpoints,
   worldCenter,
 } from '../systems/worlds'
+import { lavaUnlocked, waterUnlocked } from '../systems/plots'
 import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
 import { type WalkRect, waterIslandWalkRects } from '../systems/waterIsland'
@@ -237,26 +238,22 @@ function WalkRectPlatform({ rect }: { rect: WalkRect }) {
   )
 }
 
-/** Full water island far north — unlocked at land tier 1. */
+/** Full water island far north — unlocked after meadow upgrades. */
 export function WaterWorld() {
   const landTier = useGameStore((s) => s.landTier)
-  if (landTier < 1) return null
+  if (!waterUnlocked(landTier)) return null
 
   const [cx, , cz] = worldCenter('water')
   const { home, island } = waterBridgeEndpoints()
-  const h = homeHalf()
-  const walkRects = waterIslandWalkRects()
 
   return (
     <group>
       <Ocean from={home} to={island} />
       <DeepWaterBasin cx={cx} cz={cz} />
-      {walkRects.map((rect) => (
+      {waterIslandWalkRects().map((rect) => (
         <WalkRectPlatform key={rect.id} rect={rect} />
       ))}
       <BiomeWalls cx={cx} cz={cz} openSouth />
-      <LongBridge from={home} to={island} deckColor="#6ec4ff" railColor="#dfefff" />
-      <PortalArch position={[0, 0, h - 0.3]} rotationY={0} color="#2a6a9a" labelColor="#88ddff" />
       <IslandBeacon position={[cx, 0, cz + 14]} color="#88ddff" />
       <Gatherable id="water-tree-1" resource="wood" position={[cx - 14, 0, cz + 1]} />
       <Gatherable id="water-tree-2" resource="wood" position={[cx + 12, 0, cz + 12]} />
@@ -278,14 +275,13 @@ export function WaterWorld() {
   )
 }
 
-/** Full lava island far east — unlocked at land tier 2. */
+/** Full lava island far east — unlocked after meadow + water upgrades. */
 export function LavaWorld() {
   const landTier = useGameStore((s) => s.landTier)
-  if (landTier < 2) return null
+  if (!lavaUnlocked(landTier)) return null
 
   const [cx, , cz] = worldCenter('lava')
   const { home, island } = lavaBridgeEndpoints()
-  const h = homeHalf()
 
   return (
     <group>
@@ -301,8 +297,6 @@ export function LavaWorld() {
         </mesh>
       </RigidBody>
       <BiomeWalls cx={cx} cz={cz} openWest />
-      <LongBridge from={home} to={island} deckColor="#aa5533" railColor="#ffaa66" />
-      <PortalArch position={[h - 0.3, 0, 0]} rotationY={Math.PI / 2} color="#6a2010" labelColor="#ff6622" />
       <IslandBeacon position={[cx + biomeHalf() - 2, 0, cz]} color="#ff6622" />
       <Gatherable id="lava-rock-1" resource="stone" position={[cx + 4, 0, cz + 8]} />
       <Gatherable id="lava-rock-2" resource="stone" position={[cx - 6, 0, cz - 5]} />
@@ -332,13 +326,13 @@ export function LockedIslandHints() {
 
   return (
     <group>
-      {landTier < 1 ? (
+      {!waterUnlocked(landTier) ? (
         <mesh position={[wx, -0.2, wz]}>
           <boxGeometry args={[BIOME_ISLAND_SIZE, 1, BIOME_ISLAND_SIZE]} />
           <meshStandardMaterial color="#1a4a6a" transparent opacity={0.35} />
         </mesh>
       ) : null}
-      {landTier < 2 ? (
+      {!lavaUnlocked(landTier) ? (
         <mesh position={[lx, -0.2, lz]}>
           <boxGeometry args={[BIOME_ISLAND_SIZE, 1, BIOME_ISLAND_SIZE]} />
           <meshStandardMaterial color="#4a2010" transparent opacity={0.35} />

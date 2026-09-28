@@ -29,6 +29,7 @@
 - [x] Fix bridge exit clamp + bigger blue landing dock on Water Island
 - [x] Unified G key to place gates, slime castles, and crab pots
 - [x] Fix lava pier exit — prefer lava island clamp over bridge corridor
+- [x] Fix lava→home exit; infinite land plots with meadow→water→lava→expansions
 
 ## Now
 

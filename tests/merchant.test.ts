@@ -31,8 +31,10 @@ describe('world unlocks', () => {
   })
 
   it('unlocks water then lava with land tiers', () => {
-    expect(unlockedWorlds(1)).toEqual(['home', 'water'])
-    expect(unlockedWorlds(2)).toEqual(['home', 'water', 'lava'])
+    expect(unlockedWorlds(1)).toEqual(['home'])
+    expect(unlockedWorlds(2)).toEqual(['home'])
+    expect(unlockedWorlds(3)).toEqual(['home', 'water'])
+    expect(unlockedWorlds(5)).toEqual(['home', 'water', 'lava'])
   })
 
   it('spawns the merchant far from the center', () => {

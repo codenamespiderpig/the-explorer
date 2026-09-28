@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
 import { WaterWorld, LavaWorld, LockedIslandHints } from './world/BiomeWorlds'
+import { LandPlots } from './world/LandPlots'
 import { Player } from './player/Player'
 import { Hud } from './ui/Hud'
 import { DayNightClock } from './world/DayNightClock'
@@ -22,6 +23,7 @@ export default function App() {
           <Physics>
             <DayNightClock />
             <HomeIsland />
+            <LandPlots />
             <LockedIslandHints />
             <WaterWorld />
             <LavaWorld />
