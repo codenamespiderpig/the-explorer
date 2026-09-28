@@ -2,19 +2,19 @@
 
 import type { ItemId } from '../data/items'
 
-export const DUNGEON_MIN_LAND_TIER = 1
+export const DUNGEON_MIN_LAND_TIER = 0
 
 /** Glowing stairs on the home grassland (south-east clearing). */
 export const DUNGEON_ENTRANCE: [number, number, number] = [11, 0, -6]
 
-/** Player spawn inside the dungeon. */
-export const DUNGEON_SPAWN: [number, number, number] = [0, -44, 0]
+/** Player spawn inside the dungeon (above the entry floor so you don't fall through). */
+export const DUNGEON_SPAWN: [number, number, number] = [0, -42.5, 0]
 
 export const DUNGEON_HOME_SPAWN: [number, number, number] = [0, 3, 0]
 
 export const DUNGEON_FALL_Y = -58
 
-export const DUNGEON_INTERACT_RADIUS = 2.6
+export const DUNGEON_INTERACT_RADIUS = 4.5
 
 /** Chest sits near the end of the platform run. */
 export const DUNGEON_CHEST: [number, number, number] = [0, -44, 28]

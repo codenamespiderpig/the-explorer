@@ -31,28 +31,38 @@ function DungeonEntrance() {
 
   return (
     <group position={[ex, 0, ez]}>
-      <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider args={[1.6, 0.4, 1.8]} position={[0, 0.4, 0]} />
-        <StairStep position={[0, 0.15, 0.7]} size={[2.6, 0.3, 0.7]} />
-        <StairStep position={[0, 0.4, 0.1]} size={[2.4, 0.3, 0.7]} />
-        <StairStep position={[0, 0.65, -0.5]} size={[2.2, 0.3, 0.7]} />
-        <mesh position={[0, 1.1, -0.9]}>
-          <boxGeometry args={[2.4, 1.6, 0.35]} />
+      {/* Visual only — no solid collider so you can walk up and press E */}
+      <StairStep position={[0, 0.15, 0.7]} size={[2.6, 0.3, 0.7]} />
+      <StairStep position={[0, 0.4, 0.1]} size={[2.4, 0.3, 0.7]} />
+      <StairStep position={[0, 0.65, -0.5]} size={[2.2, 0.3, 0.7]} />
+      <mesh position={[0, 1.1, -0.9]}>
+        <boxGeometry args={[2.4, 1.6, 0.35]} />
+        <meshStandardMaterial
+          color={open ? '#2a2018' : '#3a3a3a'}
+          emissive={open ? '#886622' : '#111'}
+          emissiveIntensity={open ? 0.45 : 0.05}
+        />
+      </mesh>
+      <mesh position={[0, 1.9, -0.7]}>
+        <boxGeometry args={[1.4, 0.25, 0.2]} />
+        <meshStandardMaterial
+          color={open ? '#ffcc66' : '#666'}
+          emissive={open ? '#ffaa33' : '#000'}
+          emissiveIntensity={open ? 0.7 : 0}
+        />
+      </mesh>
+      {open ? (
+        <mesh position={[0, 0.05, 0.2]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.6, 2.1, 24]} />
           <meshStandardMaterial
-            color={open ? '#2a2018' : '#3a3a3a'}
-            emissive={open ? '#886622' : '#111'}
-            emissiveIntensity={open ? 0.45 : 0.05}
+            color="#ffcc66"
+            emissive="#ffaa33"
+            emissiveIntensity={0.55}
+            transparent
+            opacity={0.65}
           />
         </mesh>
-        <mesh position={[0, 1.9, -0.7]}>
-          <boxGeometry args={[1.4, 0.25, 0.2]} />
-          <meshStandardMaterial
-            color={open ? '#ffcc66' : '#666'}
-            emissive={open ? '#ffaa33' : '#000'}
-            emissiveIntensity={open ? 0.7 : 0}
-          />
-        </mesh>
-      </RigidBody>
+      ) : null}
     </group>
   )
 }
@@ -89,8 +99,8 @@ function DungeonInterior() {
       <ambientLight intensity={0.35} />
       <pointLight position={[sx, sy + 6, sz + 14]} intensity={1.4} distance={40} color="#ffd8a0" />
 
-      {/* Entry floor */}
-      <Platform position={[sx, sy - 0.4, sz]} size={[10, 0.8, 10]} color="#2e2a24" />
+      {/* Entry floor — thick so you don't fall through on spawn */}
+      <Platform position={[sx, sy - 1.2, sz]} size={[12, 2.4, 12]} color="#2e2a24" />
       {/* Gap platforms for light jumping */}
       <Platform position={[0, sy - 0.4, 8]} size={[3.2, 0.8, 3.2]} />
       <Platform position={[2.4, sy + 0.3, 13]} size={[2.6, 0.8, 2.6]} color="#4a4035" />

@@ -263,11 +263,6 @@ function useGatherInput() {
         return
       }
 
-      if (isNearDungeonEntrance(playerPos[0], playerPos[2])) {
-        state.setHint('Buy land from the merchant to open the dungeon stairs')
-        return
-      }
-
       const pot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
       if (pot) {
         const collected = game.collectFromCrabPot(pot.id)
@@ -369,12 +364,8 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
       return
     }
 
-    if (isNearDungeonEntrance(pos.x, pos.z)) {
-      store.setHint(
-        canEnterDungeon(game.landTier)
-          ? 'Press E to enter the dungeon'
-          : 'Dungeon sealed — buy land from the merchant first',
-      )
+      if (isNearDungeonEntrance(pos.x, pos.z)) {
+      store.setHint('Press E to enter the dungeon')
       lastId.current = null
       store.setNearby(null, null)
       return
@@ -554,7 +545,7 @@ export function Player() {
   return (
     <>
       <Ecctrl
-        key={respawnToken}
+        key={`${respawnToken}-${inDungeon ? 'dungeon' : 'overworld'}`}
         ref={ecctrl}
         position={playerSpawn}
         maxWalkVel={4}

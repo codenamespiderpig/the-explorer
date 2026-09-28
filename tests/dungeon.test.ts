@@ -12,10 +12,10 @@ import {
 } from '../src/systems/dungeon'
 
 describe('dungeon', () => {
-  it('unlocks after the first land purchase', () => {
-    expect(canEnterDungeon(0)).toBe(false)
+  it('is open from the start of the game', () => {
+    expect(canEnterDungeon(0)).toBe(true)
     expect(canEnterDungeon(DUNGEON_MIN_LAND_TIER)).toBe(true)
-    expect(DUNGEON_MIN_LAND_TIER).toBe(1)
+    expect(DUNGEON_MIN_LAND_TIER).toBe(0)
   })
 
   it('detects standing at the home entrance stairs', () => {
