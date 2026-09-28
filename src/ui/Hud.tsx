@@ -82,6 +82,7 @@ export function Hud() {
 
   const max = effectiveMaxHealth(health)
   const hpPct = Math.max(0, (health.current / max) * 100)
+  const inDungeon = useGameStore((s) => s.inDungeon)
 
   return (
     <div id="hud">
@@ -136,6 +137,13 @@ export function Hud() {
         </div>
         <div className="hud-tools">F attack · R eat fish (+{FISH_HEAL_AMOUNT} HP)</div>
       </div>
+
+      {inDungeon ? (
+        <div className="hud-dungeon-jump" role="status">
+          <span className="hud-dungeon-jump-key">Space</span>
+          <span>Jump onto the blocks</span>
+        </div>
+      ) : null}
 
       {hint ? <div className="hud-hint">{hint}</div> : null}
       <Minimap />

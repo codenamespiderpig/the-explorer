@@ -89,6 +89,36 @@ body,
   white-space: nowrap;
 }
 
+.hud-dungeon-jump {
+  position: absolute;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(20, 24, 36, 0.82);
+  color: #f4efe6;
+  border: 2px solid rgba(255, 204, 102, 0.55);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.hud-dungeon-jump-key {
+  display: inline-block;
+  min-width: 4.2rem;
+  padding: 4px 10px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(255, 204, 102, 0.2);
+  border: 2px solid #ffcc66;
+  border-radius: 8px;
+  color: #ffcc66;
+}
+
 .hud-minimap {
   position: absolute;
   right: 16px;
