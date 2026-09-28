@@ -8,13 +8,13 @@ export interface HomeLake {
 }
 
 export const HOME_LAKES: readonly HomeLake[] = [
-  { id: 'home-pond-1', position: [-2.5, 0, -4.2], radius: 2.4 },
-  { id: 'home-pond-2', position: [2.2, 0, 3.8], radius: 2.1 },
-  { id: 'home-pond-3', position: [-13.5, 0, 11], radius: 2.3 },
+  { id: 'home-pond-1', position: [-2.5, 0, -4.2], radius: 1.35 },
+  { id: 'home-pond-2', position: [2.2, 0, 3.8], radius: 1.2 },
+  { id: 'home-pond-3', position: [-13.5, 0, 11], radius: 1.3 },
 ]
 
 /** Extra bank margin so crab pots sit beside the water, not only in the middle. */
-export const HOME_LAKE_BANK_MARGIN = 1.6
+export const HOME_LAKE_BANK_MARGIN = 1.2
 
 export function isNearHomeLake(x: number, z: number): boolean {
   for (const lake of HOME_LAKES) {
