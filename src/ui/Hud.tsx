@@ -4,7 +4,7 @@ import { useGameStore } from '../stores/gameStore'
 import { effectiveMaxHealth } from '../systems/health'
 import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { isMerchantVisiting } from '../systems/merchant'
-import { lavaUnlocked, nextPlot, waterUnlocked } from '../systems/plots'
+import { lavaUnlocked, nextPlot, rainforestUnlocked, waterUnlocked } from '../systems/plots'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
 import { Minimap } from './Minimap'
@@ -14,6 +14,7 @@ const WORLD_HINT: Record<string, string> = {
   home: 'somewhere on the home island',
   water: 'somewhere in the water world',
   lava: 'somewhere in the lava world',
+  rainforest: 'somewhere in the rainforest',
 }
 
 export function Hud() {
@@ -117,6 +118,11 @@ export function Hud() {
           <div className="hud-tools">Lava Island unlocked — follow the east path</div>
         ) : waterUnlocked(landTier) ? (
           <div className="hud-tools">Keep buying land to reach the Lava Island</div>
+        ) : null}
+        {rainforestUnlocked(landTier) ? (
+          <div className="hud-tools">Rainforest unlocked — follow the south path</div>
+        ) : lavaUnlocked(landTier) ? (
+          <div className="hud-tools">Keep buying land to reach the Rainforest</div>
         ) : null}
       </div>
 

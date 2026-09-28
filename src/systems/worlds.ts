@@ -5,6 +5,8 @@ import {
   OCEAN_GAP,
   lavaHubCenter,
   lavaUnlocked,
+  rainforestHubCenter,
+  rainforestUnlocked,
   unlockedPlots,
   waterHubCenter,
   waterUnlocked,
@@ -14,7 +16,7 @@ export { BIOME_ISLAND_SIZE, HOME_ISLAND_SIZE, OCEAN_GAP }
 
 export const MERCHANT_VISIT_SEC = 90
 
-export type WorldId = 'home' | 'water' | 'lava'
+export type WorldId = 'home' | 'water' | 'lava' | 'rainforest'
 
 export interface MerchantSpawn {
   world: WorldId
@@ -34,12 +36,14 @@ export function unlockedWorlds(landTier: number): WorldId[] {
   const worlds: WorldId[] = ['home']
   if (waterUnlocked(landTier)) worlds.push('water')
   if (lavaUnlocked(landTier)) worlds.push('lava')
+  if (rainforestUnlocked(landTier)) worlds.push('rainforest')
   return worlds
 }
 
 export function worldCenter(world: WorldId, _landTier = 0): [number, number, number] {
   if (world === 'water') return waterHubCenter()
   if (world === 'lava') return lavaHubCenter()
+  if (world === 'rainforest') return rainforestHubCenter()
   return [0, 0, 0]
 }
 
@@ -66,8 +70,28 @@ export function lavaBridgeEndpoints(): {
   }
 }
 
+export function rainforestBridgeEndpoints(): {
+  home: [number, number, number]
+  island: [number, number, number]
+} {
+  const [, , rz] = worldCenter('rainforest')
+  return {
+    home: [0, 0, -(homeHalf() - 1)],
+    island: [0, 0, rz + biomeHalf() - 0.5],
+  }
+}
+
 export function worldPlayableHalf(_world: WorldId): number {
   return biomeHalf() - 1.5
+}
+
+function worldFromPlotBiome(
+  biome: 'grass' | 'water' | 'lava' | 'rainforest',
+): WorldId {
+  if (biome === 'lava') return 'lava'
+  if (biome === 'water') return 'water'
+  if (biome === 'rainforest') return 'rainforest'
+  return 'home'
 }
 
 /** Pick a far edge spot so the merchant is hard to stumble onto. */
@@ -87,7 +111,6 @@ export function merchantSpawnPosition(
     }
   }
 
-  // Prefer spawning on an unlocked outpost plot when available.
   const plots = unlockedPlots(landTier).filter((p) => p.kind === 'outpost')
   if (plots.length > 0 && rng() > 0.35) {
     const plot = plots[Math.floor(rng() * plots.length)]!
@@ -96,7 +119,7 @@ export function merchantSpawnPosition(
     const angle = rng() * Math.PI * 2
     const dist = half * (0.5 + rng() * 0.4)
     return {
-      world: plot.biome === 'lava' ? 'lava' : plot.biome === 'water' ? 'water' : 'home',
+      world: worldFromPlotBiome(plot.biome),
       position: [cx + Math.cos(angle) * dist, 0, cz + Math.sin(angle) * dist],
     }
   }

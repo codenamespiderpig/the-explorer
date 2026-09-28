@@ -140,6 +140,12 @@ body,
   stroke-linecap: round;
 }
 
+.world-map-bridge-rain {
+  stroke: #9ad870;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
 .world-map-player {
   fill: #ff3b3b;
   stroke: #fff;

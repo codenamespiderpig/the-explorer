@@ -34,6 +34,8 @@
 - [x] Top-right minimap — click to open full world overview
 - [x] Workbench unlocks advanced crafts (furnace, slime castle)
 - [x] Home grassland ponds — place crab pots on the banks
+- [x] Rainforest land south of home (3rd unlock)
+- [x] Different enemies per land; enemies a bit shorter than the player
 
 ## Now
 

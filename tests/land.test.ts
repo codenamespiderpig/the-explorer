@@ -6,7 +6,7 @@ import {
   landUpgradeCost,
   landUpgradeLabel,
 } from '../src/systems/land'
-import { LAVA_UNLOCK_INDEX, WATER_UNLOCK_INDEX, nextPlot, plotAtIndex } from '../src/systems/plots'
+import { LAVA_UNLOCK_INDEX, RAINFOREST_UNLOCK_INDEX, WATER_UNLOCK_INDEX, nextPlot, plotAtIndex } from '../src/systems/plots'
 
 describe('land upgrades', () => {
   it('keeps the home island the same size', () => {
@@ -21,6 +21,7 @@ describe('land upgrades', () => {
     expect(landUpgradeCost(10)).toBe(550)
     expect(landUpgradeLabel(0)).toContain('Water')
     expect(landUpgradeLabel(1)).toContain('Lava')
+    expect(landUpgradeLabel(2)).toContain('Rainforest')
   })
 
   it('buys land forever when the merchant is here and you can afford it', () => {
@@ -40,9 +41,10 @@ describe('land upgrades', () => {
     expect(buyLandFromMerchant(1000, 5, true).ok).toBe(true)
   })
 
-  it('unlocks water then lava first, then extras', () => {
+  it('unlocks water, lava, rainforest, then extras', () => {
     expect(plotAtIndex(WATER_UNLOCK_INDEX).id).toBe('water-hub')
     expect(plotAtIndex(LAVA_UNLOCK_INDEX).id).toBe('lava-hub')
-    expect(nextPlot(2).kind).toBe('outpost')
+    expect(plotAtIndex(RAINFOREST_UNLOCK_INDEX).id).toBe('rainforest-hub')
+    expect(nextPlot(3).kind).toBe('outpost')
   })
 })

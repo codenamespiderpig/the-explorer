@@ -7,12 +7,14 @@ const BIOME_FILL: Record<string, string> = {
   grass: '#6faf4a',
   water: '#3aa0d8',
   lava: '#c45a28',
+  rainforest: '#2f8a3a',
 }
 
 const BIOME_LOCKED: Record<string, string> = {
   grass: '#9ab889',
   water: '#8bb8d0',
   lava: '#c49a88',
+  rainforest: '#7aaa78',
 }
 
 function MapSchematic({
@@ -50,7 +52,11 @@ function MapSchematic({
             x2={b.x}
             y2={b.y}
             className={
-              bridge.biome === 'water' ? 'world-map-bridge-water' : 'world-map-bridge-lava'
+              bridge.biome === 'water'
+                ? 'world-map-bridge-water'
+                : bridge.biome === 'rainforest'
+                  ? 'world-map-bridge-rain'
+                  : 'world-map-bridge-lava'
             }
           />
         )
@@ -136,7 +142,7 @@ export function Minimap() {
               </button>
             </div>
             <p className="world-map-help">
-              Your islands and paths. Unlocked land grows north (water) and east (lava).
+              Your islands and paths. Land grows north (water), east (lava), and south (rainforest).
             </p>
             <div className="world-map-frame">
               <MapSchematic size={420} showLabels />

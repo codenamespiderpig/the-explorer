@@ -33,6 +33,7 @@ describe('world unlocks', () => {
   it('unlocks water then lava with land tiers', () => {
     expect(unlockedWorlds(1)).toEqual(['home', 'water'])
     expect(unlockedWorlds(2)).toEqual(['home', 'water', 'lava'])
+    expect(unlockedWorlds(3)).toEqual(['home', 'water', 'lava', 'rainforest'])
   })
 
   it('spawns the merchant far from the center', () => {
@@ -44,8 +45,8 @@ describe('world unlocks', () => {
   it('can spawn in unlocked biomes', () => {
     let i = 0
     const rng = () => [0, 0.6, 0.1][i++] ?? 0
-    const spawn = merchantSpawnPosition(2, rng)
-    expect(['home', 'water', 'lava']).toContain(spawn.world)
+    const spawn = merchantSpawnPosition(3, rng)
+    expect(['home', 'water', 'lava', 'rainforest']).toContain(spawn.world)
     const [cx, , cz] = worldCenter(spawn.world)
     expect(Math.hypot(spawn.position[0] - cx, spawn.position[2] - cz)).toBeGreaterThan(5)
   })

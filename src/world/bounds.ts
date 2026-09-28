@@ -12,6 +12,8 @@ import {
   lavaUnlocked,
   northChainOpen,
   plotPlayableHalf,
+  rainforestUnlocked,
+  southChainOpen,
   unlockedPlots,
   waterUnlocked,
   type LandPlot,
@@ -93,6 +95,13 @@ function onEastDock(x: number, z: number, landTier: number): boolean {
   return Math.abs(z) <= BRIDGE_GATE_HALF && x >= half && x <= eastMax
 }
 
+function onSouthDock(x: number, z: number, landTier: number): boolean {
+  if (!southChainOpen(landTier)) return false
+  const half = playableHalf(0)
+  const southMin = -homeHalf()
+  return Math.abs(x) <= BRIDGE_GATE_HALF && z <= -half && z >= southMin
+}
+
 function dockClamp(x: number, z: number, landTier: number): { x: number; z: number } | null {
   if (onNorthDock(x, z, landTier)) {
     const half = playableHalf(0)
@@ -110,6 +119,14 @@ function dockClamp(x: number, z: number, landTier: number): { x: number; z: numb
       z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),
     }
   }
+  if (onSouthDock(x, z, landTier)) {
+    const half = playableHalf(0)
+    const southMin = -homeHalf()
+    return {
+      x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
+      z: Math.min(-half, Math.max(southMin, z)),
+    }
+  }
   return null
 }
 
@@ -120,8 +137,9 @@ function isPointOnHomeIsland(x: number, z: number): boolean {
 
 function isPointOnAnyUnlockedPlot(x: number, z: number, landTier: number): LandPlot | null {
   for (const plot of unlockedPlots(landTier)) {
-    if (plot.kind === 'hub' && plot.biome === 'water') continue
-    if (plot.kind === 'hub' && plot.biome === 'lava') continue
+    if (plot.kind === 'hub' && (plot.biome === 'water' || plot.biome === 'lava' || plot.biome === 'rainforest')) {
+      continue
+    }
     if (isPointOnPlot(x, z, plot)) return plot
   }
   return null
@@ -141,15 +159,11 @@ function eastBridgeEndX(landTier: number): number {
   return furthest.center[0] - furthest.size / 2 + 0.5
 }
 
-export function onWaterBridge(x: number, z: number, landTier: number): boolean {
-  if (!northChainOpen(landTier)) return false
-  if (isPointOnHomeIsland(x, z)) return false
-  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
-  if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
-  if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
-  const zMin = homeHalf() - 1
-  const zMax = northBridgeEndZ(landTier)
-  return Math.abs(x) <= BRIDGE_GATE_HALF && z >= zMin - 1 && z <= zMax + 1
+function southBridgeEndZ(landTier: number): number {
+  const south = unlockedPlots(landTier).filter((p) => p.chain === 'south')
+  if (south.length === 0) return -(homeHalf() - 1)
+  const furthest = south.reduce((a, b) => (a.center[2] < b.center[2] ? a : b))
+  return furthest.center[2] + furthest.size / 2 - 0.5
 }
 
 function isPointOnLavaIsland(x: number, z: number): boolean {
@@ -158,15 +172,46 @@ function isPointOnLavaIsland(x: number, z: number): boolean {
   return Math.abs(x - cx) <= half + 1 && Math.abs(z - cz) <= half + 1
 }
 
+function isPointOnRainforestIsland(x: number, z: number): boolean {
+  const [cx, , cz] = worldCenter('rainforest')
+  const half = worldPlayableHalf('rainforest')
+  return Math.abs(x - cx) <= half + 1 && Math.abs(z - cz) <= half + 1
+}
+
+export function onWaterBridge(x: number, z: number, landTier: number): boolean {
+  if (!northChainOpen(landTier)) return false
+  if (isPointOnHomeIsland(x, z)) return false
+  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
+  if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
+  if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
+  if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) return false
+  const zMin = homeHalf() - 1
+  const zMax = northBridgeEndZ(landTier)
+  return Math.abs(x) <= BRIDGE_GATE_HALF && z >= zMin - 1 && z <= zMax + 1
+}
+
 export function onLavaBridge(x: number, z: number, landTier: number): boolean {
   if (!eastChainOpen(landTier)) return false
   if (isPointOnHomeIsland(x, z)) return false
   if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
   if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
   if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
+  if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) return false
   const xMin = homeHalf() - 1
   const xMax = eastBridgeEndX(landTier)
   return Math.abs(z) <= BRIDGE_GATE_HALF && x >= xMin - 1 && x <= xMax + 1
+}
+
+export function onRainforestBridge(x: number, z: number, landTier: number): boolean {
+  if (!southChainOpen(landTier)) return false
+  if (isPointOnHomeIsland(x, z)) return false
+  if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) return false
+  if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
+  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
+  if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
+  const zMax = -(homeHalf() - 1)
+  const zMin = southBridgeEndZ(landTier)
+  return Math.abs(x) <= BRIDGE_GATE_HALF && z <= zMax + 1 && z >= zMin - 1
 }
 
 function bridgeClamp(x: number, z: number, landTier: number): { x: number; z: number } | null {
@@ -186,6 +231,14 @@ function bridgeClamp(x: number, z: number, landTier: number): { x: number; z: nu
       z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),
     }
   }
+  if (onRainforestBridge(x, z, landTier)) {
+    const zMax = -(homeHalf() - 1)
+    const zMin = southBridgeEndZ(landTier)
+    return {
+      x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
+      z: Math.min(zMax + 0.5, Math.max(zMin - 0.5, z)),
+    }
+  }
   return null
 }
 
@@ -203,13 +256,16 @@ export function clampToIsland(
     return biomeClamp(x, z, 'lava')
   }
 
+  if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) {
+    return biomeClamp(x, z, 'rainforest')
+  }
+
   const onPlot = isPointOnAnyUnlockedPlot(x, z, landTier)
   if (onPlot) return plotClamp(x, z, onPlot)
 
   const dock = dockClamp(x, z, landTier)
   if (dock) return dock
 
-  // Prefer home interior over pier corridor so you can leave bridges onto home.
   if (isPointOnHomeIsland(x, z)) {
     return homeClamp(x, z)
   }
@@ -227,7 +283,6 @@ export function clampToIsland(
     }
   }
 
-  // Only clamp to home if still on/near home — don't snap back from the ocean.
   const half = playableHalf(0)
   if (Math.abs(x) <= half + 1.5 && Math.abs(z) <= half + 1.5) {
     return homeClamp(x, z)

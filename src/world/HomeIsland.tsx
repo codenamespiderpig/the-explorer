@@ -48,10 +48,12 @@ function InvisibleWalls({
   size,
   openNorth,
   openEast,
+  openSouth,
 }: {
   size: number
   openNorth: boolean
   openEast: boolean
+  openSouth: boolean
 }) {
   const hx = WALL_THICKNESS / 2
   const hy = WALL_HEIGHT / 2
@@ -62,7 +64,7 @@ function InvisibleWalls({
   const wingCenter = BRIDGE_GATE_HALF + wing
 
   return (
-    <RigidBody type="fixed" colliders={false} key={`walls-${openNorth}-${openEast}`}>
+    <RigidBody type="fixed" colliders={false} key={`walls-${openNorth}-${openEast}-${openSouth}`}>
       {openNorth ? (
         <>
           <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, inset]} />
@@ -71,7 +73,14 @@ function InvisibleWalls({
       ) : (
         <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, inset]} />
       )}
-      <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, -inset]} />
+      {openSouth ? (
+        <>
+          <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, -inset]} />
+          <CuboidCollider args={[wing, hy, hx]} position={[wingCenter, WALL_Y, -inset]} />
+        </>
+      ) : (
+        <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, -inset]} />
+      )}
       {openEast ? (
         <>
           <CuboidCollider args={[hx, hy, wing]} position={[inset, WALL_Y, -wingCenter]} />
@@ -85,7 +94,7 @@ function InvisibleWalls({
   )
 }
 
-function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
+function HomeDock({ axis, color }: { axis: 'north' | 'east' | 'south'; color: string }) {
   const half = playableHalf(0)
   const edge = homeHalf()
   const halfW = BRIDGE_GATE_HALF
@@ -96,6 +105,21 @@ function HomeDock({ axis, color }: { axis: 'north' | 'east'; color: string }) {
   if (axis === 'north') {
     return (
       <RigidBody type="fixed" colliders={false} position={[0, 0, center]}>
+        <CuboidCollider
+          args={[halfW, WALK_COLLIDER_HALF_H, halfLen]}
+          position={[0, -WALK_COLLIDER_HALF_H, 0]}
+        />
+        <mesh receiveShadow castShadow position={[0, deckHalfH, 0]}>
+          <boxGeometry args={[halfW * 2, deckHalfH * 2, halfLen * 2]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      </RigidBody>
+    )
+  }
+
+  if (axis === 'south') {
+    return (
+      <RigidBody type="fixed" colliders={false} position={[0, 0, -center]}>
         <CuboidCollider
           args={[halfW, WALK_COLLIDER_HALF_H, halfLen]}
           position={[0, -WALK_COLLIDER_HALF_H, 0]}
@@ -160,9 +184,15 @@ export function HomeIsland() {
           <meshStandardMaterial color="#6abe30" />
         </mesh>
       </RigidBody>
-      <InvisibleWalls size={size} openNorth={landTier >= 1} openEast={landTier >= 2} />
+      <InvisibleWalls
+        size={size}
+        openNorth={landTier >= 1}
+        openEast={landTier >= 2}
+        openSouth={landTier >= 3}
+      />
       {landTier >= 1 ? <HomeDock axis="north" color="#6ec4ff" /> : null}
       {landTier >= 2 ? <HomeDock axis="east" color="#aa5533" /> : null}
+      {landTier >= 3 ? <HomeDock axis="south" color="#5a8a3a" /> : null}
 
       {HOME_LAKES.map((lake) => (
         <HomePond key={lake.id} position={lake.position} radius={lake.radius} />

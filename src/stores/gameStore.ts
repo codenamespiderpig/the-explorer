@@ -32,7 +32,20 @@ import {
 import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
 import { buyLandFromMerchant } from '../systems/land'
 import {
-  advanceCrabPotCatch,
+  BIOME_ENEMY_HP,
+  biomeEnemyPositions,
+  enemyForBiome,
+  type EnemyKind,
+} from '../systems/enemies'
+import {
+  lavaUnlocked,
+  rainforestUnlocked,
+  waterUnlocked,
+  lavaHubCenter,
+  rainforestHubCenter,
+  waterHubCenter,
+} from '../systems/plots'
+import { advanceCrabPotCatch,
   collectFishFromPot,
   createCrabPot,
   type CrabPot,
@@ -51,13 +64,14 @@ import {
 } from '../systems/merchant'
 import type { WorldId } from '../systems/worlds'
 
-export type SlimeSource = 'night' | 'castle'
+export type SlimeSource = 'night' | 'castle' | 'biome'
 
 export interface Slime {
   id: string
   position: [number, number, number]
   hp: number
   source: SlimeSource
+  kind: EnemyKind
   /** Age in seconds — castle slimes rot when left unkilled. */
   ageSec: number
 }
@@ -93,6 +107,7 @@ interface GameState {
   damageNearestGate: (from: [number, number, number], amount: number) => boolean
   spawnNightSlimes: () => void
   clearNightSlimes: () => void
+  syncBiomeEnemies: () => void
   moveSlime: (id: string, position: [number, number, number]) => void
   hurtSlime: (id: string, amount: number) => SlimeDrop | null
   buyLand: () => boolean
@@ -115,10 +130,27 @@ function edgeSpawn(landTier: number): [number, number, number] {
   const half = 12 + (landTier >= 1 ? 4 : 0)
   const side = Math.floor(Math.random() * 4)
   const t = (Math.random() - 0.5) * (half * 1.6)
-  if (side === 0) return [t, 0.6, -half]
-  if (side === 1) return [t, 0.6, half]
-  if (side === 2) return [-half, 0.6, t]
-  return [half, 0.6, t]
+  if (side === 0) return [t, 0.45, -half]
+  if (side === 1) return [t, 0.45, half]
+  if (side === 2) return [-half, 0.45, t]
+  return [half, 0.45, t]
+}
+
+function makeBiomePack(
+  kind: EnemyKind,
+  center: [number, number, number],
+): Slime[] {
+  return biomeEnemyPositions(center).map((position) => {
+    slimeSeq += 1
+    return {
+      id: `slime-${slimeSeq}`,
+      position,
+      hp: BIOME_ENEMY_HP,
+      source: 'biome' as const,
+      kind,
+      ageSec: 0,
+    }
+  })
 }
 
 function countCastleSlimesNear(
@@ -203,6 +235,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             position: castleSpawnPosition(castle.position),
             hp: 20,
             source: 'castle' as const,
+            kind: 'slime' as const,
             ageSec: 0,
           },
         ]
@@ -304,6 +337,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         position: edgeSpawn(tier),
         hp: 20,
         source: 'night' as const,
+        kind: 'slime' as const,
         ageSec: 0,
       }
     })
@@ -314,6 +348,26 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   clearNightSlimes: () =>
     set((s) => ({ slimes: s.slimes.filter((sl) => sl.source !== 'night') })),
+
+  syncBiomeEnemies: () => {
+    const tier = get().landTier
+    set((s) => {
+      let slimes = s.slimes.filter((sl) => sl.source !== 'biome')
+      if (waterUnlocked(tier)) {
+        slimes = [...slimes, ...makeBiomePack(enemyForBiome('water'), waterHubCenter())]
+      }
+      if (lavaUnlocked(tier)) {
+        slimes = [...slimes, ...makeBiomePack(enemyForBiome('lava'), lavaHubCenter())]
+      }
+      if (rainforestUnlocked(tier)) {
+        slimes = [
+          ...slimes,
+          ...makeBiomePack(enemyForBiome('rainforest'), rainforestHubCenter()),
+        ]
+      }
+      return { slimes }
+    })
+  },
 
   moveSlime: (id, position) =>
     set((s) => ({
@@ -339,6 +393,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const result = buyLandFromMerchant(money, landTier, isMerchantVisiting(merchantTimeLeft))
     if (!result.ok) return false
     set({ money: result.money, landTier: result.landTier })
+    get().syncBiomeEnemies()
     return true
   },
 

@@ -4,6 +4,8 @@ import {
   lavaHubCenter,
   lavaUnlocked,
   type LandPlot,
+  rainforestHubCenter,
+  rainforestUnlocked,
   unlockedPlots,
   waterHubCenter,
   waterUnlocked,
@@ -60,8 +62,10 @@ function OutpostIsland({ plot }: { plot: LandPlot }) {
   const [cx, , cz] = plot.center
   const half = plot.size / 2
   const thick = 2
-  const top = plot.biome === 'water' ? '#5ec4ff' : '#aa5533'
-  const side = plot.biome === 'water' ? '#2a6a9a' : '#8a3020'
+  const top =
+    plot.biome === 'water' ? '#5ec4ff' : plot.biome === 'rainforest' ? '#3f9a3a' : '#aa5533'
+  const side =
+    plot.biome === 'water' ? '#2a6a9a' : plot.biome === 'rainforest' ? '#2f6a28' : '#8a3020'
 
   return (
     <group>
@@ -163,6 +167,30 @@ export function LandPlots() {
         to: dockPoint(next.center, next.size, 'west'),
         deck: '#aa5533',
         rail: '#ffaa66',
+      })
+    }
+  }
+
+  const rainGroves = outposts
+    .filter((p) => p.biome === 'rainforest')
+    .sort((a, b) => b.center[2] - a.center[2])
+  if (rainforestUnlocked(landTier) && rainGroves[0]) {
+    bridges.push({
+      key: `rain-hub-${rainGroves[0].id}`,
+      from: dockPoint(rainforestHubCenter(), 44, 'south'),
+      to: dockPoint(rainGroves[0].center, rainGroves[0].size, 'north'),
+      deck: '#5a8a3a',
+      rail: '#c8e89a',
+    })
+    for (let i = 1; i < rainGroves.length; i += 1) {
+      const prev = rainGroves[i - 1]!
+      const next = rainGroves[i]!
+      bridges.push({
+        key: `${prev.id}-${next.id}`,
+        from: dockPoint(prev.center, prev.size, 'south'),
+        to: dockPoint(next.center, next.size, 'north'),
+        deck: '#5a8a3a',
+        rail: '#c8e89a',
       })
     }
   }

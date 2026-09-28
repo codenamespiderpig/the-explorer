@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
-import { WaterWorld, LavaWorld, LockedIslandHints } from './world/BiomeWorlds'
+import { WaterWorld, LavaWorld, RainforestWorld, LockedIslandHints } from './world/BiomeWorlds'
 import { LandPlots } from './world/LandPlots'
 import { Player } from './player/Player'
 import { Hud } from './ui/Hud'
@@ -28,6 +28,7 @@ export default function App() {
             <LockedIslandHints />
             <WaterWorld />
             <LavaWorld />
+            <RainforestWorld />
             <Gates />
             <Buildings />
             <CrabPots />

@@ -5,10 +5,11 @@ import {
   biomeHalf,
   homeHalf,
   lavaBridgeEndpoints,
+  rainforestBridgeEndpoints,
   waterBridgeEndpoints,
   worldCenter,
 } from '../systems/worlds'
-import { lavaUnlocked, waterUnlocked } from '../systems/plots'
+import { lavaUnlocked, rainforestUnlocked, waterUnlocked } from '../systems/plots'
 import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
 import { type WalkRect, waterIslandWalkRects } from '../systems/waterIsland'
@@ -24,11 +25,13 @@ function BiomeWalls({
   cz,
   openSouth,
   openWest,
+  openNorth,
 }: {
   cx: number
   cz: number
   openSouth?: boolean
   openWest?: boolean
+  openNorth?: boolean
 }) {
   const half = biomeHalf()
   const hx = WALL_T / 2
@@ -40,7 +43,14 @@ function BiomeWalls({
 
   return (
     <RigidBody type="fixed" colliders={false} position={[cx, 0, cz]}>
-      <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, inset]} />
+      {openNorth ? (
+        <>
+          <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, inset]} />
+          <CuboidCollider args={[wing, hy, hx]} position={[wingCenter, WALL_Y, inset]} />
+        </>
+      ) : (
+        <CuboidCollider args={[span, hy, hx]} position={[0, WALL_Y, inset]} />
+      )}
       {openSouth ? (
         <>
           <CuboidCollider args={[wing, hy, hx]} position={[-wingCenter, WALL_Y, -inset]} />
@@ -324,11 +334,70 @@ export function LavaWorld() {
   )
 }
 
+/** Dense rainforest island far south — unlocked third. */
+export function RainforestWorld() {
+  const landTier = useGameStore((s) => s.landTier)
+  if (!rainforestUnlocked(landTier)) return null
+
+  const [cx, , cz] = worldCenter('rainforest')
+  const { home, island } = rainforestBridgeEndpoints()
+  const h = homeHalf()
+
+  return (
+    <group>
+      <Ocean from={home} to={island} />
+      <RigidBody type="fixed" colliders={false} position={[cx, 0, cz]}>
+        <CuboidCollider
+          args={[BIOME_ISLAND_SIZE / 2, THICK / 2, BIOME_ISLAND_SIZE / 2]}
+          position={[0, -THICK / 2, 0]}
+        />
+        <mesh receiveShadow position={[0, -THICK / 2, 0]}>
+          <boxGeometry args={[BIOME_ISLAND_SIZE, THICK, BIOME_ISLAND_SIZE]} />
+          <meshStandardMaterial color="#2f6a28" />
+        </mesh>
+        <mesh receiveShadow position={[0, 0.02, 0]}>
+          <boxGeometry args={[BIOME_ISLAND_SIZE - 2, 0.08, BIOME_ISLAND_SIZE - 2]} />
+          <meshStandardMaterial color="#3f9a3a" />
+        </mesh>
+      </RigidBody>
+      <BiomeWalls cx={cx} cz={cz} openNorth />
+      <LongBridge from={home} to={island} deckColor="#5a8a3a" railColor="#c8e89a" />
+      <PortalArch position={[0, 0, -(h - 0.3)]} rotationY={Math.PI} color="#2a4a18" labelColor="#7dff6a" />
+      <IslandBeacon position={[cx, 0, cz - biomeHalf() + 2]} color="#7dff6a" />
+      <Gatherable id="rain-tree-1" resource="wood" position={[cx - 10, 0, cz + 6]} />
+      <Gatherable id="rain-tree-2" resource="wood" position={[cx + 8, 0, cz - 8]} />
+      <Gatherable id="rain-tree-3" resource="wood" position={[cx - 4, 0, cz - 12]} />
+      <Gatherable id="rain-tree-4" resource="wood" position={[cx + 12, 0, cz + 2]} />
+      <Gatherable id="rain-rock-1" resource="stone" position={[cx + 5, 0, cz + 10]} />
+      <Gatherable id="rain-rock-2" resource="stone" position={[cx - 12, 0, cz - 3]} />
+      {[
+        [-8, -6],
+        [6, -10],
+        [-2, 8],
+        [10, 4],
+        [-11, 2],
+      ].map(([ox, oz], i) => (
+        <group key={i} position={[cx + ox, 0, cz + oz]}>
+          <mesh castShadow position={[0, 1.4, 0]}>
+            <cylinderGeometry args={[0.2, 0.28, 2.8, 6]} />
+            <meshStandardMaterial color="#4a3018" />
+          </mesh>
+          <mesh castShadow position={[0, 3.1, 0]}>
+            <coneGeometry args={[1.4, 2.4, 7]} />
+            <meshStandardMaterial color="#1f7a32" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 /** Distant silhouettes so players see locked islands before buying. */
 export function LockedIslandHints() {
   const landTier = useGameStore((s) => s.landTier)
   const [wx, , wz] = worldCenter('water')
   const [lx, , lz] = worldCenter('lava')
+  const [rx, , rz] = worldCenter('rainforest')
 
   return (
     <group>
@@ -342,6 +411,12 @@ export function LockedIslandHints() {
         <mesh position={[lx, -0.2, lz]}>
           <boxGeometry args={[BIOME_ISLAND_SIZE, 1, BIOME_ISLAND_SIZE]} />
           <meshStandardMaterial color="#4a2010" transparent opacity={0.35} />
+        </mesh>
+      ) : null}
+      {!rainforestUnlocked(landTier) ? (
+        <mesh position={[rx, -0.2, rz]}>
+          <boxGeometry args={[BIOME_ISLAND_SIZE, 1, BIOME_ISLAND_SIZE]} />
+          <meshStandardMaterial color="#1a4a20" transparent opacity={0.35} />
         </mesh>
       ) : null}
     </group>

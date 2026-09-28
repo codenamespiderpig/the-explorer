@@ -4,11 +4,17 @@ import {
   lavaHubCenter,
   lavaUnlocked,
   type LandPlot,
+  rainforestHubCenter,
+  rainforestUnlocked,
   unlockedPlots,
   waterHubCenter,
   waterUnlocked,
 } from './plots'
-import { lavaBridgeEndpoints, waterBridgeEndpoints } from './worlds'
+import {
+  lavaBridgeEndpoints,
+  rainforestBridgeEndpoints,
+  waterBridgeEndpoints,
+} from './worlds'
 
 export interface WorldBounds {
   minX: number
@@ -20,7 +26,7 @@ export interface WorldBounds {
 export interface MapIsland {
   id: string
   label: string
-  biome: 'grass' | 'water' | 'lava'
+  biome: 'grass' | 'water' | 'lava' | 'rainforest'
   center: [number, number, number]
   size: number
   locked: boolean
@@ -30,7 +36,7 @@ export interface MapBridge {
   id: string
   from: [number, number, number]
   to: [number, number, number]
-  biome: 'water' | 'lava'
+  biome: 'water' | 'lava' | 'rainforest'
 }
 
 export interface MapFeatures {
@@ -62,13 +68,16 @@ export function worldBounds(landTier: number): WorldBounds {
     expand(bounds, plot.center[0], plot.center[2], plot.size / 2)
   }
 
-  // Always reserve room for locked biome hubs so the map previews where they sit.
   if (!waterUnlocked(landTier)) {
     const [cx, , cz] = waterHubCenter()
     expand(bounds, cx, cz, BIOME_ISLAND_SIZE / 2)
   }
   if (!lavaUnlocked(landTier)) {
     const [cx, , cz] = lavaHubCenter()
+    expand(bounds, cx, cz, BIOME_ISLAND_SIZE / 2)
+  }
+  if (!rainforestUnlocked(landTier)) {
+    const [cx, , cz] = rainforestHubCenter()
     expand(bounds, cx, cz, BIOME_ISLAND_SIZE / 2)
   }
 
@@ -103,7 +112,7 @@ function plotToIsland(plot: LandPlot, locked = false): MapIsland {
   return {
     id: plot.id,
     label: plot.label.replace(/^Unlock\s+/i, ''),
-    biome: plot.biome,
+    biome: plot.biome === 'grass' ? 'grass' : plot.biome,
     center: plot.center,
     size: plot.size,
     locked,
@@ -147,6 +156,16 @@ export function mapFeatures(landTier: number): MapFeatures {
       locked: true,
     })
   }
+  if (!rainforestUnlocked(landTier)) {
+    islands.push({
+      id: 'rainforest-hub',
+      label: 'Rainforest',
+      biome: 'rainforest',
+      center: rainforestHubCenter(),
+      size: BIOME_ISLAND_SIZE,
+      locked: true,
+    })
+  }
 
   const bridges: MapBridge[] = []
   if (waterUnlocked(landTier)) {
@@ -156,6 +175,10 @@ export function mapFeatures(landTier: number): MapFeatures {
   if (lavaUnlocked(landTier)) {
     const { home, island } = lavaBridgeEndpoints()
     bridges.push({ id: 'lava-bridge', from: home, to: island, biome: 'lava' })
+  }
+  if (rainforestUnlocked(landTier)) {
+    const { home, island } = rainforestBridgeEndpoints()
+    bridges.push({ id: 'rainforest-bridge', from: home, to: island, biome: 'rainforest' })
   }
 
   return { islands, bridges, bounds: worldBounds(landTier) }

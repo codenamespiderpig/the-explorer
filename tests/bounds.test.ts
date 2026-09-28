@@ -2,11 +2,21 @@ import { describe, expect, it } from 'vitest'
 import {
   clampToIsland,
   onLavaBridge,
+  onRainforestBridge,
   onWaterBridge,
   PLAYABLE_HALF,
 } from '../src/world/bounds'
-import { lavaBridgeEndpoints, waterBridgeEndpoints, worldCenter } from '../src/systems/worlds'
-import { LAVA_UNLOCK_INDEX, WATER_UNLOCK_INDEX } from '../src/systems/plots'
+import {
+  lavaBridgeEndpoints,
+  rainforestBridgeEndpoints,
+  waterBridgeEndpoints,
+  worldCenter,
+} from '../src/systems/worlds'
+import {
+  LAVA_UNLOCK_INDEX,
+  RAINFOREST_UNLOCK_INDEX,
+  WATER_UNLOCK_INDEX,
+} from '../src/systems/plots'
 
 describe('clampToIsland', () => {
   it('leaves in-bounds home positions alone', () => {
@@ -101,5 +111,17 @@ describe('clampToIsland', () => {
   it('allows walking from the lava pier onto home island', () => {
     expect(clampToIsland(15, 0, LAVA_UNLOCK_INDEX)).toEqual({ x: 15, z: 0 })
     expect(onLavaBridge(15, 0, LAVA_UNLOCK_INDEX)).toBe(false)
+  })
+
+  it('allows the rainforest pier after rainforest unlock', () => {
+    const { home, island } = rainforestBridgeEndpoints()
+    const midZ = (home[2] + island[2]) / 2
+    expect(onRainforestBridge(0, midZ, RAINFOREST_UNLOCK_INDEX)).toBe(true)
+    expect(clampToIsland(0, midZ, RAINFOREST_UNLOCK_INDEX)).toEqual({ x: 0, z: midZ })
+  })
+
+  it('allows standing on the rainforest after unlock', () => {
+    const [cx, , cz] = worldCenter('rainforest')
+    expect(clampToIsland(cx, cz, RAINFOREST_UNLOCK_INDEX)).toEqual({ x: cx, z: cz })
   })
 })
