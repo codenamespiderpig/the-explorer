@@ -1,8 +1,6 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 import {
-  grassEastCenter,
-  grassNorthCenter,
   lavaHubCenter,
   lavaUnlocked,
   type LandPlot,
@@ -10,7 +8,6 @@ import {
   waterHubCenter,
   waterUnlocked,
 } from '../systems/plots'
-import { homeHalf } from '../systems/worlds'
 import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
 
@@ -63,10 +60,8 @@ function OutpostIsland({ plot }: { plot: LandPlot }) {
   const [cx, , cz] = plot.center
   const half = plot.size / 2
   const thick = 2
-  const top =
-    plot.biome === 'water' ? '#5ec4ff' : plot.biome === 'lava' ? '#aa5533' : '#6abe30'
-  const side =
-    plot.biome === 'water' ? '#2a6a9a' : plot.biome === 'lava' ? '#8a3020' : '#5a9a28'
+  const top = plot.biome === 'water' ? '#5ec4ff' : '#aa5533'
+  const side = plot.biome === 'water' ? '#2a6a9a' : '#8a3020'
 
   return (
     <group>
@@ -111,12 +106,10 @@ function dockPoint(
   return [center[0] + h - 0.5, 0, center[2]]
 }
 
-/** Meadows, reefs, crags, and the chain bridges that connect them. */
+/** Extra reefs/crags past the main water and lava hubs. */
 export function LandPlots() {
   const landTier = useGameStore((s) => s.landTier)
-  const plots = unlockedPlots(landTier)
-  const outposts = plots.filter((p) => p.kind === 'outpost')
-  const h = homeHalf()
+  const outposts = unlockedPlots(landTier).filter((p) => p.kind === 'outpost')
 
   const bridges: Array<{
     key: string
@@ -126,83 +119,14 @@ export function LandPlots() {
     rail: string
   }> = []
 
-  if (landTier >= 1) {
-    bridges.push({
-      key: 'home-grass-n',
-      from: [0, 0, h - 1],
-      to: dockPoint(grassNorthCenter(), 28, 'south'),
-      deck: '#8fbc6a',
-      rail: '#dfe8d0',
-    })
-  }
-  if (waterUnlocked(landTier)) {
-    bridges.push({
-      key: 'grass-n-water',
-      from: dockPoint(grassNorthCenter(), 28, 'north'),
-      to: dockPoint(waterHubCenter(), 44, 'south'),
-      deck: '#6ec4ff',
-      rail: '#dfefff',
-    })
-  }
-  if (landTier >= 2) {
-    bridges.push({
-      key: 'home-grass-e',
-      from: [h - 1, 0, 0],
-      to: dockPoint(grassEastCenter(), 28, 'west'),
-      deck: '#8fbc6a',
-      rail: '#dfe8d0',
-    })
-  }
-  if (lavaUnlocked(landTier)) {
-    bridges.push({
-      key: 'grass-e-lava',
-      from: dockPoint(grassEastCenter(), 28, 'east'),
-      to: dockPoint(lavaHubCenter(), 44, 'west'),
-      deck: '#aa5533',
-      rail: '#ffaa66',
-    })
-  }
-
-  const northOutposts = outposts
-    .filter((p) => p.chain === 'north')
-    .sort((a, b) => a.center[2] - b.center[2])
-  for (let i = 1; i < northOutposts.length; i += 1) {
-    const prev = northOutposts[i - 1]!
-    const next = northOutposts[i]!
-    // Skip grass→grass only; grass→reef handled via water hub bridges separately
-    if (prev.id === 'grass-north' && next.biome === 'water') {
-      if (waterUnlocked(landTier)) {
-        bridges.push({
-          key: `water-to-${next.id}`,
-          from: dockPoint(waterHubCenter(), 44, 'north'),
-          to: dockPoint(next.center, next.size, 'south'),
-          deck: '#6ec4ff',
-          rail: '#dfefff',
-        })
-      }
-      continue
-    }
-    if (prev.biome === 'water' && next.biome === 'water') {
-      bridges.push({
-        key: `${prev.id}-${next.id}`,
-        from: dockPoint(prev.center, prev.size, 'north'),
-        to: dockPoint(next.center, next.size, 'south'),
-        deck: '#6ec4ff',
-        rail: '#dfefff',
-      })
-    }
-  }
-
-  // Water hub → first reef, then reef chain
   const waterReefs = outposts
-    .filter((p) => p.biome === 'water' && p.id !== 'grass-north')
+    .filter((p) => p.biome === 'water')
     .sort((a, b) => a.center[2] - b.center[2])
   if (waterUnlocked(landTier) && waterReefs[0]) {
-    const first = waterReefs[0]
     bridges.push({
-      key: `water-hub-${first.id}`,
+      key: `water-hub-${waterReefs[0].id}`,
       from: dockPoint(waterHubCenter(), 44, 'north'),
-      to: dockPoint(first.center, first.size, 'south'),
+      to: dockPoint(waterReefs[0].center, waterReefs[0].size, 'south'),
       deck: '#6ec4ff',
       rail: '#dfefff',
     })
@@ -220,14 +144,13 @@ export function LandPlots() {
   }
 
   const lavaCrags = outposts
-    .filter((p) => p.biome === 'lava' && p.id !== 'grass-east')
+    .filter((p) => p.biome === 'lava')
     .sort((a, b) => a.center[0] - b.center[0])
   if (lavaUnlocked(landTier) && lavaCrags[0]) {
-    const first = lavaCrags[0]
     bridges.push({
-      key: `lava-hub-${first.id}`,
+      key: `lava-hub-${lavaCrags[0].id}`,
       from: dockPoint(lavaHubCenter(), 44, 'east'),
-      to: dockPoint(first.center, first.size, 'west'),
+      to: dockPoint(lavaCrags[0].center, lavaCrags[0].size, 'west'),
       deck: '#aa5533',
       rail: '#ffaa66',
     })
@@ -244,20 +167,12 @@ export function LandPlots() {
     }
   }
 
-  // Dedupe bridge keys
-  const seen = new Set<string>()
-  const uniqueBridges = bridges.filter((b) => {
-    if (seen.has(b.key)) return false
-    seen.add(b.key)
-    return true
-  })
-
   return (
     <group>
       {outposts.map((plot) => (
         <OutpostIsland key={plot.id} plot={plot} />
       ))}
-      {uniqueBridges.map((b) => (
+      {bridges.map((b) => (
         <ChainBridge
           key={b.key}
           from={b.from}

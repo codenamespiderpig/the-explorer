@@ -29,7 +29,8 @@
 - [x] Fix bridge exit clamp + bigger blue landing dock on Water Island
 - [x] Unified G key to place gates, slime castles, and crab pots
 - [x] Fix lava pier exit — prefer lava island clamp over bridge corridor
-- [x] Fix lava→home exit; infinite land plots with meadow→water→lava→expansions
+- [x] Fix lava→home exit; infinite land: water→lava first, then reef/crag extras
+- [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
 
 ## Now
 
@@ -40,5 +41,4 @@
 - [ ] M4: Island upgrade unlocks second area
 - [ ] M5: Dungeon loop (stairs → mobs + platforming → reward chest → portal home)
 - [ ] M6: Lava biome + local saves + onboarding hints
-- [ ] Place more crafted buildings (furnace/campfire) in the world
 - [ ] Armour system to raise max HP toward 145

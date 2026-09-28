@@ -1,4 +1,4 @@
-/** Land plot unlocks — infinite islands along north (water) and east (lava) chains. */
+/** Land plot unlocks — water and lava first, then infinite extras. */
 
 export type PlotBiome = 'grass' | 'water' | 'lava'
 export type PlotChain = 'north' | 'east'
@@ -21,8 +21,8 @@ export const BIOME_ISLAND_SIZE = 44
 export const OCEAN_GAP = 48
 export const OUTPOST_SIZE = 28
 export const OUTPOST_GAP = 22
-export const WATER_UNLOCK_INDEX = 3
-export const LAVA_UNLOCK_INDEX = 5
+export const WATER_UNLOCK_INDEX = 1
+export const LAVA_UNLOCK_INDEX = 2
 
 function homeHalf(): number {
   return HOME_ISLAND_SIZE / 2
@@ -36,26 +36,14 @@ function outpostHalf(): number {
   return OUTPOST_SIZE / 2
 }
 
-/** Fixed north-meadow center (between home and water). */
-export function grassNorthCenter(): [number, number, number] {
-  return [0, 0, homeHalf() + OUTPOST_GAP + outpostHalf()]
-}
-
-/** Fixed east-meadow center (between home and lava). */
-export function grassEastCenter(): [number, number, number] {
-  return [homeHalf() + OUTPOST_GAP + outpostHalf(), 0, 0]
-}
-
-/** Water hub sits past the north meadow. */
+/** Water hub — first unlock, directly north of home. */
 export function waterHubCenter(): [number, number, number] {
-  const [, , gz] = grassNorthCenter()
-  return [0, 0, gz + outpostHalf() + OCEAN_GAP + biomeHalf()]
+  return [0, 0, homeHalf() + OCEAN_GAP + biomeHalf()]
 }
 
-/** Lava hub sits past the east meadow. */
+/** Lava hub — second unlock, directly east of home. */
 export function lavaHubCenter(): [number, number, number] {
-  const [gx] = grassEastCenter()
-  return [gx + outpostHalf() + OCEAN_GAP + biomeHalf(), 0, 0]
+  return [homeHalf() + OCEAN_GAP + biomeHalf(), 0, 0]
 }
 
 function waterExpansionCenter(expansionIndex: number): [number, number, number] {
@@ -76,30 +64,6 @@ export function plotAtIndex(index: number): LandPlot {
     throw new Error(`plot index must be >= 1, got ${index}`)
   }
 
-  if (index === 1) {
-    return {
-      index,
-      id: 'grass-north',
-      label: 'Unlock the North Meadow',
-      biome: 'grass',
-      chain: 'north',
-      kind: 'outpost',
-      size: OUTPOST_SIZE,
-      center: grassNorthCenter(),
-    }
-  }
-  if (index === 2) {
-    return {
-      index,
-      id: 'grass-east',
-      label: 'Unlock the East Meadow',
-      biome: 'grass',
-      chain: 'east',
-      kind: 'outpost',
-      size: OUTPOST_SIZE,
-      center: grassEastCenter(),
-    }
-  }
   if (index === WATER_UNLOCK_INDEX) {
     return {
       index,
@@ -110,18 +74,6 @@ export function plotAtIndex(index: number): LandPlot {
       kind: 'hub',
       size: BIOME_ISLAND_SIZE,
       center: waterHubCenter(),
-    }
-  }
-  if (index === 4) {
-    return {
-      index,
-      id: 'water-reef-1',
-      label: 'Unlock a Water Reef',
-      biome: 'water',
-      chain: 'north',
-      kind: 'outpost',
-      size: OUTPOST_SIZE,
-      center: waterExpansionCenter(1),
     }
   }
   if (index === LAVA_UNLOCK_INDEX) {
@@ -137,10 +89,10 @@ export function plotAtIndex(index: number): LandPlot {
     }
   }
 
-  // Infinite expansions after lava: alternate water reef / lava crag.
+  // Infinite extras after water + lava: alternate water reef / lava crag.
   const after = index - LAVA_UNLOCK_INDEX
   if (after % 2 === 1) {
-    const n = Math.ceil(after / 2) + 1
+    const n = Math.ceil(after / 2)
     return {
       index,
       id: `water-reef-${n}`,
@@ -152,7 +104,7 @@ export function plotAtIndex(index: number): LandPlot {
       center: waterExpansionCenter(n),
     }
   }
-  const n = after / 2 + 1
+  const n = after / 2
   return {
     index,
     id: `lava-crag-${n}`,
@@ -186,11 +138,11 @@ export function lavaUnlocked(landTier: number): boolean {
 }
 
 export function northChainOpen(landTier: number): boolean {
-  return landTier >= 1
+  return waterUnlocked(landTier)
 }
 
 export function eastChainOpen(landTier: number): boolean {
-  return landTier >= 2
+  return lavaUnlocked(landTier)
 }
 
 export function plotPlayableHalf(plot: LandPlot): number {

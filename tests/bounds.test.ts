@@ -19,10 +19,11 @@ describe('clampToIsland', () => {
     expect(clampToIsland(-17, 15)).toEqual({ x: -PLAYABLE_HALF, z: 15 })
   })
 
-  it('allows the north path after the first meadow unlock', () => {
-    const midZ = 30
-    expect(onWaterBridge(0, midZ, 1)).toBe(true)
-    expect(clampToIsland(0, midZ, 1)).toEqual({ x: 0, z: midZ })
+  it('allows the long water pier after water unlock', () => {
+    const { home, island } = waterBridgeEndpoints()
+    const midZ = (home[2] + island[2]) / 2
+    expect(onWaterBridge(0, midZ, WATER_UNLOCK_INDEX)).toBe(true)
+    expect(clampToIsland(0, midZ, WATER_UNLOCK_INDEX)).toEqual({ x: 0, z: midZ })
   })
 
   it('allows standing on the water island after water unlock', () => {
@@ -37,13 +38,10 @@ describe('clampToIsland', () => {
   })
 
   it('allows the long lava pier after lava unlock', () => {
-    // Between east meadow and lava hub (not on either plot).
-    const midOceanX = 100
-    expect(onLavaBridge(midOceanX, 0, LAVA_UNLOCK_INDEX)).toBe(true)
-    expect(clampToIsland(midOceanX, 0, LAVA_UNLOCK_INDEX)).toEqual({
-      x: midOceanX,
-      z: 0,
-    })
+    const { home, island } = lavaBridgeEndpoints()
+    const midX = (home[0] + island[0]) / 2
+    expect(onLavaBridge(midX, 0, LAVA_UNLOCK_INDEX)).toBe(true)
+    expect(clampToIsland(midX, 0, LAVA_UNLOCK_INDEX)).toEqual({ x: midX, z: 0 })
   })
 
   it('allows off-center water gate entry without snapping back', () => {
@@ -81,7 +79,7 @@ describe('clampToIsland', () => {
   })
 
   it('still allows mid-pier travel on the north chain', () => {
-    expect(clampToIsland(0, 30, 1)).toEqual({ x: 0, z: 30 })
+    expect(clampToIsland(0, 40, 1)).toEqual({ x: 0, z: 40 })
   })
 
   it('allows stepping off the lava pier onto the lava island', () => {

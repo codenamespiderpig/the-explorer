@@ -9,6 +9,7 @@ import { Hud } from './ui/Hud'
 import { DayNightClock } from './world/DayNightClock'
 import { DayNightAtmosphere } from './world/DayNightAtmosphere'
 import { Gates } from './world/Gates'
+import { Buildings } from './world/Buildings'
 import { CrabPots } from './world/CrabPots'
 import { NightSlimes } from './world/NightSlimes'
 import { SlimeCastles } from './world/SlimeCastles'
@@ -28,6 +29,7 @@ export default function App() {
             <WaterWorld />
             <LavaWorld />
             <Gates />
+            <Buildings />
             <CrabPots />
             <SlimeCastles />
             <TravelingMerchant />

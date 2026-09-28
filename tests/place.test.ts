@@ -4,18 +4,18 @@ import { worldCenter } from '../src/systems/worlds'
 import { WATER_UNLOCK_INDEX } from '../src/systems/plots'
 
 describe('pickPlaceableToPlace', () => {
-  it('prefers gate when multiple placeables are owned', () => {
+  it('prefers workbench over gate when both are owned', () => {
     expect(
       pickPlaceableToPlace(
-        { 'wooden-gate': 1, 'slime-castle': 1, 'crab-pot': 1 },
+        { workbench: 1, 'wooden-gate': 1, 'slime-castle': 1, 'crab-pot': 1 },
         1,
         0,
         0,
       ),
-    ).toEqual({ ok: true, item: 'wooden-gate' })
+    ).toEqual({ ok: true, item: 'workbench' })
   })
 
-  it('places slime castle when no gate is owned', () => {
+  it('places slime castle when no buildings or gate are owned', () => {
     expect(pickPlaceableToPlace({ 'slime-castle': 1 }, 0, 0, 0)).toEqual({
       ok: true,
       item: 'slime-castle',

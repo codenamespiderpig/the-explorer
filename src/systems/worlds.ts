@@ -43,7 +43,7 @@ export function worldCenter(world: WorldId, _landTier = 0): [number, number, num
   return [0, 0, 0]
 }
 
-/** Bridge endpoints: home dock → remote island dock (via meadow when present). */
+/** Bridge endpoints: home dock → remote island dock. */
 export function waterBridgeEndpoints(): {
   home: [number, number, number]
   island: [number, number, number]

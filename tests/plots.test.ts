@@ -8,14 +8,15 @@ import {
 } from '../src/systems/plots'
 
 describe('infinite land plots', () => {
-  it('starts with meadows before water and lava hubs', () => {
-    expect(plotAtIndex(1).id).toBe('grass-north')
-    expect(plotAtIndex(2).id).toBe('grass-east')
+  it('unlocks water then lava hubs first', () => {
+    expect(plotAtIndex(WATER_UNLOCK_INDEX).id).toBe('water-hub')
+    expect(plotAtIndex(LAVA_UNLOCK_INDEX).id).toBe('lava-hub')
     expect(plotAtIndex(WATER_UNLOCK_INDEX).biome).toBe('water')
     expect(plotAtIndex(LAVA_UNLOCK_INDEX).biome).toBe('lava')
   })
 
-  it('keeps offering expansions forever', () => {
+  it('keeps offering expansions forever after the hubs', () => {
+    expect(nextPlot(2).kind).toBe('outpost')
     expect(nextPlot(20).index).toBe(21)
     expect(unlockedPlots(8).length).toBe(8)
   })

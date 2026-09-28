@@ -23,17 +23,33 @@ export interface Recipe {
 }
 
 export const RECIPES: Record<RecipeId, Recipe> = {
+  workbench: {
+    id: 'workbench',
+    name: 'Workbench',
+    description: 'Build more advanced structures. Place with G.',
+    output: 'workbench',
+    cost: { wood: 5, stone: 3 },
+    requiresSkill: 'build',
+  },
+  furnace: {
+    id: 'furnace',
+    name: 'Furnace',
+    description: 'Smelt ores later in the game. Place with G. Requires Build.',
+    output: 'furnace',
+    cost: { wood: 4, stone: 10 },
+    requiresSkill: 'build',
+  },
   campfire: {
     id: 'campfire',
     name: 'Campfire',
-    description: 'A small fire for camping.',
+    description: 'A small fire for camping. Place with G.',
     output: 'campfire',
     cost: { wood: 3 },
   },
   fence: {
     id: 'fence',
     name: 'Wooden Fence',
-    description: 'A simple fence post.',
+    description: 'A simple fence post. Place with G.',
     output: 'fence',
     cost: { wood: 2 },
   },
@@ -43,22 +59,6 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     description: 'Blocks night slimes until they break it. Place with G.',
     output: 'wooden-gate',
     cost: { wood: 6, stone: 2 },
-  },
-  workbench: {
-    id: 'workbench',
-    name: 'Workbench',
-    description: 'Build more advanced structures.',
-    output: 'workbench',
-    cost: { wood: 5, stone: 3 },
-    requiresSkill: 'build',
-  },
-  furnace: {
-    id: 'furnace',
-    name: 'Furnace',
-    description: 'Smelt ores later in the game. Requires Build.',
-    output: 'furnace',
-    cost: { wood: 4, stone: 10 },
-    requiresSkill: 'build',
   },
   'hunting-spear': {
     id: 'hunting-spear',
@@ -72,7 +72,7 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     id: 'slime-castle',
     name: 'Slime Castle',
     description:
-      'Very hard to build. Place with C — spawns farmable slimes that rot if left unkilled.',
+      'Very hard to build. Place with G — spawns farmable slimes that rot if left unkilled.',
     output: 'slime-castle',
     cost: { 'slime-goop': 28, wood: 45, stone: 35 },
     requiresSkill: 'build',
@@ -80,7 +80,7 @@ export const RECIPES: Record<RecipeId, Recipe> = {
   'crab-pot': {
     id: 'crab-pot',
     name: 'Crab Pot',
-    description: 'Place with P near water — catches fish you can eat to heal (R).',
+    description: 'Place with G near water — catches fish you can eat to heal (R).',
     output: 'crab-pot',
     cost: { wood: 4, stone: 2 },
   },

@@ -6,6 +6,7 @@ import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
 import { gatePlacementFromForward } from '../systems/gate'
 import { pickPlaceableToPlace, placeableHint } from '../systems/place'
+import { isBuildingKind } from '../systems/building'
 import { cameraLook, facingDirection } from '../systems/facing'
 import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
 import { nearestPot, nearestPotWithFish } from '../systems/crabPot'
@@ -374,6 +375,14 @@ function usePlaceablePlacement(
           : lastFacing.current
         const { position, yaw } = gatePlacementFromForward(pos, forward, 2.8)
         useGameStore.getState().placeGate(position, yaw)
+      } else if (isBuildingKind(pick.item)) {
+        const k = keys.current
+        const moving = k.forward || k.backward || k.leftward || k.rightward
+        const forward = moving
+          ? facingDirection(lookYaw.current, k)
+          : lastFacing.current
+        const { position, yaw } = gatePlacementFromForward(pos, forward, 2.2)
+        useGameStore.getState().placeBuilding(pick.item, position, yaw)
       } else if (pick.item === 'slime-castle') {
         useGameStore.getState().placeSlimeCastle([pos.x, 0, pos.z + 2.5])
       } else {

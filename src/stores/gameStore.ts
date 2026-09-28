@@ -37,6 +37,11 @@ import {
   createCrabPot,
   type CrabPot,
 } from '../systems/crabPot'
+import {
+  createBuilding,
+  type BuildingKind,
+  type PlacedBuilding,
+} from '../systems/building'
 import { heal as applyHeal } from '../systems/heal'
 import {
   MERCHANT_VISIT_SEC,
@@ -66,6 +71,7 @@ interface GameState {
   merchantPosition: [number, number, number]
   merchantWorld: WorldId
   gates: Gate[]
+  buildings: PlacedBuilding[]
   castles: SlimeCastle[]
   crabPots: CrabPot[]
   slimes: Slime[]
@@ -74,6 +80,11 @@ interface GameState {
   tick: (deltaSec: number) => void
   setPlayerPos: (pos: [number, number, number]) => void
   placeGate: (position: [number, number, number], yaw?: number) => boolean
+  placeBuilding: (
+    kind: BuildingKind,
+    position: [number, number, number],
+    yaw?: number,
+  ) => boolean
   placeSlimeCastle: (position: [number, number, number]) => boolean
   placeCrabPot: (position: [number, number, number]) => boolean
   collectFromCrabPot: (potId: string) => number
@@ -95,6 +106,7 @@ interface GameState {
 
 let slimeSeq = 0
 let gateSeq = 0
+let buildingSeq = 0
 let castleSeq = 0
 let crabPotSeq = 0
 let wasNight = false
@@ -129,6 +141,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   merchantPosition: merchantSpawnPosition(0).position,
   merchantWorld: 'home',
   gates: [],
+  buildings: [],
   castles: [],
   crabPots: [],
   slimes: [],
@@ -209,6 +222,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     gateSeq += 1
     const gate = createGate(`gate-${gateSeq}`, position, yaw, 50)
     set((s) => ({ gates: [...s.gates, gate] }))
+    return true
+  },
+
+  placeBuilding: (kind, position, yaw = 0) => {
+    buildingSeq += 1
+    const building = createBuilding(`building-${buildingSeq}`, kind, position, yaw)
+    set((s) => ({ buildings: [...s.buildings, building] }))
     return true
   },
 

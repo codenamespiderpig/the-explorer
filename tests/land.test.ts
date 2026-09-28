@@ -19,8 +19,8 @@ describe('land upgrades', () => {
     expect(landUpgradeCost(1)).toBe(100)
     expect(landUpgradeCost(2)).toBe(150)
     expect(landUpgradeCost(10)).toBe(550)
-    expect(landUpgradeLabel(0)).toContain('North Meadow')
-    expect(landUpgradeLabel(2)).toContain('Water')
+    expect(landUpgradeLabel(0)).toContain('Water')
+    expect(landUpgradeLabel(1)).toContain('Lava')
   })
 
   it('buys land forever when the merchant is here and you can afford it', () => {
@@ -40,9 +40,9 @@ describe('land upgrades', () => {
     expect(buyLandFromMerchant(1000, 5, true).ok).toBe(true)
   })
 
-  it('gates water and lava behind meadow upgrades', () => {
+  it('unlocks water then lava first, then extras', () => {
     expect(plotAtIndex(WATER_UNLOCK_INDEX).id).toBe('water-hub')
     expect(plotAtIndex(LAVA_UNLOCK_INDEX).id).toBe('lava-hub')
-    expect(nextPlot(5).biome).toMatch(/water|lava/)
+    expect(nextPlot(2).kind).toBe('outpost')
   })
 })
