@@ -29,6 +29,7 @@ export function Hud() {
   const money = useGameStore((s) => s.money)
   const landTier = useGameStore((s) => s.landTier)
   const health = useGameStore((s) => s.health)
+  const inDungeon = useGameStore((s) => s.inDungeon)
   const merchantTimeLeft = useGameStore((s) => s.merchantTimeLeft)
   const merchantWorld = useGameStore((s) => s.merchantWorld)
   const merchantCountdown = useGameStore((s) => s.merchantCountdownLabel())
@@ -82,7 +83,6 @@ export function Hud() {
 
   const max = effectiveMaxHealth(health)
   const hpPct = Math.max(0, (health.current / max) * 100)
-  const inDungeon = useGameStore((s) => s.inDungeon)
 
   return (
     <div id="hud">
@@ -139,9 +139,20 @@ export function Hud() {
       </div>
 
       {inDungeon ? (
-        <div className="hud-dungeon-jump" role="status">
-          <span className="hud-dungeon-jump-key">Space</span>
-          <span>Jump onto the blocks</span>
+        <div className="hud-dungeon-controls" aria-live="polite">
+          <div className="hud-dungeon-controls-title">Dungeon</div>
+          <div className="hud-dungeon-row">
+            <kbd className="hud-key">Space</kbd>
+            <span>Jump across the blocks</span>
+          </div>
+          <div className="hud-dungeon-row">
+            <kbd className="hud-key">F</kbd>
+            <span>Attack</span>
+          </div>
+          <div className="hud-dungeon-row">
+            <kbd className="hud-key">E</kbd>
+            <span>Chest / portal</span>
+          </div>
         </div>
       ) : null}
 
