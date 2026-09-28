@@ -108,7 +108,7 @@ function DungeonInterior() {
       <Platform position={[0, sy - 0.4, 24]} size={[10, 0.8, 8]} color="#2e2a24" />
       <Platform position={[0, sy - 0.4, 31]} size={[10, 0.8, 8]} color="#2e2a24" />
 
-      {/* Chest */}
+      {/* Chest — sits on the end platform */}
       <group position={[cx, cy, cz]}>
         <RigidBody type="fixed" colliders={false}>
           <CuboidCollider args={[0.7, 0.55, 0.5]} position={[0, 0.55, 0]} />
@@ -121,9 +121,15 @@ function DungeonInterior() {
             <meshStandardMaterial
               color={chestOpened ? '#3a2a18' : '#c9a227'}
               emissive={chestOpened ? '#000' : '#aa7700'}
-              emissiveIntensity={chestOpened ? 0 : 0.4}
+              emissiveIntensity={chestOpened ? 0 : 0.55}
             />
           </mesh>
+          {!chestOpened ? (
+            <mesh position={[0, 1.6, 0]}>
+              <sphereGeometry args={[0.2, 10, 10]} />
+              <meshStandardMaterial color="#ffe08a" emissive="#ffcc55" emissiveIntensity={0.9} />
+            </mesh>
+          ) : null}
         </RigidBody>
       </group>
 
@@ -142,6 +148,10 @@ function DungeonInterior() {
               transparent
               opacity={0.55}
             />
+          </mesh>
+          <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.9, 1.4, 24]} />
+            <meshStandardMaterial color="#88ddff" emissive="#44aaff" emissiveIntensity={0.7} />
           </mesh>
         </group>
       ) : null}

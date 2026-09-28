@@ -16,15 +16,15 @@ export const DUNGEON_FALL_Y = -58
 
 export const DUNGEON_INTERACT_RADIUS = 4.5
 
-/** Chest sits near the end of the platform run. */
-export const DUNGEON_CHEST: [number, number, number] = [0, -44, 28]
+/** Chest sits on the end platform. */
+export const DUNGEON_CHEST: [number, number, number] = [0, -42.5, 28]
 
 /** Portal appears beside the chest after it is opened. */
-export const DUNGEON_PORTAL: [number, number, number] = [0, -44, 32]
+export const DUNGEON_PORTAL: [number, number, number] = [3.5, -42.5, 31]
 
 export const DUNGEON_CHEST_LOOT: { item: ItemId; amount: number } = {
   item: 'dungeon-relic',
-  amount: 2,
+  amount: 3,
 }
 
 export const DUNGEON_MOB_POSITIONS: Array<[number, number, number]> = [

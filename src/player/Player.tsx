@@ -242,10 +242,10 @@ function useGatherInput() {
           if (loot) {
             state.addItem(loot.item, loot.amount)
             state.setHint(
-              `Chest opened — ${loot.amount} ${ITEMS[loot.item].name}. Use the portal (E)`,
+              `+${loot.amount} ${ITEMS[loot.item].name}! Check Resources (top-left). Portal is to the right (E)`,
             )
           } else {
-            state.setHint('Chest already looted — step into the portal (E)')
+            state.setHint('Chest empty — walk to the glowing portal on the right (E)')
           }
           return
         }
@@ -351,13 +351,14 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
       if (game.dungeonChestOpened && isNearDungeonPortal(pos.x, pos.z)) {
         store.setHint('Press E to take the portal home')
       } else if (isNearDungeonChest(pos.x, pos.z)) {
-        store.setHint(
-          game.dungeonChestOpened
-            ? 'Chest looted — find the glowing portal (E)'
-            : 'Press E to open the reward chest',
-        )
-      } else {
+        if (!game.dungeonChestOpened) {
+          store.setHint('Press E to open the reward chest')
+        }
+        // Keep loot hint if chest just opened — don't overwrite immediately
+      } else if (!game.dungeonChestOpened) {
         store.setHint('Dungeon — Space jump · F fight · reach the chest')
+      } else if (!store.hint?.includes('Relic') && !store.hint?.includes('portal')) {
+        store.setHint('Chest looted — glowing portal is near the chest (E)')
       }
       lastId.current = null
       store.setNearby(null, null)

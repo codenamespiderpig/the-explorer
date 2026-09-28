@@ -435,8 +435,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   openDungeonChest: () => {
     if (!get().inDungeon || get().dungeonChestOpened) return null
+    const reward = dungeonChestReward()
     set({ dungeonChestOpened: true })
-    return dungeonChestReward()
+    return reward
   },
 
   moveSlime: (id, position) =>

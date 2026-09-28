@@ -22,6 +22,7 @@ export function Hud() {
   const stone = useInventoryStore((s) => s.items.stone ?? 0)
   const goop = useInventoryStore((s) => s.items['slime-goop'] ?? 0)
   const fish = useInventoryStore((s) => s.items.fish ?? 0)
+  const relics = useInventoryStore((s) => s.items['dungeon-relic'] ?? 0)
   const hint = useInventoryStore((s) => s.hint)
   const setHint = useInventoryStore((s) => s.setHint)
   const phase = useGameStore((s) => s.dayNight.phase)
@@ -93,6 +94,7 @@ export function Hud() {
         <div>Stone: {stone}</div>
         <div>Slime Goop: {goop}</div>
         <div>Fish: {fish}</div>
+        <div>Dungeon Relics: {relics}</div>
         <div className="hud-tools">
           Q backpack · M merchant · G place · R eat fish · click map · E dungeon
         </div>
