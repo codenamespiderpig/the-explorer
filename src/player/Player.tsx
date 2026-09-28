@@ -18,6 +18,13 @@ import { useGameStore } from '../stores/gameStore'
 import { useToolActionStore } from '../stores/toolActionStore'
 import { listGatherables } from '../world/gatherableRegistry'
 import { FALL_Y, clampToIsland } from '../world/bounds'
+import {
+  canEnterDungeon,
+  DUNGEON_FALL_Y,
+  isNearDungeonChest,
+  isNearDungeonEntrance,
+  isNearDungeonPortal,
+} from '../systems/dungeon'
 import { ToolSwing } from './ToolSwing'
 
 const GATHER_RADIUS = 2.4
@@ -28,6 +35,7 @@ const MOVE_KEYS = {
   leftward: new Set(['KeyA', 'ArrowLeft']),
   rightward: new Set(['KeyD', 'ArrowRight']),
   run: new Set(['ShiftLeft', 'ShiftRight']),
+  jump: new Set(['Space']),
 }
 
 /** Small backpack on the back with only tool handles barely poking out. */
@@ -98,7 +106,7 @@ function CharacterModel() {
   )
 }
 
-/** Holds WASD/run state; jump is intentionally omitted. */
+/** Holds WASD/run/jump state. Jump is only applied inside dungeons. */
 function useMovementKeys() {
   const keys = useRef({
     forward: false,
@@ -106,6 +114,7 @@ function useMovementKeys() {
     leftward: false,
     rightward: false,
     run: false,
+    jump: false,
   })
 
   useEffect(() => {
@@ -115,8 +124,12 @@ function useMovementKeys() {
       else if (MOVE_KEYS.leftward.has(code)) keys.current.leftward = pressed
       else if (MOVE_KEYS.rightward.has(code)) keys.current.rightward = pressed
       else if (MOVE_KEYS.run.has(code)) keys.current.run = pressed
+      else if (MOVE_KEYS.jump.has(code)) keys.current.jump = pressed
     }
-    const onDown = (e: KeyboardEvent) => setKey(e.code, true)
+    const onDown = (e: KeyboardEvent) => {
+      if (MOVE_KEYS.jump.has(e.code)) e.preventDefault()
+      setKey(e.code, true)
+    }
     const onUp = (e: KeyboardEvent) => setKey(e.code, false)
     const clear = () => {
       keys.current.forward = false
@@ -124,6 +137,7 @@ function useMovementKeys() {
       keys.current.leftward = false
       keys.current.rightward = false
       keys.current.run = false
+      keys.current.jump = false
     }
     window.addEventListener('keydown', onDown)
     window.addEventListener('keyup', onUp)
@@ -217,6 +231,43 @@ function useGatherInput() {
       const game = useGameStore.getState()
       const playerPos = game.playerPos
 
+      if (game.inDungeon) {
+        if (game.dungeonChestOpened && isNearDungeonPortal(playerPos[0], playerPos[2])) {
+          game.exitDungeon()
+          state.setHint('Portal whisked you home')
+          return
+        }
+        if (isNearDungeonChest(playerPos[0], playerPos[2])) {
+          const loot = game.openDungeonChest()
+          if (loot) {
+            state.addItem(loot.item, loot.amount)
+            state.setHint(
+              `Chest opened — ${loot.amount} ${ITEMS[loot.item].name}. Use the portal (E)`,
+            )
+          } else {
+            state.setHint('Chest already looted — step into the portal (E)')
+          }
+          return
+        }
+        state.setHint('Fight ahead, jump the blocks (Space), open the chest')
+        return
+      }
+
+      if (
+        canEnterDungeon(game.landTier) &&
+        isNearDungeonEntrance(playerPos[0], playerPos[2])
+      ) {
+        if (game.enterDungeon()) {
+          state.setHint('Entered the dungeon — Space to jump, F to fight')
+        }
+        return
+      }
+
+      if (isNearDungeonEntrance(playerPos[0], playerPos[2])) {
+        state.setHint('Buy land from the merchant to open the dungeon stairs')
+        return
+      }
+
       const pot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
       if (pot) {
         const collected = game.collectFromCrabPot(pot.id)
@@ -229,7 +280,7 @@ function useGatherInput() {
 
       const { nearbyNodeId, nearbyResource, tools } = state
       if (!nearbyNodeId || !nearbyResource) {
-        state.setHint('Walk closer to a tree, rock, or crab pot with fish')
+        state.setHint('Walk closer to a tree, rock, crab pot, or the dungeon stairs')
         return
       }
       if (!canGather(nearbyResource, tools)) {
@@ -301,6 +352,34 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     const game = useGameStore.getState()
     const playerPos: [number, number, number] = [pos.x, pos.y, pos.z]
 
+    if (game.inDungeon) {
+      if (game.dungeonChestOpened && isNearDungeonPortal(pos.x, pos.z)) {
+        store.setHint('Press E to take the portal home')
+      } else if (isNearDungeonChest(pos.x, pos.z)) {
+        store.setHint(
+          game.dungeonChestOpened
+            ? 'Chest looted — find the glowing portal (E)'
+            : 'Press E to open the reward chest',
+        )
+      } else {
+        store.setHint('Dungeon — Space jump · F fight · reach the chest')
+      }
+      lastId.current = null
+      store.setNearby(null, null)
+      return
+    }
+
+    if (isNearDungeonEntrance(pos.x, pos.z)) {
+      store.setHint(
+        canEnterDungeon(game.landTier)
+          ? 'Press E to enter the dungeon'
+          : 'Dungeon sealed — buy land from the merchant first',
+      )
+      lastId.current = null
+      store.setNearby(null, null)
+      return
+    }
+
     const fishPot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
     if (fishPot) {
       store.setHint(`Press E to collect ${fishPot.storedFish} fish from crab pot`)
@@ -346,6 +425,7 @@ function usePlaceablePlacement(
     leftward: boolean
     rightward: boolean
     run: boolean
+    jump: boolean
   }>,
   lastFacing: RefObject<{ x: number; z: number }>,
 ) {
@@ -425,7 +505,9 @@ export function Player() {
   const lastFacing = useRef({ x: 0, z: -1 })
   const keys = useMovementKeys()
   const respawnToken = useGameStore((s) => s.respawnToken)
+  const playerSpawn = useGameStore((s) => s.playerSpawn)
   const landTier = useGameStore((s) => s.landTier)
+  const inDungeon = useGameStore((s) => s.inDungeon)
   useGatherInput()
   useAttackInput()
   useProximityTracking(ecctrl)
@@ -442,13 +524,21 @@ export function Player() {
       leftward: k.leftward,
       rightward: k.rightward,
       run: k.run,
-      jump: false,
+      jump: inDungeon ? k.jump : false,
     })
     if (k.forward || k.backward || k.leftward || k.rightward) {
       lastFacing.current = facingDirection(lookYaw.current, k)
     }
 
     const t = body.body.translation()
+    if (inDungeon) {
+      if (t.y < DUNGEON_FALL_Y) {
+        useGameStore.getState().exitDungeon()
+        useInventoryStore.getState().setHint('You fell — sent back home')
+      }
+      return
+    }
+
     const clamped = clampToIsland(t.x, t.z, landTier)
     const fell = t.y < FALL_Y
     if (fell || clamped.x !== t.x || clamped.z !== t.z) {
@@ -466,10 +556,10 @@ export function Player() {
       <Ecctrl
         key={respawnToken}
         ref={ecctrl}
-        position={[0, 3, 0]}
+        position={playerSpawn}
         maxWalkVel={4}
         maxRunVel={6.5}
-        jumpVel={0}
+        jumpVel={inDungeon ? 6.5 : 0}
         floatHeight={0.2}
         capsuleHalfHeight={0.4}
         capsuleRadius={0.3}

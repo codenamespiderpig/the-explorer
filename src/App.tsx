@@ -4,6 +4,7 @@ import { Physics } from '@react-three/rapier'
 import { HomeIsland } from './world/HomeIsland'
 import { WaterWorld, LavaWorld, RainforestWorld, LockedIslandHints } from './world/BiomeWorlds'
 import { LandPlots } from './world/LandPlots'
+import { Dungeon } from './world/Dungeon'
 import { Player } from './player/Player'
 import { Hud } from './ui/Hud'
 import { DayNightClock } from './world/DayNightClock'
@@ -25,6 +26,7 @@ export default function App() {
             <DayNightClock />
             <HomeIsland />
             <LandPlots />
+            <Dungeon />
             <LockedIslandHints />
             <WaterWorld />
             <LavaWorld />

@@ -93,7 +93,7 @@ export function Hud() {
         <div>Slime Goop: {goop}</div>
         <div>Fish: {fish}</div>
         <div className="hud-tools">
-          Q backpack · M merchant · G place · R eat fish · click map
+          Q backpack · M merchant · G place · R eat fish · click map · E dungeon
         </div>
       </div>
 

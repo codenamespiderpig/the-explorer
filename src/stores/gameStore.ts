@@ -31,12 +31,20 @@ import {
 } from '../systems/slimeCastle'
 import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
 import { buyLandFromMerchant } from '../systems/land'
+import type { ItemId } from '../data/items'
 import {
   BIOME_ENEMY_HP,
   biomeEnemyPositions,
   enemyForBiome,
   type EnemyKind,
 } from '../systems/enemies'
+import {
+  canEnterDungeon,
+  DUNGEON_HOME_SPAWN,
+  DUNGEON_MOB_POSITIONS,
+  DUNGEON_SPAWN,
+  dungeonChestReward,
+} from '../systems/dungeon'
 import {
   lavaUnlocked,
   rainforestUnlocked,
@@ -64,7 +72,7 @@ import {
 } from '../systems/merchant'
 import type { WorldId } from '../systems/worlds'
 
-export type SlimeSource = 'night' | 'castle' | 'biome'
+export type SlimeSource = 'night' | 'castle' | 'biome' | 'dungeon'
 
 export interface Slime {
   id: string
@@ -90,7 +98,10 @@ interface GameState {
   crabPots: CrabPot[]
   slimes: Slime[]
   playerPos: [number, number, number]
+  playerSpawn: [number, number, number]
   respawnToken: number
+  inDungeon: boolean
+  dungeonChestOpened: boolean
   tick: (deltaSec: number) => void
   setPlayerPos: (pos: [number, number, number]) => void
   placeGate: (position: [number, number, number], yaw?: number) => boolean
@@ -108,6 +119,9 @@ interface GameState {
   spawnNightSlimes: () => void
   clearNightSlimes: () => void
   syncBiomeEnemies: () => void
+  enterDungeon: () => boolean
+  exitDungeon: () => void
+  openDungeonChest: () => { item: ItemId; amount: number } | null
   moveSlime: (id: string, position: [number, number, number]) => void
   hurtSlime: (id: string, amount: number) => SlimeDrop | null
   buyLand: () => boolean
@@ -178,7 +192,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   crabPots: [],
   slimes: [],
   playerPos: [0, 1, 0],
+  playerSpawn: [0, 3, 0],
   respawnToken: 0,
+  inDungeon: false,
+  dungeonChestOpened: false,
 
   tick: (deltaSec) => {
     const prev = get().dayNight
@@ -369,6 +386,50 @@ export const useGameStore = create<GameState>((set, get) => ({
     })
   },
 
+  enterDungeon: () => {
+    if (!canEnterDungeon(get().landTier)) return false
+    const dungeonMobs = DUNGEON_MOB_POSITIONS.map((position) => {
+      slimeSeq += 1
+      return {
+        id: `slime-${slimeSeq}`,
+        position,
+        hp: 22,
+        source: 'dungeon' as const,
+        kind: 'slime' as const,
+        ageSec: 0,
+      }
+    })
+    set((s) => ({
+      inDungeon: true,
+      dungeonChestOpened: false,
+      playerSpawn: [...DUNGEON_SPAWN] as [number, number, number],
+      playerPos: [...DUNGEON_SPAWN] as [number, number, number],
+      respawnToken: s.respawnToken + 1,
+      slimes: [
+        ...s.slimes.filter((sl) => sl.source !== 'dungeon' && sl.source !== 'night'),
+        ...dungeonMobs,
+      ],
+    }))
+    return true
+  },
+
+  exitDungeon: () => {
+    set((s) => ({
+      inDungeon: false,
+      dungeonChestOpened: false,
+      playerSpawn: [...DUNGEON_HOME_SPAWN] as [number, number, number],
+      playerPos: [...DUNGEON_HOME_SPAWN] as [number, number, number],
+      respawnToken: s.respawnToken + 1,
+      slimes: s.slimes.filter((sl) => sl.source !== 'dungeon'),
+    }))
+  },
+
+  openDungeonChest: () => {
+    if (!get().inDungeon || get().dungeonChestOpened) return null
+    set({ dungeonChestOpened: true })
+    return dungeonChestReward()
+  },
+
   moveSlime: (id, position) =>
     set((s) => ({
       slimes: s.slimes.map((sl) => (sl.id === id ? { ...sl, position } : sl)),
@@ -409,10 +470,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   respawnPlayer: () => {
+    const wasDungeon = get().inDungeon
     set((s) => ({
       health: respawnHealth(s.health),
-      playerPos: [0, 3, 0],
+      inDungeon: false,
+      dungeonChestOpened: false,
+      playerSpawn: [...DUNGEON_HOME_SPAWN] as [number, number, number],
+      playerPos: [...DUNGEON_HOME_SPAWN] as [number, number, number],
       respawnToken: s.respawnToken + 1,
+      slimes: wasDungeon
+        ? s.slimes.filter((sl) => sl.source !== 'dungeon')
+        : s.slimes,
     }))
   },
 

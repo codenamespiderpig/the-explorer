@@ -36,6 +36,7 @@
 - [x] Home grassland ponds — place crab pots on the banks
 - [x] Rainforest land south of home (3rd unlock)
 - [x] Different enemies per land; enemies a bit shorter than the player
+- [x] First dungeon: home stairs → fight/jump → chest → portal home
 
 ## Now
 
@@ -44,6 +45,6 @@
 ## Next
 
 - [ ] M4: Island upgrade unlocks second area
-- [ ] M5: Dungeon loop (stairs → mobs + platforming → reward chest → portal home)
+- [ ] M5 remainder: more dungeon variety / biomes
 - [ ] M6: Lava biome + local saves + onboarding hints
 - [ ] Armour system to raise max HP toward 145

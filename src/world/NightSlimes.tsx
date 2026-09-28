@@ -70,8 +70,10 @@ function SlimeEntity({
       return
     }
 
+    const isDungeon = slime.source === 'dungeon'
     const isBiome = slime.source === 'biome'
-    if (!isBiome && store.phase() !== 'night') return
+    const bodyY = isDungeon ? localPos.current[1] : ENEMY_BODY_Y
+    if (!isBiome && !isDungeon && store.phase() !== 'night') return
 
     cooldown.current = Math.max(0, cooldown.current - delta)
     const player = store.playerPos
@@ -88,7 +90,7 @@ function SlimeEntity({
           const step = SLIME_SPEED * 0.55 * delta
           localPos.current = [
             localPos.current[0] + (hdx / hdist) * step,
-            ENEMY_BODY_Y,
+            bodyY,
             localPos.current[2] + (hdz / hdist) * step,
           ]
           body.current.setNextKinematicTranslation({
@@ -103,10 +105,10 @@ function SlimeEntity({
     }
 
     const gates = store.gates.filter((g) => !isGateDestroyed(g))
-    let target: [number, number, number] = [player[0], ENEMY_BODY_Y, player[2]]
+    let target: [number, number, number] = [player[0], bodyY, player[2]]
     let targetingGate = false
     let nearestGateDist = Infinity
-    if (!isBiome) {
+    if (!isBiome && !isDungeon) {
       for (const g of gates) {
         const dx = g.position[0] - localPos.current[0]
         const dz = g.position[2] - localPos.current[2]
@@ -114,7 +116,7 @@ function SlimeEntity({
         if (d < nearestGateDist) {
           nearestGateDist = d
           if (d < 8) {
-            target = [g.position[0], ENEMY_BODY_Y, g.position[2]]
+            target = [g.position[0], bodyY, g.position[2]]
             targetingGate = true
           }
         }
@@ -128,7 +130,7 @@ function SlimeEntity({
       const step = SLIME_SPEED * delta
       localPos.current = [
         localPos.current[0] + (dx / dist) * step,
-        ENEMY_BODY_Y,
+        bodyY,
         localPos.current[2] + (dz / dist) * step,
       ]
       body.current.setNextKinematicTranslation({
