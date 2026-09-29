@@ -33,10 +33,17 @@ import { rollSlimeDrop, type SlimeDrop } from '../systems/slimeLoot'
 import { buyLandFromMerchant } from '../systems/land'
 import type { ItemId } from '../data/items'
 import {
+  advancePendingRespawns,
   BIOME_ENEMY_HP,
   biomeEnemyPositions,
+  canSpawnPendingRespawn,
+  clearNightPendingRespawns,
   enemyForBiome,
+  NIGHT_SLIME_COUNT,
+  NIGHT_SLIME_HP,
+  scheduleOverworldRespawn,
   type EnemyKind,
+  type PendingEnemyRespawn,
 } from '../systems/enemies'
 import {
   canEnterDungeon,
@@ -103,6 +110,7 @@ interface GameState {
   castles: SlimeCastle[]
   crabPots: CrabPot[]
   slimes: Slime[]
+  pendingEnemyRespawns: PendingEnemyRespawn[]
   playerPos: [number, number, number]
   playerSpawn: [number, number, number]
   respawnToken: number
@@ -206,6 +214,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   castles: [],
   crabPots: [],
   slimes: [],
+  pendingEnemyRespawns: [],
   playerPos: [0, 1, 0],
   playerSpawn: [0, 3, 0],
   respawnToken: 0,
@@ -277,7 +286,32 @@ export const useGameStore = create<GameState>((set, get) => ({
         ]
       }
 
-      return { castles, slimes }
+      const { pending, ready } = advancePendingRespawns(s.pendingEnemyRespawns, deltaSec)
+      let pendingEnemyRespawns = pending
+      for (const entry of ready) {
+        if (!canSpawnPendingRespawn(entry, slimes)) {
+          // At cap — drop this slot rather than stacking forever.
+          continue
+        }
+        slimeSeq += 1
+        const position =
+          entry.source === 'night'
+            ? edgeSpawn(s.landTier)
+            : ([...entry.position] as [number, number, number])
+        slimes = [
+          ...slimes,
+          {
+            id: `slime-${slimeSeq}`,
+            position,
+            hp: entry.source === 'night' ? NIGHT_SLIME_HP : BIOME_ENEMY_HP,
+            source: entry.source,
+            kind: entry.kind,
+            ageSec: 0,
+          },
+        ]
+      }
+
+      return { castles, slimes, pendingEnemyRespawns }
     })
 
     set((s) => ({
@@ -370,12 +404,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   spawnNightSlimes: () => {
     const tier = get().landTier
-    const pack: Slime[] = Array.from({ length: 4 }, () => {
+    const pack: Slime[] = Array.from({ length: NIGHT_SLIME_COUNT }, () => {
       slimeSeq += 1
       return {
         id: `slime-${slimeSeq}`,
         position: edgeSpawn(tier),
-        hp: 20,
+        hp: NIGHT_SLIME_HP,
         source: 'night' as const,
         kind: 'slime' as const,
         ageSec: 0,
@@ -387,7 +421,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   clearNightSlimes: () =>
-    set((s) => ({ slimes: s.slimes.filter((sl) => sl.source !== 'night') })),
+    set((s) => ({
+      slimes: s.slimes.filter((sl) => sl.source !== 'night'),
+      pendingEnemyRespawns: clearNightPendingRespawns(s.pendingEnemyRespawns),
+    })),
 
   syncBiomeEnemies: () => {
     const tier = get().landTier
@@ -405,7 +442,11 @@ export const useGameStore = create<GameState>((set, get) => ({
           ...makeBiomePack(enemyForBiome('rainforest'), rainforestHubCenter()),
         ]
       }
-      return { slimes }
+      return {
+        slimes,
+        // Fresh biome pack — drop stale biome respawn timers.
+        pendingEnemyRespawns: s.pendingEnemyRespawns.filter((p) => p.source !== 'biome'),
+      }
     })
   },
 
@@ -501,7 +542,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       }))
       return null
     }
-    set((s) => ({ slimes: s.slimes.filter((sl) => sl.id !== id) }))
+    const scheduled = scheduleOverworldRespawn(target)
+    set((s) => ({
+      slimes: s.slimes.filter((sl) => sl.id !== id),
+      pendingEnemyRespawns: scheduled
+        ? [...s.pendingEnemyRespawns, scheduled]
+        : s.pendingEnemyRespawns,
+    }))
     return rollSlimeDrop()
   },
 

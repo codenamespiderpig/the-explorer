@@ -57,6 +57,72 @@ export function enemyVisual(kind: EnemyKind): EnemyVisual {
 export const BIOME_ENEMY_COUNT = 3
 export const BIOME_ENEMY_HP = 24
 
+/** Night pack size — matches spawnNightSlimes. */
+export const NIGHT_SLIME_COUNT = 4
+export const NIGHT_SLIME_HP = 20
+
+/** Seconds after a night/biome kill before that enemy returns. */
+export const OVERWORLD_RESPAWN_SEC = 18
+
+export type OverworldEnemySource = 'night' | 'biome'
+
+export interface PendingEnemyRespawn {
+  source: OverworldEnemySource
+  kind: EnemyKind
+  position: [number, number, number]
+  remainingSec: number
+}
+
+export function scheduleOverworldRespawn(killed: {
+  source: string
+  kind: EnemyKind
+  position: readonly [number, number, number]
+}): PendingEnemyRespawn | null {
+  if (killed.source !== 'night' && killed.source !== 'biome') return null
+  return {
+    source: killed.source,
+    kind: killed.kind,
+    position: [killed.position[0], killed.position[1], killed.position[2]],
+    remainingSec: OVERWORLD_RESPAWN_SEC,
+  }
+}
+
+export function advancePendingRespawns(
+  pending: readonly PendingEnemyRespawn[],
+  deltaSec: number,
+): { pending: PendingEnemyRespawn[]; ready: PendingEnemyRespawn[] } {
+  const next: PendingEnemyRespawn[] = []
+  const ready: PendingEnemyRespawn[] = []
+  for (const entry of pending) {
+    const remainingSec = entry.remainingSec - deltaSec
+    if (remainingSec <= 0) {
+      ready.push({ ...entry, remainingSec: 0 })
+    } else {
+      next.push({ ...entry, remainingSec })
+    }
+  }
+  return { pending: next, ready }
+}
+
+export function clearNightPendingRespawns(
+  pending: readonly PendingEnemyRespawn[],
+): PendingEnemyRespawn[] {
+  return pending.filter((p) => p.source !== 'night')
+}
+
+export function canSpawnPendingRespawn(
+  entry: PendingEnemyRespawn,
+  slimes: readonly { source: string; kind: EnemyKind }[],
+): boolean {
+  if (entry.source === 'night') {
+    return slimes.filter((s) => s.source === 'night').length < NIGHT_SLIME_COUNT
+  }
+  return (
+    slimes.filter((s) => s.source === 'biome' && s.kind === entry.kind).length <
+    BIOME_ENEMY_COUNT
+  )
+}
+
 /** Scatter a few spawn points around a hub center. */
 export function biomeEnemyPositions(
   center: readonly [number, number, number],

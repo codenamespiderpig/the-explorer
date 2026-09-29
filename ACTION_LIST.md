@@ -44,6 +44,7 @@
 - [x] Dungeon relics spend with T for permanent armour / max HP
 - [x] Dungeon end: claim 2 beacon coins beside chest (+20 money each), then E opens the chest
 - [x] Lava Island patches burn on step (6 HP, i-frames rate-limit)
+- [x] Night/biome enemies respawn ~18s after kill
 
 ## Now
 
