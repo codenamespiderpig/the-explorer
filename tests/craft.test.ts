@@ -30,6 +30,12 @@ describe('canCraft', () => {
     const mats = { wood: 20, stone: 20 }
     expect(canCraft(RECIPES.furnace, mats, new Set(['build']), false)).toBe(false)
     expect(canCraft(RECIPES.furnace, mats, new Set(['build']), true)).toBe(true)
+    expect(canCraft(RECIPES['advanced-campfire'], mats, new Set(), false)).toBe(
+      false,
+    )
+    expect(canCraft(RECIPES['advanced-campfire'], mats, new Set(), true)).toBe(
+      true,
+    )
   })
 })
 

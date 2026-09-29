@@ -3,6 +3,7 @@ import type { SkillId } from './skills'
 
 export type RecipeId =
   | 'campfire'
+  | 'advanced-campfire'
   | 'fence'
   | 'workbench'
   | 'hunting-spear'
@@ -28,7 +29,8 @@ export const RECIPES: Record<RecipeId, Recipe> = {
   workbench: {
     id: 'workbench',
     name: 'Workbench',
-    description: 'Place with G to unlock advanced crafts (furnace, slime castle).',
+    description:
+      'Place with G to unlock advanced crafts (furnace, advanced campfire, slime castle).',
     output: 'workbench',
     cost: { wood: 5, stone: 3 },
     requiresSkill: 'build',
@@ -48,6 +50,15 @@ export const RECIPES: Record<RecipeId, Recipe> = {
     description: 'Place with G — lights the area around it at night.',
     output: 'campfire',
     cost: { wood: 3 },
+  },
+  'advanced-campfire': {
+    id: 'advanced-campfire',
+    name: 'Advanced Campfire',
+    description:
+      'Advanced — craft at a placed workbench. Place with G — spreads a wider night light that keeps slimes away.',
+    output: 'advanced-campfire',
+    cost: { wood: 8, stone: 6 },
+    requiresWorkbench: true,
   },
   fence: {
     id: 'fence',

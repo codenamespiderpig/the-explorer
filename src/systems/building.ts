@@ -1,6 +1,11 @@
 import type { ItemId } from '../data/items'
 
-export type BuildingKind = 'workbench' | 'furnace' | 'campfire' | 'fence'
+export type BuildingKind =
+  | 'workbench'
+  | 'furnace'
+  | 'campfire'
+  | 'advanced-campfire'
+  | 'fence'
 
 export interface PlacedBuilding {
   id: string
@@ -9,7 +14,13 @@ export interface PlacedBuilding {
   yaw: number
 }
 
-export const BUILDING_KINDS = ['workbench', 'furnace', 'campfire', 'fence'] as const satisfies readonly BuildingKind[]
+export const BUILDING_KINDS = [
+  'workbench',
+  'furnace',
+  'campfire',
+  'advanced-campfire',
+  'fence',
+] as const satisfies readonly BuildingKind[]
 
 export function isBuildingKind(id: ItemId): id is BuildingKind {
   return (BUILDING_KINDS as readonly string[]).includes(id)

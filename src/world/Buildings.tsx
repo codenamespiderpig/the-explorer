@@ -1,48 +1,70 @@
 import { useGameStore } from '../stores/gameStore'
 import type { BuildingKind } from '../systems/building'
+import {
+  ADVANCED_CAMPFIRE_LIGHT_RADIUS,
+  CAMPFIRE_LIGHT_RADIUS,
+} from '../systems/campfireLight'
 
 /** Lights the area at night; quiet flame during the day. */
-function CampfireMesh({ yaw }: { yaw: number }) {
+function CampfireMesh({
+  yaw,
+  advanced = false,
+}: {
+  yaw: number
+  advanced?: boolean
+}) {
   const phase = useGameStore((s) => s.dayNight.phase)
   const night = phase === 'night'
-  const flameIntensity = night ? 1.35 : 0.45
+  const flameIntensity = night ? (advanced ? 1.8 : 1.35) : advanced ? 0.65 : 0.45
+  const flameH = advanced ? 1.0 : 0.7
+  const flameR = advanced ? 0.38 : 0.28
+  const lightIntensity = advanced ? 2.2 : 1.4
+  const lightDistance = advanced
+    ? ADVANCED_CAMPFIRE_LIGHT_RADIUS
+    : CAMPFIRE_LIGHT_RADIUS
 
   return (
     <group rotation={[0, yaw, 0]}>
       <mesh castShadow position={[0, 0.12, 0]}>
-        <cylinderGeometry args={[0.55, 0.65, 0.2, 8]} />
+        <cylinderGeometry args={[advanced ? 0.7 : 0.55, advanced ? 0.8 : 0.65, 0.2, 8]} />
         <meshStandardMaterial color="#4a3018" />
       </mesh>
       {/* Log pile under the flame */}
       <mesh castShadow position={[-0.12, 0.22, 0.05]} rotation={[0.15, 0.4, 1.2]}>
-        <cylinderGeometry args={[0.08, 0.09, 0.7, 6]} />
+        <cylinderGeometry args={[0.08, 0.09, advanced ? 0.85 : 0.7, 6]} />
         <meshStandardMaterial color="#5c3a1e" />
       </mesh>
       <mesh castShadow position={[0.14, 0.2, -0.06]} rotation={[-0.2, -0.5, 1.05]}>
-        <cylinderGeometry args={[0.07, 0.08, 0.65, 6]} />
+        <cylinderGeometry args={[0.07, 0.08, advanced ? 0.8 : 0.65, 6]} />
         <meshStandardMaterial color="#6a4424" />
       </mesh>
       <mesh castShadow position={[0.02, 0.24, 0.12]} rotation={[0.35, 0.1, 0.95]}>
-        <cylinderGeometry args={[0.06, 0.07, 0.55, 6]} />
+        <cylinderGeometry args={[0.06, 0.07, advanced ? 0.7 : 0.55, 6]} />
         <meshStandardMaterial color="#4e3218" />
       </mesh>
       <mesh castShadow position={[-0.05, 0.18, -0.16]} rotation={[-0.1, 0.8, 1.35]}>
-        <cylinderGeometry args={[0.065, 0.075, 0.6, 6]} />
+        <cylinderGeometry args={[0.065, 0.075, advanced ? 0.75 : 0.6, 6]} />
         <meshStandardMaterial color="#633e20" />
       </mesh>
-      <mesh position={[0, 0.52, 0]}>
-        <coneGeometry args={[0.28, 0.7, 6]} />
+      {advanced ? (
+        <mesh castShadow position={[0.08, 0.26, 0.02]} rotation={[0.05, -0.3, 1.15]}>
+          <cylinderGeometry args={[0.07, 0.08, 0.72, 6]} />
+          <meshStandardMaterial color="#5a381c" />
+        </mesh>
+      ) : null}
+      <mesh position={[0, advanced ? 0.62 : 0.52, 0]}>
+        <coneGeometry args={[flameR, flameH, 6]} />
         <meshStandardMaterial
-          color="#ff7722"
+          color={advanced ? '#ff9933' : '#ff7722'}
           emissive="#ff4400"
           emissiveIntensity={flameIntensity}
         />
       </mesh>
       {night ? (
         <pointLight
-          position={[0, 1.2, 0]}
-          intensity={1.4}
-          distance={10}
+          position={[0, advanced ? 1.5 : 1.2, 0]}
+          intensity={lightIntensity}
+          distance={lightDistance}
           color="#ff8844"
           castShadow={false}
         />
@@ -127,6 +149,9 @@ function BuildingMesh({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
   }
   if (kind === 'campfire') {
     return <CampfireMesh yaw={yaw} />
+  }
+  if (kind === 'advanced-campfire') {
+    return <CampfireMesh yaw={yaw} advanced />
   }
   return (
     <group rotation={[0, yaw, 0]}>

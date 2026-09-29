@@ -6,6 +6,7 @@ export const PLACEABLE_ITEMS = [
   'workbench',
   'furnace',
   'campfire',
+  'advanced-campfire',
   'fence',
   'wooden-gate',
   'slime-castle',
@@ -30,6 +31,7 @@ export function isPlaceableItem(id: ItemId): id is PlaceableItemId {
 const DEFAULT_PLACE_ORDER = [
   'workbench',
   'furnace',
+  'advanced-campfire',
   'campfire',
   'wooden-gate',
   'slime-castle',
@@ -86,6 +88,7 @@ export function placeableHint(result: PickPlaceableResult): string {
         workbench: 'Workbench',
         furnace: 'Furnace',
         campfire: 'Campfire',
+        'advanced-campfire': 'Advanced Campfire',
         fence: 'Fence',
       }
       return `${names[result.item]} placed`

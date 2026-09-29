@@ -21,6 +21,12 @@ describe('pickPlaceableToPlace', () => {
     ).toEqual({ ok: true, item: 'workbench' })
   })
 
+  it('prefers advanced campfire over a normal campfire', () => {
+    expect(
+      pickPlaceableToPlace({ campfire: 1, 'advanced-campfire': 1 }, 0, 0, 0),
+    ).toEqual({ ok: true, item: 'advanced-campfire' })
+  })
+
   it('places preferred placeable when owned', () => {
     expect(
       pickPlaceableToPlace({ workbench: 1, fence: 3 }, 0, 0, 0, 'fence'),

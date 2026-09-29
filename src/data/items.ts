@@ -2,6 +2,7 @@ export type ResourceId = 'wood' | 'stone'
 export type ToolId = 'wooden-sword' | 'wooden-pickaxe' | 'wooden-axe'
 export type CraftedItemId =
   | 'campfire'
+  | 'advanced-campfire'
   | 'fence'
   | 'workbench'
   | 'hunting-spear'
@@ -28,6 +29,11 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   'wooden-pickaxe': { id: 'wooden-pickaxe', name: 'Wooden Pickaxe', sellValue: 5 },
   'wooden-axe': { id: 'wooden-axe', name: 'Wooden Axe', sellValue: 5 },
   campfire: { id: 'campfire', name: 'Campfire', sellValue: 4 },
+  'advanced-campfire': {
+    id: 'advanced-campfire',
+    name: 'Advanced Campfire',
+    sellValue: 18,
+  },
   fence: { id: 'fence', name: 'Wooden Fence', sellValue: 3 },
   workbench: { id: 'workbench', name: 'Workbench', sellValue: 12 },
   'hunting-spear': { id: 'hunting-spear', name: 'Hunting Spear', sellValue: 8 },

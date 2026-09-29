@@ -34,10 +34,12 @@
 - [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
 - [x] Campfire shows a log pile; workbench has little tools on top
 - [x] Campfire lights the nearby area at night
+- [x] Advanced campfire (workbench craft) — wider night light
+- [x] Night slimes avoid campfire light
 - [x] Smaller fences; G prefers workbench / last-crafted placeable (click inventory to pick)
 
 - [x] Top-right minimap — click to open full world overview
-- [x] Workbench unlocks advanced crafts (furnace, slime castle)
+- [x] Workbench unlocks advanced crafts (furnace, advanced campfire, slime castle)
 - [x] Home grassland ponds — place crab pots on the banks
 - [x] Rainforest land south of home (3rd unlock)
 - [x] Different enemies per land; enemies a bit shorter than the player

@@ -11,6 +11,7 @@ const RARE_ITEMS = new Set<ItemId>([
   'slime-goop',
   'dungeon-relic',
   'campfire',
+  'advanced-campfire',
   'fence',
   'workbench',
   'hunting-spear',

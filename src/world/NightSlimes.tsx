@@ -16,6 +16,10 @@ import {
   type EnemyKind,
 } from '../systems/enemies'
 import {
+  isInCampfireLight,
+  steerAwayFromCampfireLight,
+} from '../systems/campfireLight'
+import {
   DUNGEON_ENEMY_COOLDOWN,
   DUNGEON_ENEMY_DAMAGE,
   DUNGEON_ENEMY_SPEED,
@@ -151,15 +155,53 @@ function SlimeEntity({
       }
     }
 
+    const isNight = slime.source === 'night'
+    const buildings = store.buildings
+    const targetInLight =
+      isNight && isInCampfireLight(target[0], target[2], buildings)
+
     faceToward(target[0], target[2])
 
     const dx = target[0] - localPos.current[0]
     const dz = target[2] - localPos.current[2]
     const dist = Math.hypot(dx, dz) || 1
+    // Stay on the rim when the chase target sits inside campfire light.
+    if (isNight && targetInLight && isInCampfireLight(localPos.current[0], localPos.current[2], buildings)) {
+      const pushed = steerAwayFromCampfireLight(
+        localPos.current[0],
+        localPos.current[2],
+        localPos.current[0],
+        localPos.current[2],
+        buildings,
+      )
+      localPos.current = [pushed.x, bodyY, pushed.z]
+      body.current.setNextKinematicTranslation({
+        x: localPos.current[0],
+        y: localPos.current[1],
+        z: localPos.current[2],
+      })
+      store.moveSlime(id, localPos.current)
+      return
+    }
     if (dist > ATTACK_RANGE) {
       const step = moveSpeed * delta
       let nx = localPos.current[0] + (dx / dist) * step
       let nz = localPos.current[2] + (dz / dist) * step
+      if (isNight) {
+        const steered = steerAwayFromCampfireLight(
+          localPos.current[0],
+          localPos.current[2],
+          nx,
+          nz,
+          buildings,
+        )
+        nx = steered.x
+        nz = steered.z
+        // Don't walk into the glow toward a lit target — hold outside.
+        if (targetInLight && isInCampfireLight(nx, nz, buildings)) {
+          return
+        }
+      }
       if (isBiome) {
         const [hubX, , hubZ] = hubCenterForEnemyKind(kind)
         const clamped = clampToBiomeLeash(nx, nz, hubX, hubZ)
@@ -174,14 +216,16 @@ function SlimeEntity({
       })
       store.moveSlime(id, localPos.current)
     } else if (cooldown.current <= 0) {
-      cooldown.current = hitCooldown
-      if (targetingGate && nearestGateDist <= GATE_RANGE) {
-        store.damageNearestGate(localPos.current, GATE_DAMAGE)
-      } else {
-        const pdx = player[0] - localPos.current[0]
-        const pdz = player[2] - localPos.current[2]
-        if (Math.hypot(pdx, pdz) <= ATTACK_RANGE + 0.4) {
-          store.damagePlayer(hitDamage)
+      if (!(isNight && targetInLight)) {
+        cooldown.current = hitCooldown
+        if (targetingGate && nearestGateDist <= GATE_RANGE) {
+          store.damageNearestGate(localPos.current, GATE_DAMAGE)
+        } else {
+          const pdx = player[0] - localPos.current[0]
+          const pdz = player[2] - localPos.current[2]
+          if (Math.hypot(pdx, pdz) <= ATTACK_RANGE + 0.4) {
+            store.damagePlayer(hitDamage)
+          }
         }
       }
     }
