@@ -16,36 +16,40 @@ export const DUNGEON_FALL_Y = -58
 
 export const DUNGEON_INTERACT_RADIUS = 4.5
 
-export const DUNGEON_COIN_PICKUP_RADIUS = 2.2
+export const DUNGEON_COIN_PICKUP_RADIUS = 3.5
 
 export const DUNGEON_COINS_REQUIRED = 2
 
 /** Money granted each time you claim a dungeon coin. */
 export const DUNGEON_COIN_MONEY = 20
 
-/** Gold coins to claim at the end before the chest unlocks. */
+/**
+ * Gold coins beside the chest — easy to spot at the end of the hall.
+ * Floor Y is ~-42.5; coins float just above it.
+ */
 export const DUNGEON_COIN_POSITIONS: Array<[number, number, number]> = [
-  [-2.4, -42.2, 26.5],
-  [2.4, -42.2, 29.2],
+  [-3.2, -41.8, 27],
+  [3.2, -41.8, 27],
 ]
 
-/** Chest sits on the end platform. */
-export const DUNGEON_CHEST: [number, number, number] = [0, -42.5, 28]
+/** Chest at the end of the hall. */
+export const DUNGEON_CHEST: [number, number, number] = [0, -42.5, 30]
 
 /** Portal appears beside the chest after it is opened. */
-export const DUNGEON_PORTAL: [number, number, number] = [3.5, -42.5, 31]
+export const DUNGEON_PORTAL: [number, number, number] = [0, -42.5, 34]
 
 export const DUNGEON_CHEST_LOOT: { item: ItemId; amount: number } = {
   item: 'dungeon-relic',
   amount: 3,
 }
 
-/** Little dungeon mobs along the run. */
+/** Five little dungeon mobs along the flat hall. */
 export const DUNGEON_MOB_POSITIONS: Array<[number, number, number]> = [
-  [-1.2, -42.9, 8],
-  [1.5, -42.9, 13],
-  [0, -42.9, 18],
-  [2, -42.9, 22],
+  [-2, -42.05, 6],
+  [2.2, -42.05, 10],
+  [0, -42.05, 14],
+  [-2.5, -42.05, 18],
+  [2, -42.05, 22],
 ]
 
 /** Damage dealt by dungeon enemies (lighter than night slimes). */

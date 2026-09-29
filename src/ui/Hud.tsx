@@ -151,18 +151,14 @@ export function Hud() {
         <div className="hud-dungeon-controls" aria-live="polite">
           <div className="hud-dungeon-controls-title">Dungeon</div>
           <div className="hud-dungeon-row">
-            <kbd className="hud-key">Space</kbd>
-            <span>Jump</span>
-          </div>
-          <div className="hud-dungeon-row">
             <kbd className="hud-key">F</kbd>
-            <span>Fight mobs</span>
+            <span>Fight 5 mobs</span>
           </div>
           <div className="hud-dungeon-row">
             <kbd className="hud-key">E</kbd>
             <span>
-              Coins {dungeonCoins.length}/{DUNGEON_COINS_REQUIRED}
-              {dungeonChestUnlocked ? ' · chest ready' : ''}
+              Claim gold coins {dungeonCoins.length}/{DUNGEON_COINS_REQUIRED}
+              {dungeonChestUnlocked ? ' · then open chest' : ' (by the chest)'}
             </span>
           </div>
         </div>

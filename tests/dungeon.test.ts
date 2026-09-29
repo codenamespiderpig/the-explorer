@@ -6,6 +6,7 @@ import {
   DUNGEON_COIN_POSITIONS,
   DUNGEON_ENTRANCE,
   DUNGEON_MIN_LAND_TIER,
+  DUNGEON_MOB_POSITIONS,
   DUNGEON_SPAWN,
   canEnterDungeon,
   canOpenDungeonChest,
@@ -37,8 +38,8 @@ describe('dungeon', () => {
 
   it('detects chest and portal spots inside the dungeon', () => {
     expect(isNearDungeonChest(0, 0)).toBe(false)
-    expect(isNearDungeonChest(0, 28)).toBe(true)
-    expect(isNearDungeonPortal(3.5, 31)).toBe(true)
+    expect(isNearDungeonChest(0, 30)).toBe(true)
+    expect(isNearDungeonPortal(0, 34)).toBe(true)
   })
 
   it('rewards dungeon relics from the chest', () => {
@@ -54,6 +55,10 @@ describe('dungeon', () => {
     expect(canUnlockDungeonChest(0)).toBe(false)
     expect(canUnlockDungeonChest(1)).toBe(false)
     expect(canUnlockDungeonChest(2)).toBe(true)
+  })
+
+  it('spawns five dungeon mobs along the hall', () => {
+    expect(DUNGEON_MOB_POSITIONS).toHaveLength(5)
   })
 
   it('collects each coin once and unlocks at two', () => {

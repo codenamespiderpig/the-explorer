@@ -278,7 +278,7 @@ function useGatherInput() {
           }
           return
         }
-        state.setHint('Fight the mobs, jump (Space), claim 2 coins, then open the chest')
+        state.setHint('Fight the 5 mobs, then claim the 2 glowing gold coins by the chest (E)')
         return
       }
 
@@ -398,7 +398,7 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
               : `Claim ${DUNGEON_COINS_REQUIRED} gold coins first (${game.dungeonCoinsCollected.length}/${DUNGEON_COINS_REQUIRED})`,
           )
         } else if (!game.dungeonChestUnlocked) {
-          store.setHint('Fight mobs · Space jump · claim 2 coins · then E on chest')
+          store.setHint('Fight mobs · claim 2 glowing gold coins beside the chest (E)')
         } else if (!store.hint?.includes('Relic') && !store.hint?.includes('portal')) {
           store.setHint('Chest unlocked — press E near it, then use the portal')
         }
