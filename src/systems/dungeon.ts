@@ -1,4 +1,4 @@
-/** First dungeon — stairs on home land, fight + short platforming, chest, portal home. */
+/** First dungeon — stairs on home land, fight + coin minigame, chest, portal home. */
 
 import type { ItemId } from '../data/items'
 
@@ -16,6 +16,16 @@ export const DUNGEON_FALL_Y = -58
 
 export const DUNGEON_INTERACT_RADIUS = 4.5
 
+export const DUNGEON_COIN_PICKUP_RADIUS = 2.2
+
+export const DUNGEON_COINS_REQUIRED = 2
+
+/** Gold coins to claim at the end before the chest unlocks. */
+export const DUNGEON_COIN_POSITIONS: Array<[number, number, number]> = [
+  [-2.4, -42.2, 26.5],
+  [2.4, -42.2, 29.2],
+]
+
 /** Chest sits on the end platform. */
 export const DUNGEON_CHEST: [number, number, number] = [0, -42.5, 28]
 
@@ -27,9 +37,12 @@ export const DUNGEON_CHEST_LOOT: { item: ItemId; amount: number } = {
   amount: 3,
 }
 
+/** Little dungeon mobs along the run. */
 export const DUNGEON_MOB_POSITIONS: Array<[number, number, number]> = [
-  [0, -42.9, 16],
-  [1.5, -42.9, 24],
+  [-1.2, -42.9, 8],
+  [1.5, -42.9, 13],
+  [0, -42.9, 18],
+  [2, -42.9, 22],
 ]
 
 /** Damage dealt by dungeon enemies (lighter than night slimes). */
@@ -51,6 +64,61 @@ export function isNearDungeonChest(x: number, z: number): boolean {
 
 export function isNearDungeonPortal(x: number, z: number): boolean {
   return Math.hypot(x - DUNGEON_PORTAL[0], z - DUNGEON_PORTAL[2]) <= DUNGEON_INTERACT_RADIUS
+}
+
+export function isNearDungeonCoin(x: number, z: number, coinIndex: number): boolean {
+  const coin = DUNGEON_COIN_POSITIONS[coinIndex]
+  if (!coin) return false
+  return Math.hypot(x - coin[0], z - coin[2]) <= DUNGEON_COIN_PICKUP_RADIUS
+}
+
+export function nearestDungeonCoinIndex(
+  x: number,
+  z: number,
+  alreadyCollected: readonly number[],
+): number | null {
+  let best: number | null = null
+  let bestDist = DUNGEON_COIN_PICKUP_RADIUS
+  for (let i = 0; i < DUNGEON_COIN_POSITIONS.length; i += 1) {
+    if (alreadyCollected.includes(i)) continue
+    const coin = DUNGEON_COIN_POSITIONS[i]!
+    const dist = Math.hypot(x - coin[0], z - coin[2])
+    if (dist <= bestDist) {
+      bestDist = dist
+      best = i
+    }
+  }
+  return best
+}
+
+export function canUnlockDungeonChest(coinsCollected: number): boolean {
+  return coinsCollected >= DUNGEON_COINS_REQUIRED
+}
+
+export function canOpenDungeonChest(unlocked: boolean, alreadyOpened: boolean): boolean {
+  return unlocked && !alreadyOpened
+}
+
+export type CollectCoinResult =
+  | { ok: true; collected: number[]; unlocked: boolean }
+  | { ok: false; reason: 'already-collected' | 'invalid-coin' }
+
+export function collectDungeonCoin(
+  alreadyCollected: readonly number[],
+  coinIndex: number,
+): CollectCoinResult {
+  if (coinIndex < 0 || coinIndex >= DUNGEON_COIN_POSITIONS.length) {
+    return { ok: false, reason: 'invalid-coin' }
+  }
+  if (alreadyCollected.includes(coinIndex)) {
+    return { ok: false, reason: 'already-collected' }
+  }
+  const collected = [...alreadyCollected, coinIndex]
+  return {
+    ok: true,
+    collected,
+    unlocked: canUnlockDungeonChest(collected.length),
+  }
 }
 
 export function dungeonChestReward(): { item: ItemId; amount: number } {

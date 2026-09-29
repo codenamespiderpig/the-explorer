@@ -5,6 +5,8 @@ import { effectiveMaxHealth } from '../systems/health'
 import { FISH_HEAL_AMOUNT } from '../systems/heal'
 import { isMerchantVisiting } from '../systems/merchant'
 import { lavaUnlocked, nextPlot, rainforestUnlocked, waterUnlocked } from '../systems/plots'
+import { DUNGEON_COINS_REQUIRED } from '../systems/dungeon'
+import { RELIC_ARMOUR_BONUS } from '../systems/relic'
 import { Backpack } from './Backpack'
 import { Merchant } from './Merchant'
 import { Minimap } from './Minimap'
@@ -31,6 +33,8 @@ export function Hud() {
   const landTier = useGameStore((s) => s.landTier)
   const health = useGameStore((s) => s.health)
   const inDungeon = useGameStore((s) => s.inDungeon)
+  const dungeonCoins = useGameStore((s) => s.dungeonCoinsCollected)
+  const dungeonChestUnlocked = useGameStore((s) => s.dungeonChestUnlocked)
   const merchantTimeLeft = useGameStore((s) => s.merchantTimeLeft)
   const merchantWorld = useGameStore((s) => s.merchantWorld)
   const merchantCountdown = useGameStore((s) => s.merchantCountdownLabel())
@@ -95,8 +99,11 @@ export function Hud() {
         <div>Slime Goop: {goop}</div>
         <div>Fish: {fish}</div>
         <div>Dungeon Relics: {relics}</div>
+        {relics > 0 ? (
+          <div className="hud-tools">Press T — spend relic (+{RELIC_ARMOUR_BONUS} max HP)</div>
+        ) : null}
         <div className="hud-tools">
-          Q backpack · M merchant · G place · R eat fish · click map · E dungeon
+          Q backpack · M merchant · G place · R eat fish · T relic · click map · E dungeon
         </div>
       </div>
 
@@ -145,15 +152,18 @@ export function Hud() {
           <div className="hud-dungeon-controls-title">Dungeon</div>
           <div className="hud-dungeon-row">
             <kbd className="hud-key">Space</kbd>
-            <span>Jump across the blocks</span>
+            <span>Jump</span>
           </div>
           <div className="hud-dungeon-row">
             <kbd className="hud-key">F</kbd>
-            <span>Attack</span>
+            <span>Fight mobs</span>
           </div>
           <div className="hud-dungeon-row">
             <kbd className="hud-key">E</kbd>
-            <span>Chest / portal</span>
+            <span>
+              Coins {dungeonCoins.length}/{DUNGEON_COINS_REQUIRED}
+              {dungeonChestUnlocked ? ' · chest ready' : ''}
+            </span>
           </div>
         </div>
       ) : null}

@@ -40,11 +40,15 @@ import {
 } from '../systems/enemies'
 import {
   canEnterDungeon,
+  canOpenDungeonChest,
+  canUnlockDungeonChest,
+  collectDungeonCoin,
   DUNGEON_HOME_SPAWN,
   DUNGEON_MOB_POSITIONS,
   DUNGEON_SPAWN,
   dungeonChestReward,
 } from '../systems/dungeon'
+import { applyRelicArmour } from '../systems/relic'
 import {
   lavaUnlocked,
   rainforestUnlocked,
@@ -102,6 +106,8 @@ interface GameState {
   respawnToken: number
   inDungeon: boolean
   dungeonChestOpened: boolean
+  dungeonChestUnlocked: boolean
+  dungeonCoinsCollected: number[]
   /** Timestamp (ms) until which the player ignores damage. */
   invulnerableUntil: number
   tick: (deltaSec: number) => void
@@ -123,7 +129,11 @@ interface GameState {
   syncBiomeEnemies: () => void
   enterDungeon: () => boolean
   exitDungeon: () => void
+  collectDungeonCoinAt: (coinIndex: number) => boolean
   openDungeonChest: () => { item: ItemId; amount: number } | null
+  useRelic: (relicsOwned: number) =>
+    | { ok: true; relicsSpent: number; maxHealth: number }
+    | { ok: false; reason: 'no-relic' | 'armour-capped' }
   moveSlime: (id: string, position: [number, number, number]) => void
   hurtSlime: (id: string, amount: number) => SlimeDrop | null
   buyLand: () => boolean
@@ -198,6 +208,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   respawnToken: 0,
   inDungeon: false,
   dungeonChestOpened: false,
+  dungeonChestUnlocked: false,
+  dungeonCoinsCollected: [],
   invulnerableUntil: 0,
 
   tick: (deltaSec) => {
@@ -400,7 +412,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       return {
         id: `slime-${slimeSeq}`,
         position,
-        hp: 18,
+        hp: 14,
         source: 'dungeon' as const,
         kind: 'slime' as const,
         ageSec: 0,
@@ -409,6 +421,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({
       inDungeon: true,
       dungeonChestOpened: false,
+      dungeonChestUnlocked: false,
+      dungeonCoinsCollected: [],
       health: respawnHealth(s.health),
       invulnerableUntil: performance.now() + 2000,
       playerSpawn: [...DUNGEON_SPAWN] as [number, number, number],
@@ -426,6 +440,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({
       inDungeon: false,
       dungeonChestOpened: false,
+      dungeonChestUnlocked: false,
+      dungeonCoinsCollected: [],
       playerSpawn: [...DUNGEON_HOME_SPAWN] as [number, number, number],
       playerPos: [...DUNGEON_HOME_SPAWN] as [number, number, number],
       respawnToken: s.respawnToken + 1,
@@ -433,11 +449,35 @@ export const useGameStore = create<GameState>((set, get) => ({
     }))
   },
 
+  collectDungeonCoinAt: (coinIndex) => {
+    if (!get().inDungeon) return false
+    const result = collectDungeonCoin(get().dungeonCoinsCollected, coinIndex)
+    if (!result.ok) return false
+    set({
+      dungeonCoinsCollected: result.collected,
+      dungeonChestUnlocked: result.unlocked || canUnlockDungeonChest(result.collected.length),
+    })
+    return true
+  },
+
   openDungeonChest: () => {
-    if (!get().inDungeon || get().dungeonChestOpened) return null
+    const s = get()
+    if (!s.inDungeon) return null
+    if (!canOpenDungeonChest(s.dungeonChestUnlocked, s.dungeonChestOpened)) return null
     const reward = dungeonChestReward()
     set({ dungeonChestOpened: true })
     return reward
+  },
+
+  useRelic: (relicsOwned) => {
+    const result = applyRelicArmour(get().health, relicsOwned)
+    if (!result.ok) return result
+    set({ health: result.health })
+    return {
+      ok: true,
+      relicsSpent: result.relicsSpent,
+      maxHealth: effectiveMaxHealth(result.health),
+    }
   },
 
   moveSlime: (id, position) =>
@@ -485,6 +525,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       health: respawnHealth(s.health),
       inDungeon: false,
       dungeonChestOpened: false,
+      dungeonChestUnlocked: false,
+      dungeonCoinsCollected: [],
       playerSpawn: [...DUNGEON_HOME_SPAWN] as [number, number, number],
       playerPos: [...DUNGEON_HOME_SPAWN] as [number, number, number],
       respawnToken: s.respawnToken + 1,

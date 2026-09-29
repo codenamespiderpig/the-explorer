@@ -20,11 +20,14 @@ import { listGatherables } from '../world/gatherableRegistry'
 import { FALL_Y, clampToIsland } from '../world/bounds'
 import {
   canEnterDungeon,
+  DUNGEON_COINS_REQUIRED,
   DUNGEON_FALL_Y,
   isNearDungeonChest,
   isNearDungeonEntrance,
   isNearDungeonPortal,
+  nearestDungeonCoinIndex,
 } from '../systems/dungeon'
+import { RELIC_ARMOUR_BONUS } from '../systems/relic'
 import { ToolSwing } from './ToolSwing'
 
 const GATHER_RADIUS = 2.4
@@ -237,19 +240,44 @@ function useGatherInput() {
           state.setHint('Portal whisked you home')
           return
         }
+
+        const coinIndex = nearestDungeonCoinIndex(
+          playerPos[0],
+          playerPos[2],
+          game.dungeonCoinsCollected,
+        )
+        if (coinIndex !== null) {
+          if (game.collectDungeonCoinAt(coinIndex)) {
+            const next = useGameStore.getState()
+            const count = next.dungeonCoinsCollected.length
+            state.setHint(
+              next.dungeonChestUnlocked
+                ? `Coins ${count}/${DUNGEON_COINS_REQUIRED} — chest unlocked! Press E`
+                : `Claimed a coin (${count}/${DUNGEON_COINS_REQUIRED})`,
+            )
+          }
+          return
+        }
+
         if (isNearDungeonChest(playerPos[0], playerPos[2])) {
+          if (!game.dungeonChestUnlocked) {
+            state.setHint(
+              `Claim ${DUNGEON_COINS_REQUIRED} coins first (${game.dungeonCoinsCollected.length}/${DUNGEON_COINS_REQUIRED})`,
+            )
+            return
+          }
           const loot = game.openDungeonChest()
           if (loot) {
             state.addItem(loot.item, loot.amount)
             state.setHint(
-              `+${loot.amount} ${ITEMS[loot.item].name}! Check Resources (top-left). Portal is to the right (E)`,
+              `+${loot.amount} ${ITEMS[loot.item].name}! Press T later to spend relics for armour. Portal (E)`,
             )
           } else {
-            state.setHint('Chest empty — walk to the glowing portal on the right (E)')
+            state.setHint('Chest empty — walk to the glowing portal (E)')
           }
           return
         }
-        state.setHint('Fight ahead, jump the blocks (Space), open the chest')
+        state.setHint('Fight the mobs, jump (Space), claim 2 coins, then open the chest')
         return
       }
 
@@ -350,15 +378,29 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     if (game.inDungeon) {
       if (game.dungeonChestOpened && isNearDungeonPortal(pos.x, pos.z)) {
         store.setHint('Press E to take the portal home')
-      } else if (isNearDungeonChest(pos.x, pos.z)) {
-        if (!game.dungeonChestOpened) {
-          store.setHint('Press E to open the reward chest')
+      } else {
+        const coinIndex = nearestDungeonCoinIndex(
+          pos.x,
+          pos.z,
+          game.dungeonCoinsCollected,
+        )
+        if (coinIndex !== null) {
+          store.setHint(
+            `Press E to claim coin (${game.dungeonCoinsCollected.length}/${DUNGEON_COINS_REQUIRED})`,
+          )
+        } else if (isNearDungeonChest(pos.x, pos.z)) {
+          store.setHint(
+            game.dungeonChestUnlocked
+              ? game.dungeonChestOpened
+                ? 'Chest empty — find the portal (E)'
+                : 'Press E to open the reward chest'
+              : `Claim ${DUNGEON_COINS_REQUIRED} gold coins first (${game.dungeonCoinsCollected.length}/${DUNGEON_COINS_REQUIRED})`,
+          )
+        } else if (!game.dungeonChestUnlocked) {
+          store.setHint('Fight mobs · Space jump · claim 2 coins · then E on chest')
+        } else if (!store.hint?.includes('Relic') && !store.hint?.includes('portal')) {
+          store.setHint('Chest unlocked — press E near it, then use the portal')
         }
-        // Keep loot hint if chest just opened — don't overwrite immediately
-      } else if (!game.dungeonChestOpened) {
-        store.setHint('Dungeon — Space jump · F fight · reach the chest')
-      } else if (!store.hint?.includes('Relic') && !store.hint?.includes('portal')) {
-        store.setHint('Chest looted — glowing portal is near the chest (E)')
       }
       lastId.current = null
       store.setNearby(null, null)
@@ -491,6 +533,34 @@ function useEatFishInput() {
   }, [])
 }
 
+function useRelicInput() {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyT' || e.repeat) return
+      const inv = useInventoryStore.getState()
+      const relics = inv.items['dungeon-relic'] ?? 0
+      const result = useGameStore.getState().useRelic(relics)
+      if (!result.ok) {
+        inv.setHint(
+          result.reason === 'no-relic'
+            ? 'No dungeon relics — clear a dungeon chest first'
+            : 'Armour already maxed (145 HP)',
+        )
+        return
+      }
+      inv.setItems({
+        ...inv.items,
+        'dungeon-relic': Math.max(0, relics - result.relicsSpent),
+      })
+      inv.setHint(
+        `Relic forged into armour (+${RELIC_ARMOUR_BONUS} max HP → ${result.maxHealth})`,
+      )
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+}
+
 export function Player() {
   const ecctrl = useRef<EcctrlHandle>(null)
   const lookYaw = useRef(0)
@@ -505,6 +575,7 @@ export function Player() {
   useProximityTracking(ecctrl)
   usePlaceablePlacement(ecctrl, lookYaw, keys, lastFacing)
   useEatFishInput()
+  useRelicInput()
 
   useFrame(() => {
     const body = ecctrl.current
