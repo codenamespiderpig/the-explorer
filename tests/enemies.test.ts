@@ -8,6 +8,7 @@ import {
   ENEMY_RADIUS,
   enemyForBiome,
   enemyVisual,
+  facingYaw,
   hubCenterForEnemyKind,
   isOutsideBiomeLeash,
   NIGHT_SLIME_COUNT,
@@ -167,6 +168,13 @@ describe('overworld enemy respawn', () => {
     expect(isOutsideBiomeLeash(0, pierZ, hx, hz)).toBe(true)
     const clamped = clampToBiomeLeash(0, pierZ, hx, hz)
     expect(Math.hypot(clamped.x - hx, clamped.z - hz)).toBeCloseTo(BIOME_LEASH_RADIUS, 5)
+  })
+
+  it('faces local +Z toward a chase target', () => {
+    // Target due +Z → yaw 0; due +X → yaw π/2
+    expect(facingYaw(0, 0, 0, 5)).toBeCloseTo(0, 5)
+    expect(facingYaw(0, 0, 5, 0)).toBeCloseTo(Math.PI / 2, 5)
+    expect(facingYaw(0, 0, 0, -5)).toBeCloseTo(Math.PI, 5)
   })
 })
 

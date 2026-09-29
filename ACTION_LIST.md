@@ -41,6 +41,7 @@
 - [x] Home grassland ponds — place crab pots on the banks
 - [x] Rainforest land south of home (3rd unlock)
 - [x] Different enemies per land; enemies a bit shorter than the player
+- [x] Slime faces turn toward their chase target
 - [x] First dungeon: home stairs → flat fight hall (5 mobs) → chest → portal home
 - [x] Dungeon vanishes after you clear it (chest + leave)
 - [x] Dungeon relics spend with T for permanent armour / max HP

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RigidBody, type RapierRigidBody } from '@react-three/rapier'
+import type { Group } from 'three'
 import { useGameStore, type SlimeSource } from '../stores/gameStore'
 import { isGateDestroyed } from '../systems/gate'
 import { slimeRotPhase } from '../systems/slimeCastle'
@@ -9,6 +10,7 @@ import {
   ENEMY_RADIUS,
   clampToBiomeLeash,
   enemyVisual,
+  facingYaw,
   hubCenterForEnemyKind,
   isOutsideBiomeLeash,
   type EnemyKind,
@@ -51,9 +53,20 @@ function SlimeEntity({
   kind: EnemyKind
 }) {
   const body = useRef<RapierRigidBody>(null)
+  const visual = useRef<Group>(null)
   const cooldown = useRef(0)
   const localPos = useRef(position)
   const wanderAngle = useRef(Math.random() * Math.PI * 2)
+
+  const faceToward = (toX: number, toZ: number) => {
+    if (!visual.current) return
+    visual.current.rotation.y = facingYaw(
+      localPos.current[0],
+      localPos.current[2],
+      toX,
+      toZ,
+    )
+  }
 
   useFrame((_, delta) => {
     const store = useGameStore.getState()
@@ -63,16 +76,15 @@ function SlimeEntity({
     if (slime.source === 'castle') {
       wanderAngle.current += delta * 0.7
       const step = CASTLE_WANDER_SPEED * delta
-      localPos.current = [
-        localPos.current[0] + Math.cos(wanderAngle.current) * step,
-        ENEMY_BODY_Y,
-        localPos.current[2] + Math.sin(wanderAngle.current) * step,
-      ]
+      const nx = localPos.current[0] + Math.cos(wanderAngle.current) * step
+      const nz = localPos.current[2] + Math.sin(wanderAngle.current) * step
+      localPos.current = [nx, ENEMY_BODY_Y, nz]
       body.current.setNextKinematicTranslation({
         x: localPos.current[0],
         y: localPos.current[1],
         z: localPos.current[2],
       })
+      faceToward(nx + Math.cos(wanderAngle.current), nz + Math.sin(wanderAngle.current))
       store.moveSlime(id, localPos.current)
       return
     }
@@ -113,6 +125,7 @@ function SlimeEntity({
             y: localPos.current[1],
             z: localPos.current[2],
           })
+          faceToward(hubX, hubZ)
           store.moveSlime(id, localPos.current)
         }
         return
@@ -137,6 +150,8 @@ function SlimeEntity({
         }
       }
     }
+
+    faceToward(target[0], target[2])
 
     const dx = target[0] - localPos.current[0]
     const dz = target[2] - localPos.current[2]
@@ -184,34 +199,36 @@ function SlimeEntity({
       colliders="ball"
       sensor
     >
-      <mesh castShadow>
-        <sphereGeometry args={[ENEMY_RADIUS, 16, 16]} />
-        <meshStandardMaterial
-          color={colors.color}
-          emissive={colors.emissive}
-          emissiveIntensity={colors.intensity}
-        />
-      </mesh>
-      {kind === 'leaf' ? (
-        <mesh castShadow position={[0, ENEMY_RADIUS * 0.55, 0]} rotation={[0.2, 0, 0.3]}>
-          <boxGeometry args={[0.55, 0.08, 0.28]} />
-          <meshStandardMaterial color="#1a6a28" />
+      <group ref={visual}>
+        <mesh castShadow>
+          <sphereGeometry args={[ENEMY_RADIUS, 16, 16]} />
+          <meshStandardMaterial
+            color={colors.color}
+            emissive={colors.emissive}
+            emissiveIntensity={colors.intensity}
+          />
         </mesh>
-      ) : null}
-      {kind === 'tide' ? (
-        <mesh position={[0, -ENEMY_RADIUS * 0.15, 0]}>
-          <torusGeometry args={[ENEMY_RADIUS * 0.55, 0.06, 8, 16]} />
-          <meshStandardMaterial color="#a8e8ff" emissive="#66ccee" emissiveIntensity={0.35} />
+        {kind === 'leaf' ? (
+          <mesh castShadow position={[0, ENEMY_RADIUS * 0.55, 0]} rotation={[0.2, 0, 0.3]}>
+            <boxGeometry args={[0.55, 0.08, 0.28]} />
+            <meshStandardMaterial color="#1a6a28" />
+          </mesh>
+        ) : null}
+        {kind === 'tide' ? (
+          <mesh position={[0, -ENEMY_RADIUS * 0.15, 0]}>
+            <torusGeometry args={[ENEMY_RADIUS * 0.55, 0.06, 8, 16]} />
+            <meshStandardMaterial color="#a8e8ff" emissive="#66ccee" emissiveIntensity={0.35} />
+          </mesh>
+        ) : null}
+        <mesh position={[0.16, 0.14, ENEMY_RADIUS * 0.7]}>
+          <sphereGeometry args={[eyeScale, 8, 8]} />
+          <meshStandardMaterial color="#102010" />
         </mesh>
-      ) : null}
-      <mesh position={[0.16, 0.14, ENEMY_RADIUS * 0.7]}>
-        <sphereGeometry args={[eyeScale, 8, 8]} />
-        <meshStandardMaterial color="#102010" />
-      </mesh>
-      <mesh position={[-0.16, 0.14, ENEMY_RADIUS * 0.7]}>
-        <sphereGeometry args={[eyeScale, 8, 8]} />
-        <meshStandardMaterial color="#102010" />
-      </mesh>
+        <mesh position={[-0.16, 0.14, ENEMY_RADIUS * 0.7]}>
+          <sphereGeometry args={[eyeScale, 8, 8]} />
+          <meshStandardMaterial color="#102010" />
+        </mesh>
+      </group>
     </RigidBody>
   )
 }

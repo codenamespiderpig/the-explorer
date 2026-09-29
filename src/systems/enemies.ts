@@ -196,3 +196,13 @@ export function isOutsideBiomeLeash(
 ): boolean {
   return Math.hypot(x - homeX, z - homeZ) > radius
 }
+
+/** Yaw (radians) so local +Z faces toward a target on the XZ plane. */
+export function facingYaw(
+  fromX: number,
+  fromZ: number,
+  toX: number,
+  toZ: number,
+): number {
+  return Math.atan2(toX - fromX, toZ - fromZ)
+}
