@@ -81,12 +81,26 @@ describe('clampToIsland', () => {
 
   it('allows stepping off the pier onto the wide water landing', () => {
     const { island } = waterBridgeEndpoints()
-    const [cx, , cz] = worldCenter('water')
+    const [, , cz] = worldCenter('water')
     const half = worldPlayableHalf('water')
+    // Off-center on the dock (outside the gate corridor) snaps onto the island rim.
     const clamped = clampToIsland(3.5, island[2], WATER_UNLOCK_INDEX)
     expect(clamped.x).toBe(3.5)
-    // Solid hub playable edge sits just inside the pier dock point.
     expect(clamped.z).toBeCloseTo(cz - half, 5)
+  })
+
+  it('allows walking from the pier onto the water island through the gate', () => {
+    const { island } = waterBridgeEndpoints()
+    const [, , cz] = worldCenter('water')
+    const half = worldPlayableHalf('water')
+    const southEdge = cz - half
+    // Mid junction: pier dock → a step onto the island floor.
+    const atDock = clampToIsland(0, island[2], WATER_UNLOCK_INDEX)
+    expect(atDock.x).toBe(0)
+    expect(atDock.z).toBeCloseTo(island[2], 5)
+    const ontoIsland = clampToIsland(0, southEdge + 1.5, WATER_UNLOCK_INDEX)
+    expect(ontoIsland.x).toBe(0)
+    expect(ontoIsland.z).toBeCloseTo(southEdge + 1.5, 5)
   })
 
   it('allows leaving the water hub onto the pier', () => {
@@ -94,9 +108,10 @@ describe('clampToIsland', () => {
     const half = worldPlayableHalf('water')
     const southEdge = cz - half
     const clamped = clampToIsland(0, southEdge, WATER_UNLOCK_INDEX)
-    expect(onWaterBridge(0, southEdge, WATER_UNLOCK_INDEX)).toBe(true)
     expect(clamped.x).toBe(0)
-    expect(clamped.z).toBeLessThanOrEqual(southEdge + 0.5)
+    // Still free to move south toward the pier from the rim.
+    const ontoPier = clampToIsland(0, southEdge - 1, WATER_UNLOCK_INDEX)
+    expect(ontoPier.z).toBeLessThan(southEdge)
   })
 
   it('allows walking from the water pier onto home island', () => {

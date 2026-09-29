@@ -177,8 +177,8 @@ function isPointOnRainforestIsland(x: number, z: number): boolean {
 }
 
 /**
- * South gate corridor on the water hub — hand off to the pier so you can
- * walk home instead of getting stuck on the playable rim.
+ * South gate corridor at the water hub dock — two-way junction between
+ * pier and island so neither entry nor exit gets stuck on the rim.
  */
 export function onWaterIslandPierHandoff(x: number, z: number, landTier: number): boolean {
   if (!waterUnlocked(landTier)) return false
@@ -186,8 +186,25 @@ export function onWaterIslandPierHandoff(x: number, z: number, landTier: number)
   const [, , cz] = worldCenter('water')
   const half = worldPlayableHalf('water')
   const southEdge = cz - half
-  // At or south of the playable rim, still near the island dock.
-  return z <= southEdge + 0.35 && z >= southEdge - 3.5
+  const pierEnd = northBridgeEndZ(landTier)
+  // From just south of the pier dock up a short way onto the island floor.
+  return z <= southEdge + 2.5 && z >= pierEnd - 1.5
+}
+
+/** Clamp freely through the water pier ↔ island gate corridor. */
+function waterPierJunctionClamp(
+  x: number,
+  z: number,
+  landTier: number,
+): { x: number; z: number } {
+  const [, , cz] = worldCenter('water')
+  const half = worldPlayableHalf('water')
+  const southEdge = cz - half
+  const pierEnd = northBridgeEndZ(landTier)
+  return {
+    x: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, x)),
+    z: Math.min(southEdge + 2.5, Math.max(pierEnd - 1.5, z)),
+  }
 }
 
 export function onWaterBridge(x: number, z: number, landTier: number): boolean {
@@ -267,17 +284,12 @@ export function clampToIsland(
   z: number,
   landTier = 0,
 ): { x: number; z: number } {
-  // Leave water onto the pier before island clamp traps you on the rim.
+  // Two-way pier ↔ water island gate (enter and leave without getting stuck).
   if (onWaterIslandPierHandoff(x, z, landTier)) {
-    const bridge = bridgeClamp(x, z, landTier)
-    if (bridge) return bridge
+    return waterPierJunctionClamp(x, z, landTier)
   }
 
-  if (
-    waterUnlocked(landTier) &&
-    isPointOnWaterIslandWalkable(x, z) &&
-    !onWaterIslandPierHandoff(x, z, landTier)
-  ) {
+  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) {
     return waterBiomeClamp(x, z)
   }
 
