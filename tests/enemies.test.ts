@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import {
   advancePendingRespawns,
+  BIOME_LEASH_RADIUS,
   canSpawnPendingRespawn,
   clearNightPendingRespawns,
+  clampToBiomeLeash,
   ENEMY_RADIUS,
   enemyForBiome,
   enemyVisual,
+  hubCenterForEnemyKind,
   NIGHT_SLIME_COUNT,
   OVERWORLD_RESPAWN_SEC,
   scheduleOverworldRespawn,
   type EnemyKind,
   type PendingEnemyRespawn,
 } from '../src/systems/enemies'
+import { BIOME_ISLAND_SIZE, plotAtIndex, waterHubCenter } from '../src/systems/plots'
 
 describe('enemies', () => {
   it('keeps enemies a bit shorter than the player', () => {
@@ -132,5 +136,36 @@ describe('overworld enemy respawn', () => {
         { source: 'biome', kind: 'ember' },
       ]),
     ).toBe(false)
+  })
+
+  it('respawns tide blobs on the water hub, not grassland death coords', () => {
+    const [wx, , wz] = waterHubCenter()
+    const scheduled = scheduleOverworldRespawn({
+      source: 'biome',
+      kind: 'tide',
+      position: [0, 0.45, 0],
+    })!
+    expect(scheduled.position[0]).not.toBe(0)
+    expect(Math.hypot(scheduled.position[0] - wx, scheduled.position[2] - wz)).toBeLessThan(
+      BIOME_LEASH_RADIUS,
+    )
+    expect(hubCenterForEnemyKind('tide')).toEqual(waterHubCenter())
+  })
+
+  it('leashes biome movement to the hub radius', () => {
+    const [hx, , hz] = waterHubCenter()
+    const far = clampToBiomeLeash(hx + 100, hz, hx, hz)
+    expect(Math.hypot(far.x - hx, far.z - hz)).toBeCloseTo(BIOME_LEASH_RADIUS, 5)
+    expect(BIOME_LEASH_RADIUS).toBe(BIOME_ISLAND_SIZE / 2 - 2)
+  })
+})
+
+describe('water reef unlocks', () => {
+  it('makes purchased water islands full biome size', () => {
+    // First water expansion is plot index 4 (after water/lava/rainforest hubs).
+    const reef = plotAtIndex(4)
+    expect(reef.biome).toBe('water')
+    expect(reef.size).toBe(BIOME_ISLAND_SIZE)
+    expect(reef.label).toContain('Water Island')
   })
 })

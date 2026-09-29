@@ -11,6 +11,7 @@ import {
   rainforestBridgeEndpoints,
   waterBridgeEndpoints,
   worldCenter,
+  worldPlayableHalf,
 } from '../src/systems/worlds'
 import {
   LAVA_UNLOCK_INDEX,
@@ -41,10 +42,12 @@ describe('clampToIsland', () => {
     expect(clampToIsland(cx, cz, WATER_UNLOCK_INDEX)).toEqual({ x: cx, z: cz })
   })
 
-  it('clamps open water on Water Island to nearest islet', () => {
+  it('clamps past the water hub edge onto the solid island', () => {
     const [cx, , cz] = worldCenter('water')
-    const clamped = clampToIsland(cx + 20, cz, WATER_UNLOCK_INDEX)
-    expect(clamped).not.toEqual({ x: cx + 20, z: cz })
+    // Just inside the detection ring (half+1) but outside the playable half.
+    const clamped = clampToIsland(cx + 21, cz, WATER_UNLOCK_INDEX)
+    expect(clamped).not.toEqual({ x: cx + 21, z: cz })
+    expect(Math.abs(clamped.x - cx)).toBeLessThanOrEqual(20.5 + 0.01)
   })
 
   it('allows the long lava pier after lava unlock', () => {
@@ -78,10 +81,12 @@ describe('clampToIsland', () => {
 
   it('allows stepping off the pier onto the wide water landing', () => {
     const { island } = waterBridgeEndpoints()
-    expect(clampToIsland(3.5, island[2], WATER_UNLOCK_INDEX)).toEqual({
-      x: 3.5,
-      z: island[2],
-    })
+    const [cx, , cz] = worldCenter('water')
+    const half = worldPlayableHalf('water')
+    const clamped = clampToIsland(3.5, island[2], WATER_UNLOCK_INDEX)
+    expect(clamped.x).toBe(3.5)
+    // Solid hub playable edge sits just inside the pier dock point.
+    expect(clamped.z).toBeCloseTo(cz - half, 5)
   })
 
   it('prefers home north dock over pier clamp near the gate', () => {

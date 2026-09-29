@@ -13,7 +13,6 @@ import { lavaUnlocked, rainforestUnlocked, waterUnlocked } from '../systems/plot
 import { LAVA_PATCH_OFFSETS } from '../systems/lavaHazards'
 import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
-import { type WalkRect, waterIslandWalkRects } from '../systems/waterIsland'
 
 const THICK = 2.4
 const WALL_H = 12
@@ -199,57 +198,7 @@ function PortalArch({
   )
 }
 
-function DeepWaterBasin({ cx, cz }: { cx: number; cz: number }) {
-  return (
-    <mesh receiveShadow position={[cx, -0.6, cz]}>
-      <boxGeometry args={[BIOME_ISLAND_SIZE, 0.2, BIOME_ISLAND_SIZE]} />
-      <meshStandardMaterial color="#1a6a9a" transparent opacity={0.92} />
-    </mesh>
-  )
-}
-
-function WalkRectPlatform({ rect }: { rect: WalkRect }) {
-  const mx = (rect.xMin + rect.xMax) / 2
-  const mz = (rect.zMin + rect.zMax) / 2
-  const halfW = (rect.xMax - rect.xMin) / 2
-  const halfL = (rect.zMax - rect.zMin) / 2
-  const isWalkway = rect.kind === 'walkway'
-  const landHalfH = 0.6
-
-  if (isWalkway) {
-    return (
-      <RigidBody type="fixed" colliders={false} position={[mx, 0, mz]}>
-        <CuboidCollider
-          args={[halfW, WALK_COLLIDER_HALF_H, halfL]}
-          position={[0, -WALK_COLLIDER_HALF_H, 0]}
-        />
-        <mesh receiveShadow castShadow position={[0, 0.04, 0]}>
-          <boxGeometry args={[halfW * 2, 0.08, halfL * 2]} />
-          <meshStandardMaterial color="#6ec4ff" />
-        </mesh>
-      </RigidBody>
-    )
-  }
-
-  return (
-    <RigidBody type="fixed" colliders={false} position={[mx, 0, mz]}>
-      <CuboidCollider
-        args={[halfW, WALK_COLLIDER_HALF_H, halfL]}
-        position={[0, -WALK_COLLIDER_HALF_H, 0]}
-      />
-      <mesh receiveShadow castShadow position={[0, -landHalfH, 0]}>
-        <boxGeometry args={[halfW * 2, landHalfH * 2, halfL * 2]} />
-        <meshStandardMaterial color="#2a6a9a" />
-      </mesh>
-      <mesh receiveShadow position={[0, 0.02, 0]}>
-        <boxGeometry args={[halfW * 2 - 0.4, 0.06, halfL * 2 - 0.4]} />
-        <meshStandardMaterial color="#5ec4ff" />
-      </mesh>
-    </RigidBody>
-  )
-}
-
-/** Full water island far north — unlocked first. */
+/** Full water island far north — unlocked first (solid hub, same size as lava). */
 export function WaterWorld() {
   const landTier = useGameStore((s) => s.landTier)
   if (!waterUnlocked(landTier)) return null
@@ -261,24 +210,34 @@ export function WaterWorld() {
   return (
     <group>
       <Ocean from={home} to={island} />
-      <DeepWaterBasin cx={cx} cz={cz} />
-      {waterIslandWalkRects().map((rect) => (
-        <WalkRectPlatform key={rect.id} rect={rect} />
-      ))}
+      <RigidBody type="fixed" colliders={false} position={[cx, 0, cz]}>
+        <CuboidCollider
+          args={[BIOME_ISLAND_SIZE / 2, THICK / 2, BIOME_ISLAND_SIZE / 2]}
+          position={[0, -THICK / 2, 0]}
+        />
+        <mesh receiveShadow position={[0, -THICK / 2, 0]}>
+          <boxGeometry args={[BIOME_ISLAND_SIZE, THICK, BIOME_ISLAND_SIZE]} />
+          <meshStandardMaterial color="#2a6a9a" />
+        </mesh>
+        <mesh receiveShadow position={[0, 0.02, 0]}>
+          <boxGeometry args={[BIOME_ISLAND_SIZE - 2, 0.08, BIOME_ISLAND_SIZE - 2]} />
+          <meshStandardMaterial color="#5ec4ff" />
+        </mesh>
+      </RigidBody>
       <BiomeWalls cx={cx} cz={cz} openSouth />
       <LongBridge from={home} to={island} deckColor="#6ec4ff" railColor="#dfefff" />
       <PortalArch position={[0, 0, h - 0.3]} rotationY={0} color="#2a6a9a" labelColor="#88ddff" />
-      <IslandBeacon position={[cx, 0, cz + 14]} color="#88ddff" />
-      <Gatherable id="water-tree-1" resource="wood" position={[cx - 14, 0, cz + 1]} />
-      <Gatherable id="water-tree-2" resource="wood" position={[cx + 12, 0, cz + 12]} />
-      <Gatherable id="water-tree-3" resource="wood" position={[cx - 3, 0, cz - 2]} />
-      <Gatherable id="water-rock-1" resource="stone" position={[cx + 14, 0, cz - 1]} />
-      <Gatherable id="water-rock-2" resource="stone" position={[cx - 14, 0, cz + 2]} />
+      <IslandBeacon position={[cx, 0, cz + biomeHalf() - 2]} color="#88ddff" />
+      <Gatherable id="water-tree-1" resource="wood" position={[cx - 10, 0, cz + 4]} />
+      <Gatherable id="water-tree-2" resource="wood" position={[cx + 8, 0, cz + 10]} />
+      <Gatherable id="water-tree-3" resource="wood" position={[cx - 3, 0, cz - 6]} />
+      <Gatherable id="water-rock-1" resource="stone" position={[cx + 10, 0, cz - 4]} />
+      <Gatherable id="water-rock-2" resource="stone" position={[cx - 8, 0, cz + 2]} />
       {[
-        [-14, 2],
-        [12, 10],
-        [4, -3],
-        [-2, 12],
+        [-10, 6],
+        [8, 8],
+        [4, -5],
+        [-2, 10],
       ].map(([ox, oz], i) => (
         <mesh key={i} position={[cx + ox, 0.35, cz + oz]}>
           <coneGeometry args={[0.55, 1.4, 6]} />

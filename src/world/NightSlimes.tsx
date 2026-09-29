@@ -7,7 +7,9 @@ import { slimeRotPhase } from '../systems/slimeCastle'
 import {
   ENEMY_BODY_Y,
   ENEMY_RADIUS,
+  clampToBiomeLeash,
   enemyVisual,
+  isOutsideBiomeLeash,
   type EnemyKind,
 } from '../systems/enemies'
 import {
@@ -90,17 +92,26 @@ function SlimeEntity({
       const pdx = player[0] - localPos.current[0]
       const pdz = player[2] - localPos.current[2]
       const pdist = Math.hypot(pdx, pdz)
-      if (pdist > BIOME_AGGRO) {
+      const playerOutside = isOutsideBiomeLeash(
+        player[0],
+        player[2],
+        homePos.current[0],
+        homePos.current[2],
+      )
+      // Do not chase across the bridge onto other lands.
+      if (pdist > BIOME_AGGRO || playerOutside) {
         const hdx = homePos.current[0] - localPos.current[0]
         const hdz = homePos.current[2] - localPos.current[2]
         const hdist = Math.hypot(hdx, hdz) || 1
         if (hdist > 0.4) {
           const step = moveSpeed * 0.55 * delta
-          localPos.current = [
+          const next = clampToBiomeLeash(
             localPos.current[0] + (hdx / hdist) * step,
-            bodyY,
             localPos.current[2] + (hdz / hdist) * step,
-          ]
+            homePos.current[0],
+            homePos.current[2],
+          )
+          localPos.current = [next.x, bodyY, next.z]
           body.current.setNextKinematicTranslation({
             x: localPos.current[0],
             y: localPos.current[1],
@@ -136,11 +147,19 @@ function SlimeEntity({
     const dist = Math.hypot(dx, dz) || 1
     if (dist > ATTACK_RANGE) {
       const step = moveSpeed * delta
-      localPos.current = [
-        localPos.current[0] + (dx / dist) * step,
-        bodyY,
-        localPos.current[2] + (dz / dist) * step,
-      ]
+      let nx = localPos.current[0] + (dx / dist) * step
+      let nz = localPos.current[2] + (dz / dist) * step
+      if (isBiome) {
+        const clamped = clampToBiomeLeash(
+          nx,
+          nz,
+          homePos.current[0],
+          homePos.current[2],
+        )
+        nx = clamped.x
+        nz = clamped.z
+      }
+      localPos.current = [nx, bodyY, nz]
       body.current.setNextKinematicTranslation({
         x: localPos.current[0],
         y: localPos.current[1],

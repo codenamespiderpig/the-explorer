@@ -45,6 +45,8 @@
 - [x] Dungeon end: claim 2 beacon coins beside chest (+20 money each), then E opens the chest
 - [x] Lava Island patches burn on step (6 HP, i-frames rate-limit)
 - [x] Night/biome enemies respawn ~18s after kill
+- [x] Tide blobs leashed to water hub; biome respawns on hub (not grassland)
+- [x] Water hub + water unlocks are full-size islands (still buy from merchant)
 
 ## Now
 

@@ -1,4 +1,4 @@
-import { worldCenter } from './worlds'
+import { BIOME_ISLAND_SIZE, waterHubCenter } from './plots'
 
 export type WalkRectKind = 'islet' | 'walkway'
 
@@ -11,21 +11,10 @@ export interface WalkRect {
   zMax: number
 }
 
-/** Island-local walkable rectangles (origin = worldCenter('water')). */
-export const WATER_ISLAND_RECTS: WalkRect[] = [
-  { id: 'dock', kind: 'islet', xMin: -7, xMax: 7, zMin: -22, zMax: -12 },
-  { id: 'central', kind: 'islet', xMin: -7, xMax: 7, zMin: -6, zMax: 6 },
-  { id: 'west', kind: 'islet', xMin: -18, xMax: -10, zMin: -4, zMax: 4 },
-  { id: 'east', kind: 'islet', xMin: 10, xMax: 18, zMin: -4, zMax: 4 },
-  { id: 'northeast', kind: 'islet', xMin: 8, xMax: 16, zMin: 8, zMax: 16 },
-  { id: 'north', kind: 'islet', xMin: -4, xMax: 4, zMin: 10, zMax: 18 },
-  { id: 'walk-dock-central', kind: 'walkway', xMin: -1.2, xMax: 1.2, zMin: -12, zMax: -6 },
-  { id: 'walk-central-west', kind: 'walkway', xMin: -10, xMax: -7, zMin: -1.2, zMax: 1.2 },
-  { id: 'walk-central-east', kind: 'walkway', xMin: 7, xMax: 10, zMin: -1.2, zMax: 1.2 },
-  { id: 'walk-central-north', kind: 'walkway', xMin: -1.2, xMax: 1.2, zMin: 6, zMax: 10 },
-  { id: 'walk-central-ne-e', kind: 'walkway', xMin: 5.8, xMax: 9.2, zMin: 5.8, zMax: 7.2 },
-  { id: 'walk-central-ne-n', kind: 'walkway', xMin: 6.8, xMax: 9.2, zMin: 7.2, zMax: 10 },
-]
+/** @deprecated mini-islet layout removed — water hub is a solid island. */
+export const WATER_ISLAND_RECTS: WalkRect[] = []
+
+const WATER_PLAYABLE_HALF = BIOME_ISLAND_SIZE / 2 - 1.5
 
 function translateRect(rect: WalkRect, cx: number, cz: number): WalkRect {
   return {
@@ -37,8 +26,9 @@ function translateRect(rect: WalkRect, cx: number, cz: number): WalkRect {
   }
 }
 
+/** Kept for callers; empty now that the hub is a solid slab. */
 export function waterIslandWalkRects(): WalkRect[] {
-  const [cx, , cz] = worldCenter('water')
+  const [cx, , cz] = waterHubCenter()
   return WATER_ISLAND_RECTS.map((rect) => translateRect(rect, cx, cz))
 }
 
@@ -50,8 +40,10 @@ export function isPointInWalkRect(x: number, z: number, rect: WalkRect): boolean
   return x >= rect.xMin && x <= rect.xMax && z >= rect.zMin && z <= rect.zMax
 }
 
+/** Solid water hub playable area (same footprint as lava/rainforest hubs). */
 export function isPointOnWaterIslandWalkable(x: number, z: number): boolean {
-  return waterIslandWalkRects().some((rect) => isPointInWalkRect(x, z, rect))
+  const [cx, , cz] = waterHubCenter()
+  return Math.abs(x - cx) <= WATER_PLAYABLE_HALF + 1 && Math.abs(z - cz) <= WATER_PLAYABLE_HALF + 1
 }
 
 function closestPointOnRect(x: number, z: number, rect: WalkRect): { x: number; z: number } {
@@ -67,6 +59,13 @@ export function clampToWalkableRects(
   z: number,
   rects: readonly WalkRect[],
 ): { x: number; z: number } {
+  if (rects.length === 0) {
+    const [cx, , cz] = waterHubCenter()
+    return {
+      x: cx + Math.min(WATER_PLAYABLE_HALF, Math.max(-WATER_PLAYABLE_HALF, x - cx)),
+      z: cz + Math.min(WATER_PLAYABLE_HALF, Math.max(-WATER_PLAYABLE_HALF, z - cz)),
+    }
+  }
   if (rects.some((rect) => isPointInWalkRect(x, z, rect))) {
     return { x, z }
   }
@@ -92,4 +91,16 @@ export function randomPointInRect(
     x: rect.xMin + rng() * (rect.xMax - rect.xMin),
     z: rect.zMin + rng() * (rect.zMax - rect.zMin),
   }
+}
+
+/** Random point on the solid water hub (for merchant, etc.). */
+export function randomPointOnWaterHub(rng: () => number = Math.random): {
+  x: number
+  z: number
+} {
+  const [cx, , cz] = waterHubCenter()
+  const half = BIOME_ISLAND_SIZE / 2 - 2
+  const angle = rng() * Math.PI * 2
+  const dist = half * (0.35 + rng() * 0.55)
+  return { x: cx + Math.cos(angle) * dist, z: cz + Math.sin(angle) * dist }
 }

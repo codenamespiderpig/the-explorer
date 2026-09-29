@@ -54,8 +54,8 @@ export function rainforestHubCenter(): [number, number, number] {
 
 function waterExpansionCenter(expansionIndex: number): [number, number, number] {
   const [cx, , cz] = waterHubCenter()
-  const step = OUTPOST_SIZE + OUTPOST_GAP
-  return [cx, 0, cz + biomeHalf() + OUTPOST_GAP + outpostHalf() + (expansionIndex - 1) * step]
+  const step = BIOME_ISLAND_SIZE + OCEAN_GAP
+  return [cx, 0, cz + biomeHalf() + OCEAN_GAP + biomeHalf() + (expansionIndex - 1) * step]
 }
 
 function lavaExpansionCenter(expansionIndex: number): [number, number, number] {
@@ -121,11 +121,11 @@ export function plotAtIndex(index: number): LandPlot {
     return {
       index,
       id: `water-reef-${n}`,
-      label: `Unlock Water Reef ${n}`,
+      label: `Unlock Water Island ${n}`,
       biome: 'water',
       chain: 'north',
       kind: 'outpost',
-      size: OUTPOST_SIZE,
+      size: BIOME_ISLAND_SIZE,
       center: waterExpansionCenter(n),
     }
   }

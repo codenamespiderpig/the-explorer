@@ -19,9 +19,7 @@ import {
   type LandPlot,
 } from '../systems/plots'
 import {
-  clampToWalkableRects,
   isPointOnWaterIslandWalkable,
-  waterIslandWalkRects,
 } from '../systems/waterIsland'
 
 export {
@@ -54,10 +52,10 @@ function homeClamp(x: number, z: number) {
 function waterBiomeClamp(x: number, z: number): { x: number; z: number } {
   const [cx, , cz] = worldCenter('water')
   const half = worldPlayableHalf('water')
-  if (Math.abs(x - cx) > half + 1 || Math.abs(z - cz) > half + 1) {
-    return { x, z }
+  return {
+    x: cx + Math.min(half, Math.max(-half, x - cx)),
+    z: cz + Math.min(half, Math.max(-half, z - cz)),
   }
-  return clampToWalkableRects(x, z, waterIslandWalkRects())
 }
 
 function biomeClamp(x: number, z: number, world: WorldId): { x: number; z: number } {

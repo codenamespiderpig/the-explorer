@@ -1,4 +1,4 @@
-import { randomPointInRect, waterIslandIsletRects } from './waterIsland'
+import { randomPointOnWaterHub } from './waterIsland'
 import {
   BIOME_ISLAND_SIZE,
   HOME_ISLAND_SIZE,
@@ -103,12 +103,8 @@ export function merchantSpawnPosition(
   const world = worlds[Math.floor(rng() * worlds.length)] ?? 'home'
 
   if (world === 'water') {
-    const islets = waterIslandIsletRects()
-    const rect = islets[Math.floor(rng() * islets.length)] ?? islets[0]
-    if (rect) {
-      const point = randomPointInRect(rect, rng)
-      return { world, position: [point.x, 0, point.z] }
-    }
+    const point = randomPointOnWaterHub(rng)
+    return { world, position: [point.x, 0, point.z] }
   }
 
   const plots = unlockedPlots(landTier).filter((p) => p.kind === 'outpost')
