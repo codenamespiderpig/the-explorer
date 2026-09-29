@@ -45,7 +45,7 @@ export const RECIPES: Record<RecipeId, Recipe> = {
   campfire: {
     id: 'campfire',
     name: 'Campfire',
-    description: 'A small fire for camping. Place with G.',
+    description: 'Place with G — lights the area around it at night.',
     output: 'campfire',
     cost: { wood: 3 },
   },

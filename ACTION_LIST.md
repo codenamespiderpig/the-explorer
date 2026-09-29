@@ -33,6 +33,7 @@
 - [x] Fix lava→home exit; infinite land: water→lava first, then reef/crag extras
 - [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
 - [x] Campfire shows a log pile; workbench has little tools on top
+- [x] Campfire lights the nearby area at night
 - [x] Smaller fences; G prefers workbench / last-crafted placeable (click inventory to pick)
 
 - [x] Top-right minimap — click to open full world overview

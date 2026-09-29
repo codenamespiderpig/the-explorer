@@ -1,6 +1,56 @@
 import { useGameStore } from '../stores/gameStore'
 import type { BuildingKind } from '../systems/building'
 
+/** Lights the area at night; quiet flame during the day. */
+function CampfireMesh({ yaw }: { yaw: number }) {
+  const phase = useGameStore((s) => s.dayNight.phase)
+  const night = phase === 'night'
+  const flameIntensity = night ? 1.35 : 0.45
+
+  return (
+    <group rotation={[0, yaw, 0]}>
+      <mesh castShadow position={[0, 0.12, 0]}>
+        <cylinderGeometry args={[0.55, 0.65, 0.2, 8]} />
+        <meshStandardMaterial color="#4a3018" />
+      </mesh>
+      {/* Log pile under the flame */}
+      <mesh castShadow position={[-0.12, 0.22, 0.05]} rotation={[0.15, 0.4, 1.2]}>
+        <cylinderGeometry args={[0.08, 0.09, 0.7, 6]} />
+        <meshStandardMaterial color="#5c3a1e" />
+      </mesh>
+      <mesh castShadow position={[0.14, 0.2, -0.06]} rotation={[-0.2, -0.5, 1.05]}>
+        <cylinderGeometry args={[0.07, 0.08, 0.65, 6]} />
+        <meshStandardMaterial color="#6a4424" />
+      </mesh>
+      <mesh castShadow position={[0.02, 0.24, 0.12]} rotation={[0.35, 0.1, 0.95]}>
+        <cylinderGeometry args={[0.06, 0.07, 0.55, 6]} />
+        <meshStandardMaterial color="#4e3218" />
+      </mesh>
+      <mesh castShadow position={[-0.05, 0.18, -0.16]} rotation={[-0.1, 0.8, 1.35]}>
+        <cylinderGeometry args={[0.065, 0.075, 0.6, 6]} />
+        <meshStandardMaterial color="#633e20" />
+      </mesh>
+      <mesh position={[0, 0.52, 0]}>
+        <coneGeometry args={[0.28, 0.7, 6]} />
+        <meshStandardMaterial
+          color="#ff7722"
+          emissive="#ff4400"
+          emissiveIntensity={flameIntensity}
+        />
+      </mesh>
+      {night ? (
+        <pointLight
+          position={[0, 1.2, 0]}
+          intensity={1.4}
+          distance={10}
+          color="#ff8844"
+          castShadow={false}
+        />
+      ) : null}
+    </group>
+  )
+}
+
 function BuildingMesh({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
   if (kind === 'workbench') {
     return (
@@ -76,35 +126,7 @@ function BuildingMesh({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
     )
   }
   if (kind === 'campfire') {
-    return (
-      <group rotation={[0, yaw, 0]}>
-        <mesh castShadow position={[0, 0.12, 0]}>
-          <cylinderGeometry args={[0.55, 0.65, 0.2, 8]} />
-          <meshStandardMaterial color="#4a3018" />
-        </mesh>
-        {/* Log pile under the flame */}
-        <mesh castShadow position={[-0.12, 0.22, 0.05]} rotation={[0.15, 0.4, 1.2]}>
-          <cylinderGeometry args={[0.08, 0.09, 0.7, 6]} />
-          <meshStandardMaterial color="#5c3a1e" />
-        </mesh>
-        <mesh castShadow position={[0.14, 0.2, -0.06]} rotation={[-0.2, -0.5, 1.05]}>
-          <cylinderGeometry args={[0.07, 0.08, 0.65, 6]} />
-          <meshStandardMaterial color="#6a4424" />
-        </mesh>
-        <mesh castShadow position={[0.02, 0.24, 0.12]} rotation={[0.35, 0.1, 0.95]}>
-          <cylinderGeometry args={[0.06, 0.07, 0.55, 6]} />
-          <meshStandardMaterial color="#4e3218" />
-        </mesh>
-        <mesh castShadow position={[-0.05, 0.18, -0.16]} rotation={[-0.1, 0.8, 1.35]}>
-          <cylinderGeometry args={[0.065, 0.075, 0.6, 6]} />
-          <meshStandardMaterial color="#633e20" />
-        </mesh>
-        <mesh position={[0, 0.52, 0]}>
-          <coneGeometry args={[0.28, 0.7, 6]} />
-          <meshStandardMaterial color="#ff7722" emissive="#ff4400" emissiveIntensity={0.7} />
-        </mesh>
-      </group>
-    )
+    return <CampfireMesh yaw={yaw} />
   }
   return (
     <group rotation={[0, yaw, 0]}>
