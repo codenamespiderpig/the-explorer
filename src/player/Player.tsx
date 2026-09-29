@@ -475,7 +475,13 @@ function usePlaceablePlacement(
       const inv = useInventoryStore.getState()
       const pos = ecctrl.current.currPos
       const landTier = useGameStore.getState().landTier
-      const pick = pickPlaceableToPlace(inv.items, landTier, pos.x, pos.z)
+      const pick = pickPlaceableToPlace(
+        inv.items,
+        landTier,
+        pos.x,
+        pos.z,
+        inv.preferredPlaceable,
+      )
 
       if (!pick.ok) {
         inv.setHint(placeableHint(pick))
@@ -483,7 +489,11 @@ function usePlaceablePlacement(
       }
 
       const count = inv.items[pick.item] ?? 0
-      inv.setItems({ ...inv.items, [pick.item]: count - 1 })
+      const nextCount = count - 1
+      inv.setItems({ ...inv.items, [pick.item]: nextCount })
+      if (nextCount < 1 && inv.preferredPlaceable === pick.item) {
+        inv.setPreferredPlaceable(null)
+      }
 
       if (pick.item === 'wooden-gate') {
         const k = keys.current

@@ -362,6 +362,23 @@ body,
   border: 1px solid rgba(61, 47, 30, 0.2);
   border-radius: 6px;
   font-size: 0.9rem;
+  font: inherit;
+  color: inherit;
+  cursor: default;
+}
+
+button.bp-inv-slot:not(:disabled) {
+  cursor: pointer;
+}
+
+button.bp-inv-slot:disabled {
+  opacity: 1;
+}
+
+.bp-inv-slot-selected {
+  border-color: #c9a227;
+  background: rgba(255, 220, 140, 0.85);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.45);
 }
 
 

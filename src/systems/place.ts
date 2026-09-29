@@ -22,29 +22,60 @@ function count(items: Partial<Record<ItemId, number>>, id: PlaceableItemId): num
   return items[id] ?? 0
 }
 
+export function isPlaceableItem(id: ItemId): id is PlaceableItemId {
+  return (PLACEABLE_ITEMS as readonly string[]).includes(id)
+}
+
+/** Priority when nothing is preferred — workbench first, fence last. */
+const DEFAULT_PLACE_ORDER = [
+  'workbench',
+  'furnace',
+  'campfire',
+  'wooden-gate',
+  'slime-castle',
+  'crab-pot',
+  'fence',
+] as const satisfies readonly PlaceableItemId[]
+
+function tryPick(
+  id: PlaceableItemId,
+  items: Partial<Record<ItemId, number>>,
+  landTier: number,
+  x: number,
+  z: number,
+): PickPlaceableResult | null {
+  if (count(items, id) < 1) return null
+  if (id === 'crab-pot' && !isNearWater(x, z, landTier)) {
+    return { ok: false, reason: 'crab-pot-needs-water' }
+  }
+  return { ok: true, item: id }
+}
+
 /** Choose which placeable to use when pressing G. */
 export function pickPlaceableToPlace(
   items: Partial<Record<ItemId, number>>,
   landTier: number,
   x: number,
   z: number,
+  preferred: PlaceableItemId | null = null,
 ): PickPlaceableResult {
-  // Prefer crafted buildings first so workbench/furnace aren't blocked by a leftover gate.
-  for (const id of ['workbench', 'furnace', 'campfire', 'fence'] as const) {
-    if (count(items, id) > 0) return { ok: true, item: id }
+  if (preferred) {
+    const picked = tryPick(preferred, items, landTier, x, z)
+    if (picked) return picked
   }
-  if (count(items, 'wooden-gate') > 0) {
-    return { ok: true, item: 'wooden-gate' }
-  }
-  if (count(items, 'slime-castle') > 0) {
-    return { ok: true, item: 'slime-castle' }
-  }
-  if (count(items, 'crab-pot') > 0) {
-    if (!isNearWater(x, z, landTier)) {
-      return { ok: false, reason: 'crab-pot-needs-water' }
+
+  let blockedByWater = false
+  for (const id of DEFAULT_PLACE_ORDER) {
+    const picked = tryPick(id, items, landTier, x, z)
+    if (!picked) continue
+    if (!picked.ok) {
+      blockedByWater = true
+      continue
     }
-    return { ok: true, item: 'crab-pot' }
+    return picked
   }
+
+  if (blockedByWater) return { ok: false, reason: 'crab-pot-needs-water' }
   return { ok: false, reason: 'none-owned' }
 }
 

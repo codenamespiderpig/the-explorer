@@ -15,6 +15,31 @@ describe('pickPlaceableToPlace', () => {
     ).toEqual({ ok: true, item: 'workbench' })
   })
 
+  it('prefers workbench over leftover fences', () => {
+    expect(
+      pickPlaceableToPlace({ workbench: 1, fence: 5, campfire: 2 }, 0, 0, 0),
+    ).toEqual({ ok: true, item: 'workbench' })
+  })
+
+  it('places preferred placeable when owned', () => {
+    expect(
+      pickPlaceableToPlace({ workbench: 1, fence: 3 }, 0, 0, 0, 'fence'),
+    ).toEqual({ ok: true, item: 'fence' })
+  })
+
+  it('falls back when preferred is not owned', () => {
+    expect(
+      pickPlaceableToPlace({ workbench: 1, fence: 1 }, 0, 0, 0, 'furnace'),
+    ).toEqual({ ok: true, item: 'workbench' })
+  })
+
+  it('places fence only when nothing else is placeable', () => {
+    expect(pickPlaceableToPlace({ fence: 2 }, 0, 0, 0)).toEqual({
+      ok: true,
+      item: 'fence',
+    })
+  })
+
   it('places slime castle when no buildings or gate are owned', () => {
     expect(pickPlaceableToPlace({ 'slime-castle': 1 }, 0, 0, 0)).toEqual({
       ok: true,

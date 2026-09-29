@@ -5,6 +5,7 @@ import { SKILL_LIST, type Skill } from '../data/skills'
 import { canCraft, craft } from '../systems/craft'
 import { canLearn, learn } from '../systems/learn'
 import { hasPlacedBuilding } from '../systems/building'
+import { isPlaceableItem } from '../systems/place'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { useProgressStore, useUiStore } from '../stores/uiStore'
@@ -38,7 +39,12 @@ function CraftPanel() {
     const result = craft(recipe, items)
     if (!result.ok) return
     setItems(result.remaining)
-    setHint(`Crafted ${ITEMS[result.item].name}`)
+    if (isPlaceableItem(result.item)) {
+      useInventoryStore.getState().setPreferredPlaceable(result.item)
+      setHint(`Crafted ${ITEMS[result.item].name} — press G to place it`)
+    } else {
+      setHint(`Crafted ${ITEMS[result.item].name}`)
+    }
   }
 
   return (
@@ -145,6 +151,9 @@ function LearnPanel() {
 function InventoryPanel() {
   const items = useInventoryStore((s) => s.items)
   const tools = useInventoryStore((s) => s.tools)
+  const preferredPlaceable = useInventoryStore((s) => s.preferredPlaceable)
+  const setPreferredPlaceable = useInventoryStore((s) => s.setPreferredPlaceable)
+  const setHint = useInventoryStore((s) => s.setHint)
   const learned = useProgressStore((s) => s.learned)
 
   const entries = Object.entries(items).filter(([, n]) => (n ?? 0) > 0)
@@ -158,11 +167,27 @@ function InventoryPanel() {
             {ITEMS[tool].name}
           </div>
         ))}
-        {entries.map(([id, n]) => (
-          <div key={id} className="bp-inv-slot">
-            {ITEMS[id as ItemId]?.name ?? id} ×{n}
-          </div>
-        ))}
+        {entries.map(([id, n]) => {
+          const itemId = id as ItemId
+          const placeable = isPlaceableItem(itemId)
+          const selected = preferredPlaceable === itemId
+          return (
+            <button
+              key={id}
+              type="button"
+              className={selected ? 'bp-inv-slot bp-inv-slot-selected' : 'bp-inv-slot'}
+              disabled={!placeable}
+              onClick={() => {
+                if (!placeable) return
+                setPreferredPlaceable(itemId)
+                setHint(`${ITEMS[itemId].name} selected — press G to place`)
+              }}
+              title={placeable ? 'Click then press G to place' : undefined}
+            >
+              {ITEMS[itemId]?.name ?? id} ×{n}
+            </button>
+          )
+        })}
         {entries.length === 0 ? (
           <div className="bp-row-meta">Empty — gather wood and stone</div>
         ) : null}

@@ -108,13 +108,18 @@ function BuildingMesh({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
   }
   return (
     <group rotation={[0, yaw, 0]}>
-      <mesh castShadow position={[0, 0.55, 0]}>
-        <boxGeometry args={[0.18, 1.1, 0.18]} />
+      {/* Short post + thin rail — fits the player scale */}
+      <mesh castShadow position={[0, 0.35, 0]}>
+        <boxGeometry args={[0.1, 0.7, 0.1]} />
         <meshStandardMaterial color="#8b5a2b" />
       </mesh>
-      <mesh castShadow position={[0, 0.95, 0]}>
-        <boxGeometry args={[1.2, 0.12, 0.12]} />
+      <mesh castShadow position={[0, 0.55, 0]}>
+        <boxGeometry args={[0.7, 0.07, 0.07]} />
         <meshStandardMaterial color="#6b4420" />
+      </mesh>
+      <mesh castShadow position={[0, 0.32, 0]}>
+        <boxGeometry args={[0.7, 0.06, 0.06]} />
+        <meshStandardMaterial color="#5a3a18" />
       </mesh>
     </group>
   )
