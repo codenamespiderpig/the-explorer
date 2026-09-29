@@ -20,6 +20,7 @@ import { listGatherables } from '../world/gatherableRegistry'
 import { FALL_Y, clampToIsland } from '../world/bounds'
 import {
   canEnterDungeon,
+  DUNGEON_COIN_MONEY,
   DUNGEON_COINS_REQUIRED,
   DUNGEON_FALL_Y,
   isNearDungeonChest,
@@ -252,8 +253,8 @@ function useGatherInput() {
             const count = next.dungeonCoinsCollected.length
             state.setHint(
               next.dungeonChestUnlocked
-                ? `Coins ${count}/${DUNGEON_COINS_REQUIRED} — chest unlocked! Press E`
-                : `Claimed a coin (${count}/${DUNGEON_COINS_REQUIRED})`,
+                ? `+${DUNGEON_COIN_MONEY} money · coins ${count}/${DUNGEON_COINS_REQUIRED} — chest unlocked! Press E`
+                : `+${DUNGEON_COIN_MONEY} money · coin ${count}/${DUNGEON_COINS_REQUIRED}`,
             )
           }
           return

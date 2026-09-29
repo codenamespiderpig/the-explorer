@@ -43,6 +43,7 @@ import {
   canOpenDungeonChest,
   canUnlockDungeonChest,
   collectDungeonCoin,
+  DUNGEON_COIN_MONEY,
   DUNGEON_HOME_SPAWN,
   DUNGEON_MOB_POSITIONS,
   DUNGEON_SPAWN,
@@ -453,10 +454,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!get().inDungeon) return false
     const result = collectDungeonCoin(get().dungeonCoinsCollected, coinIndex)
     if (!result.ok) return false
-    set({
+    set((s) => ({
       dungeonCoinsCollected: result.collected,
       dungeonChestUnlocked: result.unlocked || canUnlockDungeonChest(result.collected.length),
-    })
+      money: s.money + DUNGEON_COIN_MONEY,
+    }))
     return true
   },
 

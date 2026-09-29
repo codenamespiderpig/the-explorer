@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   DUNGEON_CHEST_LOOT,
+  DUNGEON_COIN_MONEY,
   DUNGEON_COINS_REQUIRED,
   DUNGEON_COIN_POSITIONS,
   DUNGEON_ENTRANCE,
@@ -48,6 +49,7 @@ describe('dungeon', () => {
 
   it('requires two coins before the chest unlocks', () => {
     expect(DUNGEON_COINS_REQUIRED).toBe(2)
+    expect(DUNGEON_COIN_MONEY).toBe(20)
     expect(DUNGEON_COIN_POSITIONS).toHaveLength(2)
     expect(canUnlockDungeonChest(0)).toBe(false)
     expect(canUnlockDungeonChest(1)).toBe(false)

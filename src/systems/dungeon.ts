@@ -20,6 +20,9 @@ export const DUNGEON_COIN_PICKUP_RADIUS = 2.2
 
 export const DUNGEON_COINS_REQUIRED = 2
 
+/** Money granted each time you claim a dungeon coin. */
+export const DUNGEON_COIN_MONEY = 20
+
 /** Gold coins to claim at the end before the chest unlocks. */
 export const DUNGEON_COIN_POSITIONS: Array<[number, number, number]> = [
   [-2.4, -42.2, 26.5],
