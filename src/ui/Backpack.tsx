@@ -52,12 +52,11 @@ function CraftPanel() {
       <div className="bp-section-title">Build & craft</div>
       {!hasWorkbench ? (
         <div className="bp-row-meta" style={{ marginBottom: 8 }}>
-          Craft workbench → press G to place — unlocks furnace, advanced
-          campfire, slime castle
+          Craft workbench → press G to place → stand next to it and press E
         </div>
       ) : (
         <div className="bp-row-meta" style={{ marginBottom: 8 }}>
-          Workbench ready — advanced crafts unlocked
+          Workbench ready — press E beside it (or craft here)
         </div>
       )}
       <ul className="bp-list">

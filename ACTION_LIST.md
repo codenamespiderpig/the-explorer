@@ -41,6 +41,7 @@
 - [x] Top-right minimap — click to open full world overview
 - [x] Workbench unlocks advanced crafts (furnace, advanced campfire, slime castle)
 - [x] HUD + craft panel explain: place workbench with G to unlock advanced crafts
+- [x] Press E beside a placed workbench to open the craft panel
 - [x] Home grassland ponds — place crab pots on the banks
 - [x] Rainforest land south of home (3rd unlock)
 - [x] Different enemies per land; enemies a bit shorter than the player

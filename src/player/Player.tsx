@@ -6,7 +6,7 @@ import { canGather, gatherYield } from '../systems/gather'
 import { findNearestGatherable } from '../systems/proximity'
 import { gatePlacementFromForward } from '../systems/gate'
 import { pickPlaceableToPlace, placeableHint } from '../systems/place'
-import { isBuildingKind } from '../systems/building'
+import { isBuildingKind, nearestBuildingOfKind } from '../systems/building'
 import { cameraLook, facingDirection } from '../systems/facing'
 import { ATTACK_RANGE, nearestTargetInRange, SWORD_DAMAGE } from '../systems/combat'
 import { nearestPot, nearestPotWithFish } from '../systems/crabPot'
@@ -16,6 +16,7 @@ import { ITEMS } from '../data/items'
 import { useInventoryStore } from '../stores/inventoryStore'
 import { useGameStore } from '../stores/gameStore'
 import { useToolActionStore } from '../stores/toolActionStore'
+import { useUiStore } from '../stores/uiStore'
 import { listGatherables } from '../world/gatherableRegistry'
 import { FALL_Y, clampToIsland } from '../world/bounds'
 import {
@@ -303,9 +304,25 @@ function useGatherInput() {
         return
       }
 
+      const workbench = nearestBuildingOfKind(
+        game.buildings,
+        'workbench',
+        playerPos[0],
+        playerPos[2],
+        2.8,
+      )
+      if (workbench) {
+        useUiStore.getState().setBackpackTab('craft')
+        useUiStore.getState().setBackpackOpen(true)
+        state.setHint('Workbench — craft advanced items here')
+        return
+      }
+
       const { nearbyNodeId, nearbyResource, tools } = state
       if (!nearbyNodeId || !nearbyResource) {
-        state.setHint('Walk closer to a tree, rock, crab pot, or the dungeon stairs')
+        state.setHint(
+          'Walk closer to a tree, rock, crab pot, workbench, or the dungeon stairs',
+        )
         return
       }
       if (!canGather(nearbyResource, tools)) {
@@ -422,6 +439,20 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
     const fishPot = nearestPotWithFish(game.crabPots, playerPos, 2.8)
     if (fishPot) {
       store.setHint(`Press E to collect ${fishPot.storedFish} fish from crab pot`)
+      lastId.current = null
+      store.setNearby(null, null)
+      return
+    }
+
+    const workbench = nearestBuildingOfKind(
+      game.buildings,
+      'workbench',
+      pos.x,
+      pos.z,
+      2.8,
+    )
+    if (workbench) {
+      store.setHint('Press E to use the workbench')
       lastId.current = null
       store.setNearby(null, null)
       return

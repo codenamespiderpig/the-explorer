@@ -41,3 +41,24 @@ export function hasPlacedBuilding(
 ): boolean {
   return buildings.some((b) => b.kind === kind)
 }
+
+/** Nearest building of `kind` within `radius`, or null. */
+export function nearestBuildingOfKind(
+  buildings: readonly PlacedBuilding[],
+  kind: BuildingKind,
+  x: number,
+  z: number,
+  radius: number,
+): PlacedBuilding | null {
+  let best: PlacedBuilding | null = null
+  let bestDist = radius
+  for (const b of buildings) {
+    if (b.kind !== kind) continue
+    const d = Math.hypot(b.position[0] - x, b.position[2] - z)
+    if (d <= bestDist) {
+      bestDist = d
+      best = b
+    }
+  }
+  return best
+}

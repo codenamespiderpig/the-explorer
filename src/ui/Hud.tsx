@@ -103,7 +103,7 @@ export function Hud() {
           <div className="hud-tools">Press T — spend relic (+{RELIC_ARMOUR_BONUS} max HP)</div>
         ) : null}
         <div className="hud-tools">
-          Q backpack · G place (workbench unlocks advanced crafts) · M merchant · R eat fish · T relic · click map · E dungeon
+          Q backpack · G place · E use workbench · M merchant · R eat fish · T relic · click map · E dungeon
         </div>
       </div>
 
