@@ -12,11 +12,13 @@ import {
   canOpenDungeonChest,
   canUnlockDungeonChest,
   collectDungeonCoin,
+  completeDungeonOnExit,
   dungeonChestReward,
   isNearDungeonChest,
   isNearDungeonCoin,
   isNearDungeonEntrance,
   isNearDungeonPortal,
+  shouldHideDungeonEntrance,
 } from '../src/systems/dungeon'
 
 describe('dungeon', () => {
@@ -24,6 +26,15 @@ describe('dungeon', () => {
     expect(canEnterDungeon(0)).toBe(true)
     expect(canEnterDungeon(DUNGEON_MIN_LAND_TIER)).toBe(true)
     expect(DUNGEON_MIN_LAND_TIER).toBe(0)
+  })
+
+  it('disappears after completion — cannot re-enter', () => {
+    expect(canEnterDungeon(0, false)).toBe(true)
+    expect(canEnterDungeon(0, true)).toBe(false)
+    expect(shouldHideDungeonEntrance(true)).toBe(true)
+    expect(shouldHideDungeonEntrance(false)).toBe(false)
+    expect(completeDungeonOnExit(true)).toBe(true)
+    expect(completeDungeonOnExit(false)).toBe(false)
   })
 
   it('detects standing at the home entrance stairs', () => {

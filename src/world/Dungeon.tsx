@@ -7,6 +7,7 @@ import {
   DUNGEON_ENTRANCE,
   DUNGEON_PORTAL,
   DUNGEON_SPAWN,
+  shouldHideDungeonEntrance,
 } from '../systems/dungeon'
 
 function StairStep({
@@ -24,10 +25,13 @@ function StairStep({
   )
 }
 
-/** Overworld entrance — glowing stairs after first land unlock. */
+/** Overworld entrance — glowing stairs; vanishes after the dungeon is cleared. */
 function DungeonEntrance() {
   const landTier = useGameStore((s) => s.landTier)
-  const open = canEnterDungeon(landTier)
+  const completed = useGameStore((s) => s.dungeonCompleted)
+  if (shouldHideDungeonEntrance(completed)) return null
+
+  const open = canEnterDungeon(landTier, completed)
   const [ex, , ez] = DUNGEON_ENTRANCE
 
   return (

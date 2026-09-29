@@ -238,7 +238,7 @@ function useGatherInput() {
       if (game.inDungeon) {
         if (game.dungeonChestOpened && isNearDungeonPortal(playerPos[0], playerPos[2])) {
           game.exitDungeon()
-          state.setHint('Portal whisked you home')
+          state.setHint('Dungeon cleared — stairs gone. Press T to spend relics')
           return
         }
 
@@ -283,7 +283,7 @@ function useGatherInput() {
       }
 
       if (
-        canEnterDungeon(game.landTier) &&
+        canEnterDungeon(game.landTier, game.dungeonCompleted) &&
         isNearDungeonEntrance(playerPos[0], playerPos[2])
       ) {
         if (game.enterDungeon()) {
@@ -408,7 +408,10 @@ function useProximityTracking(ecctrl: RefObject<EcctrlHandle | null>) {
       return
     }
 
-      if (isNearDungeonEntrance(pos.x, pos.z)) {
+      if (
+        !game.dungeonCompleted &&
+        isNearDungeonEntrance(pos.x, pos.z)
+      ) {
       store.setHint('Press E to enter the dungeon')
       lastId.current = null
       store.setNearby(null, null)

@@ -37,6 +37,7 @@
 - [x] Rainforest land south of home (3rd unlock)
 - [x] Different enemies per land; enemies a bit shorter than the player
 - [x] First dungeon: home stairs → flat fight hall (5 mobs) → chest → portal home
+- [x] Dungeon vanishes after you clear it (chest + leave)
 - [x] Dungeon relics spend with T for permanent armour / max HP
 - [x] Dungeon end: claim 2 beacon coins beside chest (+20 money each), then E opens the chest
 

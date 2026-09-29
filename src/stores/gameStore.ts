@@ -43,6 +43,7 @@ import {
   canOpenDungeonChest,
   canUnlockDungeonChest,
   collectDungeonCoin,
+  completeDungeonOnExit,
   DUNGEON_COIN_MONEY,
   DUNGEON_HOME_SPAWN,
   DUNGEON_MOB_POSITIONS,
@@ -106,6 +107,7 @@ interface GameState {
   playerSpawn: [number, number, number]
   respawnToken: number
   inDungeon: boolean
+  dungeonCompleted: boolean
   dungeonChestOpened: boolean
   dungeonChestUnlocked: boolean
   dungeonCoinsCollected: number[]
@@ -208,6 +210,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerSpawn: [0, 3, 0],
   respawnToken: 0,
   inDungeon: false,
+  dungeonCompleted: false,
   dungeonChestOpened: false,
   dungeonChestUnlocked: false,
   dungeonCoinsCollected: [],
@@ -407,7 +410,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   enterDungeon: () => {
-    if (!canEnterDungeon(get().landTier)) return false
+    if (!canEnterDungeon(get().landTier, get().dungeonCompleted)) return false
     const dungeonMobs = DUNGEON_MOB_POSITIONS.map((position) => {
       slimeSeq += 1
       return {
@@ -440,6 +443,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   exitDungeon: () => {
     set((s) => ({
       inDungeon: false,
+      dungeonCompleted: s.dungeonCompleted || completeDungeonOnExit(s.dungeonChestOpened),
       dungeonChestOpened: false,
       dungeonChestUnlocked: false,
       dungeonCoinsCollected: [],
@@ -523,9 +527,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   respawnPlayer: () => {
     const wasDungeon = get().inDungeon
+    const chestOpened = get().dungeonChestOpened
     set((s) => ({
       health: respawnHealth(s.health),
       inDungeon: false,
+      dungeonCompleted:
+        s.dungeonCompleted || (wasDungeon && completeDungeonOnExit(chestOpened)),
       dungeonChestOpened: false,
       dungeonChestUnlocked: false,
       dungeonCoinsCollected: [],

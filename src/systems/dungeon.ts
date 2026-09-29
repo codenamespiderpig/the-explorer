@@ -57,8 +57,18 @@ export const DUNGEON_ENEMY_DAMAGE = 4
 export const DUNGEON_ENEMY_COOLDOWN = 1.5
 export const DUNGEON_ENEMY_SPEED = 1.45
 
-export function canEnterDungeon(landTier: number): boolean {
-  return landTier >= DUNGEON_MIN_LAND_TIER
+export function canEnterDungeon(landTier: number, completed = false): boolean {
+  return !completed && landTier >= DUNGEON_MIN_LAND_TIER
+}
+
+/** Entrance vanishes once the dungeon has been cleared. */
+export function shouldHideDungeonEntrance(completed: boolean): boolean {
+  return completed
+}
+
+/** Completing = leave after opening the chest (portal or fall). */
+export function completeDungeonOnExit(chestOpened: boolean): boolean {
+  return chestOpened
 }
 
 export function isNearDungeonEntrance(x: number, z: number): boolean {
