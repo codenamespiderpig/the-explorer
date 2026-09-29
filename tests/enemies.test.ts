@@ -9,6 +9,7 @@ import {
   enemyForBiome,
   enemyVisual,
   hubCenterForEnemyKind,
+  isOutsideBiomeLeash,
   NIGHT_SLIME_COUNT,
   OVERWORLD_RESPAWN_SEC,
   scheduleOverworldRespawn,
@@ -157,6 +158,15 @@ describe('overworld enemy respawn', () => {
     const far = clampToBiomeLeash(hx + 100, hz, hx, hz)
     expect(Math.hypot(far.x - hx, far.z - hz)).toBeCloseTo(BIOME_LEASH_RADIUS, 5)
     expect(BIOME_LEASH_RADIUS).toBe(BIOME_ISLAND_SIZE / 2 - 2)
+  })
+
+  it('keeps tide blobs off the water pier toward grassland', () => {
+    const [hx, , hz] = waterHubCenter()
+    // Pier mid-path south of the hub — must be outside hub leash.
+    const pierZ = hz - BIOME_LEASH_RADIUS - 5
+    expect(isOutsideBiomeLeash(0, pierZ, hx, hz)).toBe(true)
+    const clamped = clampToBiomeLeash(0, pierZ, hx, hz)
+    expect(Math.hypot(clamped.x - hx, clamped.z - hz)).toBeCloseTo(BIOME_LEASH_RADIUS, 5)
   })
 })
 

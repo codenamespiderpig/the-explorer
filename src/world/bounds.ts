@@ -176,10 +176,31 @@ function isPointOnRainforestIsland(x: number, z: number): boolean {
   return Math.abs(x - cx) <= half + 1 && Math.abs(z - cz) <= half + 1
 }
 
+/**
+ * South gate corridor on the water hub — hand off to the pier so you can
+ * walk home instead of getting stuck on the playable rim.
+ */
+export function onWaterIslandPierHandoff(x: number, z: number, landTier: number): boolean {
+  if (!waterUnlocked(landTier)) return false
+  if (Math.abs(x) > BRIDGE_GATE_HALF) return false
+  const [, , cz] = worldCenter('water')
+  const half = worldPlayableHalf('water')
+  const southEdge = cz - half
+  // At or south of the playable rim, still near the island dock.
+  return z <= southEdge + 0.35 && z >= southEdge - 3.5
+}
+
 export function onWaterBridge(x: number, z: number, landTier: number): boolean {
   if (!northChainOpen(landTier)) return false
   if (isPointOnHomeIsland(x, z)) return false
-  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
+  // Allow pier travel at the water hub south rim (handoff), even if "on" the island.
+  if (
+    waterUnlocked(landTier) &&
+    isPointOnWaterIslandWalkable(x, z) &&
+    !onWaterIslandPierHandoff(x, z, landTier)
+  ) {
+    return false
+  }
   if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
   if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
   if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) return false
@@ -246,7 +267,17 @@ export function clampToIsland(
   z: number,
   landTier = 0,
 ): { x: number; z: number } {
-  if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) {
+  // Leave water onto the pier before island clamp traps you on the rim.
+  if (onWaterIslandPierHandoff(x, z, landTier)) {
+    const bridge = bridgeClamp(x, z, landTier)
+    if (bridge) return bridge
+  }
+
+  if (
+    waterUnlocked(landTier) &&
+    isPointOnWaterIslandWalkable(x, z) &&
+    !onWaterIslandPierHandoff(x, z, landTier)
+  ) {
     return waterBiomeClamp(x, z)
   }
 

@@ -89,6 +89,21 @@ describe('clampToIsland', () => {
     expect(clamped.z).toBeCloseTo(cz - half, 5)
   })
 
+  it('allows leaving the water hub onto the pier', () => {
+    const [, , cz] = worldCenter('water')
+    const half = worldPlayableHalf('water')
+    const southEdge = cz - half
+    const clamped = clampToIsland(0, southEdge, WATER_UNLOCK_INDEX)
+    expect(onWaterBridge(0, southEdge, WATER_UNLOCK_INDEX)).toBe(true)
+    expect(clamped.x).toBe(0)
+    expect(clamped.z).toBeLessThanOrEqual(southEdge + 0.5)
+  })
+
+  it('allows walking from the water pier onto home island', () => {
+    expect(clampToIsland(0, 15, WATER_UNLOCK_INDEX)).toEqual({ x: 0, z: 15 })
+    expect(onWaterBridge(0, 15, WATER_UNLOCK_INDEX)).toBe(false)
+  })
+
   it('prefers home north dock over pier clamp near the gate', () => {
     expect(clampToIsland(0, 17.8, 1)).toEqual({ x: 0, z: 17.8 })
   })

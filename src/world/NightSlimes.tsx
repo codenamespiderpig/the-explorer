@@ -9,6 +9,7 @@ import {
   ENEMY_RADIUS,
   clampToBiomeLeash,
   enemyVisual,
+  hubCenterForEnemyKind,
   isOutsideBiomeLeash,
   type EnemyKind,
 } from '../systems/enemies'
@@ -53,7 +54,6 @@ function SlimeEntity({
   const cooldown = useRef(0)
   const localPos = useRef(position)
   const wanderAngle = useRef(Math.random() * Math.PI * 2)
-  const homePos = useRef(position)
 
   useFrame((_, delta) => {
     const store = useGameStore.getState()
@@ -89,27 +89,23 @@ function SlimeEntity({
     const player = store.playerPos
 
     if (isBiome) {
+      const [hubX, , hubZ] = hubCenterForEnemyKind(kind)
       const pdx = player[0] - localPos.current[0]
       const pdz = player[2] - localPos.current[2]
       const pdist = Math.hypot(pdx, pdz)
-      const playerOutside = isOutsideBiomeLeash(
-        player[0],
-        player[2],
-        homePos.current[0],
-        homePos.current[2],
-      )
+      const playerOutside = isOutsideBiomeLeash(player[0], player[2], hubX, hubZ)
       // Do not chase across the bridge onto other lands.
       if (pdist > BIOME_AGGRO || playerOutside) {
-        const hdx = homePos.current[0] - localPos.current[0]
-        const hdz = homePos.current[2] - localPos.current[2]
+        const hdx = hubX - localPos.current[0]
+        const hdz = hubZ - localPos.current[2]
         const hdist = Math.hypot(hdx, hdz) || 1
         if (hdist > 0.4) {
           const step = moveSpeed * 0.55 * delta
           const next = clampToBiomeLeash(
             localPos.current[0] + (hdx / hdist) * step,
             localPos.current[2] + (hdz / hdist) * step,
-            homePos.current[0],
-            homePos.current[2],
+            hubX,
+            hubZ,
           )
           localPos.current = [next.x, bodyY, next.z]
           body.current.setNextKinematicTranslation({
@@ -150,12 +146,8 @@ function SlimeEntity({
       let nx = localPos.current[0] + (dx / dist) * step
       let nz = localPos.current[2] + (dz / dist) * step
       if (isBiome) {
-        const clamped = clampToBiomeLeash(
-          nx,
-          nz,
-          homePos.current[0],
-          homePos.current[2],
-        )
+        const [hubX, , hubZ] = hubCenterForEnemyKind(kind)
+        const clamped = clampToBiomeLeash(nx, nz, hubX, hubZ)
         nx = clamped.x
         nz = clamped.z
       }

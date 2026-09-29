@@ -53,6 +53,7 @@ import {
   completeDungeonOnExit,
   DUNGEON_COIN_MONEY,
   DUNGEON_HOME_SPAWN,
+  DUNGEON_ENEMY_HP,
   DUNGEON_MOB_POSITIONS,
   DUNGEON_SPAWN,
   dungeonChestReward,
@@ -457,7 +458,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       return {
         id: `slime-${slimeSeq}`,
         position,
-        hp: 14,
+        hp: DUNGEON_ENEMY_HP,
         source: 'dungeon' as const,
         kind: 'slime' as const,
         ageSec: 0,

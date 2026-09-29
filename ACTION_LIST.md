@@ -48,6 +48,7 @@
 - [x] Night/biome enemies respawn ~18s after kill
 - [x] Tide blobs leashed to water hub; biome respawns on hub (not grassland)
 - [x] Water hub + water unlocks are full-size islands (still buy from merchant)
+- [x] Water→home pier exit works; tide leash uses hub center; dungeon mobs take 3 hits
 
 ## Now
 

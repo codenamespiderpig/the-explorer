@@ -56,6 +56,8 @@ export const DUNGEON_MOB_POSITIONS: Array<[number, number, number]> = [
 export const DUNGEON_ENEMY_DAMAGE = 4
 export const DUNGEON_ENEMY_COOLDOWN = 1.5
 export const DUNGEON_ENEMY_SPEED = 1.45
+/** HP so a sword hit (10) needs three swings to clear. */
+export const DUNGEON_ENEMY_HP = 25
 
 export function canEnterDungeon(landTier: number, completed = false): boolean {
   return !completed && landTier >= DUNGEON_MIN_LAND_TIER

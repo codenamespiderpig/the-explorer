@@ -5,6 +5,7 @@ import {
   DUNGEON_COINS_REQUIRED,
   DUNGEON_COIN_POSITIONS,
   DUNGEON_ENTRANCE,
+  DUNGEON_ENEMY_HP,
   DUNGEON_MIN_LAND_TIER,
   DUNGEON_MOB_POSITIONS,
   DUNGEON_SPAWN,
@@ -20,6 +21,7 @@ import {
   isNearDungeonPortal,
   shouldHideDungeonEntrance,
 } from '../src/systems/dungeon'
+import { SWORD_DAMAGE } from '../src/systems/combat'
 
 describe('dungeon', () => {
   it('is open from the start of the game', () => {
@@ -70,6 +72,10 @@ describe('dungeon', () => {
 
   it('spawns five dungeon mobs along the hall', () => {
     expect(DUNGEON_MOB_POSITIONS).toHaveLength(5)
+  })
+
+  it('takes three sword hits to defeat a dungeon mob', () => {
+    expect(Math.ceil(DUNGEON_ENEMY_HP / SWORD_DAMAGE)).toBe(3)
   })
 
   it('collects each coin once and unlocks at two', () => {
