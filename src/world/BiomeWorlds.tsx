@@ -10,6 +10,7 @@ import {
   worldCenter,
 } from '../systems/worlds'
 import { lavaUnlocked, rainforestUnlocked, waterUnlocked } from '../systems/plots'
+import { LAVA_PATCH_OFFSETS } from '../systems/lavaHazards'
 import { BRIDGE_GATE_HALF, BRIDGE_HALF_WIDTH, WALK_COLLIDER_HALF_H } from './bounds'
 import { Gatherable } from './Gatherable'
 import { type WalkRect, waterIslandWalkRects } from '../systems/waterIsland'
@@ -318,16 +319,10 @@ export function LavaWorld() {
       <Gatherable id="lava-rock-2" resource="stone" position={[cx - 6, 0, cz - 5]} />
       <Gatherable id="lava-rock-3" resource="stone" position={[cx + 10, 0, cz - 2]} />
       <Gatherable id="lava-rock-4" resource="stone" position={[cx - 8, 0, cz + 4]} />
-      {[
-        [0, 0],
-        [3, 4],
-        [-4, -3],
-        [6, -5],
-        [-7, 6],
-      ].map(([ox, oz], i) => (
-        <mesh key={i} position={[cx + ox, 0.15, cz + oz]}>
-          <boxGeometry args={[1.4, 0.3, 1.4]} />
-          <meshStandardMaterial color="#ff6622" emissive="#cc2200" emissiveIntensity={0.65} />
+      {LAVA_PATCH_OFFSETS.map(([ox, oz], i) => (
+        <mesh key={i} position={[cx + ox, 0.18, cz + oz]}>
+          <boxGeometry args={[1.4, 0.36, 1.4]} />
+          <meshStandardMaterial color="#ff7722" emissive="#ff3300" emissiveIntensity={0.85} />
         </mesh>
       ))}
     </group>

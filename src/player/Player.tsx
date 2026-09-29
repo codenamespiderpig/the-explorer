@@ -28,6 +28,7 @@ import {
   isNearDungeonPortal,
   nearestDungeonCoinIndex,
 } from '../systems/dungeon'
+import { isOnLavaPatch, LAVA_BURN_DAMAGE } from '../systems/lavaHazards'
 import { RELIC_ARMOUR_BONUS } from '../systems/relic'
 import { ToolSwing } from './ToolSwing'
 
@@ -625,6 +626,16 @@ export function Player() {
       )
       const v = body.body.linvel()
       body.body.setLinvel({ x: 0, y: fell ? 0 : v.y, z: 0 }, true)
+    }
+
+    const px = fell ? 0 : clamped.x
+    const pz = fell ? 0 : clamped.z
+    if (isOnLavaPatch(px, pz, landTier)) {
+      const before = useGameStore.getState().health.current
+      useGameStore.getState().damagePlayer(LAVA_BURN_DAMAGE)
+      if (useGameStore.getState().health.current < before) {
+        useInventoryStore.getState().setHint('Lava burns!')
+      }
     }
   })
 
