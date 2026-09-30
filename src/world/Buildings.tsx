@@ -1,9 +1,56 @@
+import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
 import { useGameStore } from '../stores/gameStore'
 import type { BuildingKind } from '../systems/building'
 import {
   ADVANCED_CAMPFIRE_LIGHT_RADIUS,
   CAMPFIRE_LIGHT_RADIUS,
 } from '../systems/campfireLight'
+
+/** Walk-through rocks and little logs around an advanced campfire (scenery only). */
+function AdvancedCampfireScenery() {
+  return (
+    <group>
+      {/* Rocks */}
+      <mesh castShadow position={[1.35, 0.12, 0.55]} rotation={[0.2, 0.4, 0.1]}>
+        <icosahedronGeometry args={[0.22, 0]} />
+        <meshStandardMaterial color="#6a6860" roughness={0.95} />
+      </mesh>
+      <mesh castShadow position={[-1.2, 0.1, 0.85]} rotation={[0.1, -0.6, 0.15]}>
+        <icosahedronGeometry args={[0.18, 0]} />
+        <meshStandardMaterial color="#5c5a52" roughness={0.95} />
+      </mesh>
+      <mesh castShadow position={[0.9, 0.14, -1.4]} rotation={[-0.15, 0.8, 0.05]}>
+        <icosahedronGeometry args={[0.26, 0]} />
+        <meshStandardMaterial color="#737068" roughness={0.92} />
+      </mesh>
+      <mesh castShadow position={[-1.45, 0.11, -0.7]} rotation={[0.25, 0.2, -0.1]}>
+        <icosahedronGeometry args={[0.2, 0]} />
+        <meshStandardMaterial color="#68655c" roughness={0.95} />
+      </mesh>
+      <mesh castShadow position={[0.15, 0.09, 1.55]} rotation={[0.05, -0.3, 0.2]}>
+        <icosahedronGeometry args={[0.16, 0]} />
+        <meshStandardMaterial color="#5a5850" roughness={0.95} />
+      </mesh>
+      {/* Little logs on the ground — walk-through, not gatherable */}
+      <mesh castShadow position={[1.55, 0.08, -0.35]} rotation={[0, 0.6, Math.PI / 2]}>
+        <cylinderGeometry args={[0.07, 0.08, 0.55, 6]} />
+        <meshStandardMaterial color="#5c3a1e" />
+      </mesh>
+      <mesh castShadow position={[-0.65, 0.07, -1.5]} rotation={[0.05, -0.4, Math.PI / 2]}>
+        <cylinderGeometry args={[0.06, 0.07, 0.48, 6]} />
+        <meshStandardMaterial color="#6a4424" />
+      </mesh>
+      <mesh castShadow position={[-1.6, 0.075, 0.25]} rotation={[-0.05, 1.1, Math.PI / 2]}>
+        <cylinderGeometry args={[0.065, 0.07, 0.5, 6]} />
+        <meshStandardMaterial color="#4e3218" />
+      </mesh>
+      <mesh castShadow position={[0.55, 0.07, 1.35]} rotation={[0.08, -1.2, Math.PI / 2]}>
+        <cylinderGeometry args={[0.055, 0.06, 0.42, 6]} />
+        <meshStandardMaterial color="#633e20" />
+      </mesh>
+    </group>
+  )
+}
 
 /** Lights the area at night; quiet flame during the day. */
 function CampfireMesh({
@@ -69,6 +116,7 @@ function CampfireMesh({
           castShadow={false}
         />
       ) : null}
+      {advanced ? <AdvancedCampfireScenery /> : null}
     </group>
   )
 }
@@ -172,6 +220,31 @@ function BuildingMesh({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
   )
 }
 
+function BuildingCollider({ kind, yaw }: { kind: BuildingKind; yaw: number }) {
+  if (kind === 'campfire') {
+    return (
+      <RigidBody type="fixed" colliders={false} rotation={[0, yaw, 0]}>
+        <CylinderCollider args={[0.35, 0.55]} position={[0, 0.35, 0]} />
+      </RigidBody>
+    )
+  }
+  if (kind === 'advanced-campfire') {
+    return (
+      <RigidBody type="fixed" colliders={false} rotation={[0, yaw, 0]}>
+        <CylinderCollider args={[0.45, 0.7]} position={[0, 0.45, 0]} />
+      </RigidBody>
+    )
+  }
+  if (kind === 'workbench') {
+    return (
+      <RigidBody type="fixed" colliders={false} rotation={[0, yaw, 0]}>
+        <CuboidCollider args={[0.7, 0.45, 0.4]} position={[0, 0.45, 0]} />
+      </RigidBody>
+    )
+  }
+  return null
+}
+
 export function Buildings() {
   const buildings = useGameStore((s) => s.buildings)
   return (
@@ -179,6 +252,7 @@ export function Buildings() {
       {buildings.map((b) => (
         <group key={b.id} position={b.position}>
           <BuildingMesh kind={b.kind} yaw={b.yaw} />
+          <BuildingCollider kind={b.kind} yaw={b.yaw} />
         </group>
       ))}
     </>

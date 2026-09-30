@@ -35,6 +35,7 @@
 - [x] Campfire shows a log pile; workbench has little tools on top
 - [x] Campfire lights the nearby area at night
 - [x] Advanced campfire (workbench craft) — wider night light
+- [x] Advanced campfire has walk-through rocks and little logs; campfires + workbench block walking
 - [x] Night slimes avoid campfire light
 - [x] Smaller fences; G prefers workbench / last-crafted placeable (click inventory to pick)
 
