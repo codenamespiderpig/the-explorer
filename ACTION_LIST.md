@@ -31,6 +31,7 @@
 - [x] Unified G key to place gates, slime castles, and crab pots
 - [x] Fix lava pier exit — prefer lava island clamp over bridge corridor
 - [x] Fix lava→home exit; infinite land: water→lava first, then reef/crag extras
+- [x] Lava→pier leave works (two-way west rim junction, same as water)
 - [x] Place crafted buildings (workbench/furnace/campfire/fence) with G
 - [x] Campfire shows a log pile; workbench has little tools on top
 - [x] Campfire lights the nearby area at night

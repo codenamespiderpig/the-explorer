@@ -135,6 +135,17 @@ describe('clampToIsland', () => {
     })
   })
 
+  it('allows leaving the lava hub onto the pier', () => {
+    const [cx] = worldCenter('lava')
+    const half = worldPlayableHalf('lava')
+    const westEdge = cx - half
+    const clamped = clampToIsland(westEdge, 0, LAVA_UNLOCK_INDEX)
+    expect(clamped.z).toBe(0)
+    // Still free to move west toward the pier from the rim.
+    const ontoPier = clampToIsland(westEdge - 1, 0, LAVA_UNLOCK_INDEX)
+    expect(ontoPier.x).toBeLessThan(westEdge)
+  })
+
   it('prefers home east dock over lava pier clamp near the gate', () => {
     expect(clampToIsland(17.8, 0, 2)).toEqual({ x: 17.8, z: 0 })
   })

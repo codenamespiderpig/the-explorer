@@ -207,6 +207,37 @@ function waterPierJunctionClamp(
   }
 }
 
+/**
+ * West gate corridor at the lava hub dock — two-way junction between
+ * pier and island so neither entry nor exit gets stuck on the rim.
+ */
+export function onLavaIslandPierHandoff(x: number, z: number, landTier: number): boolean {
+  if (!lavaUnlocked(landTier)) return false
+  if (Math.abs(z) > BRIDGE_GATE_HALF) return false
+  const [cx] = worldCenter('lava')
+  const half = worldPlayableHalf('lava')
+  const westEdge = cx - half
+  const pierEnd = eastBridgeEndX(landTier)
+  // From just west of the pier dock a short way onto the island floor.
+  return x <= westEdge + 2.5 && x >= pierEnd - 1.5
+}
+
+/** Clamp freely through the lava pier ↔ island gate corridor. */
+function lavaPierJunctionClamp(
+  x: number,
+  z: number,
+  landTier: number,
+): { x: number; z: number } {
+  const [cx] = worldCenter('lava')
+  const half = worldPlayableHalf('lava')
+  const westEdge = cx - half
+  const pierEnd = eastBridgeEndX(landTier)
+  return {
+    x: Math.min(westEdge + 2.5, Math.max(pierEnd - 1.5, x)),
+    z: Math.min(BRIDGE_GATE_HALF, Math.max(-BRIDGE_GATE_HALF, z)),
+  }
+}
+
 export function onWaterBridge(x: number, z: number, landTier: number): boolean {
   if (!northChainOpen(landTier)) return false
   if (isPointOnHomeIsland(x, z)) return false
@@ -229,7 +260,14 @@ export function onWaterBridge(x: number, z: number, landTier: number): boolean {
 export function onLavaBridge(x: number, z: number, landTier: number): boolean {
   if (!eastChainOpen(landTier)) return false
   if (isPointOnHomeIsland(x, z)) return false
-  if (lavaUnlocked(landTier) && isPointOnLavaIsland(x, z)) return false
+  // Allow pier travel at the lava hub west rim (handoff), even if "on" the island.
+  if (
+    lavaUnlocked(landTier) &&
+    isPointOnLavaIsland(x, z) &&
+    !onLavaIslandPierHandoff(x, z, landTier)
+  ) {
+    return false
+  }
   if (isPointOnAnyUnlockedPlot(x, z, landTier)) return false
   if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) return false
   if (rainforestUnlocked(landTier) && isPointOnRainforestIsland(x, z)) return false
@@ -287,6 +325,11 @@ export function clampToIsland(
   // Two-way pier ↔ water island gate (enter and leave without getting stuck).
   if (onWaterIslandPierHandoff(x, z, landTier)) {
     return waterPierJunctionClamp(x, z, landTier)
+  }
+
+  // Two-way pier ↔ lava island gate (enter and leave without getting stuck).
+  if (onLavaIslandPierHandoff(x, z, landTier)) {
+    return lavaPierJunctionClamp(x, z, landTier)
   }
 
   if (waterUnlocked(landTier) && isPointOnWaterIslandWalkable(x, z)) {
