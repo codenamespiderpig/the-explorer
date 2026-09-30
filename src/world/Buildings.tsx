@@ -6,47 +6,59 @@ import {
   CAMPFIRE_LIGHT_RADIUS,
 } from '../systems/campfireLight'
 
-/** Walk-through rocks and little logs around an advanced campfire (scenery only). */
+/** Walk-through rocks and little logs piled tight around an advanced campfire. */
 function AdvancedCampfireScenery() {
   return (
     <group>
-      {/* Rocks */}
-      <mesh castShadow position={[1.35, 0.12, 0.55]} rotation={[0.2, 0.4, 0.1]}>
-        <icosahedronGeometry args={[0.22, 0]} />
+      {/* Stone ring hugging the dirt pad */}
+      <mesh castShadow position={[0.85, 0.1, 0.25]} rotation={[0.2, 0.4, 0.1]}>
+        <icosahedronGeometry args={[0.2, 0]} />
         <meshStandardMaterial color="#6a6860" roughness={0.95} />
       </mesh>
-      <mesh castShadow position={[-1.2, 0.1, 0.85]} rotation={[0.1, -0.6, 0.15]}>
-        <icosahedronGeometry args={[0.18, 0]} />
+      <mesh castShadow position={[0.55, 0.09, 0.75]} rotation={[0.1, -0.5, 0.15]}>
+        <icosahedronGeometry args={[0.16, 0]} />
         <meshStandardMaterial color="#5c5a52" roughness={0.95} />
       </mesh>
-      <mesh castShadow position={[0.9, 0.14, -1.4]} rotation={[-0.15, 0.8, 0.05]}>
-        <icosahedronGeometry args={[0.26, 0]} />
+      <mesh castShadow position={[-0.2, 0.11, 0.88]} rotation={[-0.1, 0.7, 0.05]}>
+        <icosahedronGeometry args={[0.22, 0]} />
         <meshStandardMaterial color="#737068" roughness={0.92} />
       </mesh>
-      <mesh castShadow position={[-1.45, 0.11, -0.7]} rotation={[0.25, 0.2, -0.1]}>
-        <icosahedronGeometry args={[0.2, 0]} />
+      <mesh castShadow position={[-0.88, 0.1, 0.35]} rotation={[0.25, 0.2, -0.1]}>
+        <icosahedronGeometry args={[0.18, 0]} />
         <meshStandardMaterial color="#68655c" roughness={0.95} />
       </mesh>
-      <mesh castShadow position={[0.15, 0.09, 1.55]} rotation={[0.05, -0.3, 0.2]}>
-        <icosahedronGeometry args={[0.16, 0]} />
+      <mesh castShadow position={[-0.78, 0.09, -0.45]} rotation={[0.05, -0.3, 0.2]}>
+        <icosahedronGeometry args={[0.17, 0]} />
         <meshStandardMaterial color="#5a5850" roughness={0.95} />
       </mesh>
-      {/* Little logs on the ground — walk-through, not gatherable */}
-      <mesh castShadow position={[1.55, 0.08, -0.35]} rotation={[0, 0.6, Math.PI / 2]}>
-        <cylinderGeometry args={[0.07, 0.08, 0.55, 6]} />
+      <mesh castShadow position={[0.15, 0.12, -0.9]} rotation={[0.15, 0.9, -0.05]}>
+        <icosahedronGeometry args={[0.21, 0]} />
+        <meshStandardMaterial color="#6e6b62" roughness={0.93} />
+      </mesh>
+      <mesh castShadow position={[0.82, 0.1, -0.4]} rotation={[-0.2, -0.8, 0.1]}>
+        <icosahedronGeometry args={[0.19, 0]} />
+        <meshStandardMaterial color="#626058" roughness={0.95} />
+      </mesh>
+      {/* Little sticks/logs nestled against the stones */}
+      <mesh castShadow position={[0.95, 0.07, 0.05]} rotation={[0.05, 0.35, Math.PI / 2]}>
+        <cylinderGeometry args={[0.05, 0.06, 0.38, 6]} />
         <meshStandardMaterial color="#5c3a1e" />
       </mesh>
-      <mesh castShadow position={[-0.65, 0.07, -1.5]} rotation={[0.05, -0.4, Math.PI / 2]}>
-        <cylinderGeometry args={[0.06, 0.07, 0.48, 6]} />
+      <mesh castShadow position={[0.25, 0.065, 0.95]} rotation={[0.08, -0.9, Math.PI / 2]}>
+        <cylinderGeometry args={[0.045, 0.055, 0.34, 6]} />
         <meshStandardMaterial color="#6a4424" />
       </mesh>
-      <mesh castShadow position={[-1.6, 0.075, 0.25]} rotation={[-0.05, 1.1, Math.PI / 2]}>
-        <cylinderGeometry args={[0.065, 0.07, 0.5, 6]} />
+      <mesh castShadow position={[-0.95, 0.07, -0.05]} rotation={[-0.05, 1.0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.05, 0.055, 0.36, 6]} />
         <meshStandardMaterial color="#4e3218" />
       </mesh>
-      <mesh castShadow position={[0.55, 0.07, 1.35]} rotation={[0.08, -1.2, Math.PI / 2]}>
-        <cylinderGeometry args={[0.055, 0.06, 0.42, 6]} />
+      <mesh castShadow position={[-0.35, 0.065, -0.92]} rotation={[0.06, -0.2, Math.PI / 2]}>
+        <cylinderGeometry args={[0.04, 0.05, 0.32, 6]} />
         <meshStandardMaterial color="#633e20" />
+      </mesh>
+      <mesh castShadow position={[0.55, 0.08, -0.75]} rotation={[0.1, 0.85, 1.35]}>
+        <cylinderGeometry args={[0.035, 0.04, 0.28, 5]} />
+        <meshStandardMaterial color="#5a381c" />
       </mesh>
     </group>
   )
