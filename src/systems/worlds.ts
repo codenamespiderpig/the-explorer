@@ -11,6 +11,11 @@ import {
   waterHubCenter,
   waterUnlocked,
 } from './plots'
+import {
+  bridgeEndpointsForChain,
+  chainForBiome,
+  getBiomeLayout,
+} from './worldLayout'
 
 export { BIOME_ISLAND_SIZE, HOME_ISLAND_SIZE, OCEAN_GAP }
 
@@ -47,38 +52,26 @@ export function worldCenter(world: WorldId, _landTier = 0): [number, number, num
   return [0, 0, 0]
 }
 
-/** Bridge endpoints: home dock → remote island dock. */
+/** Bridge endpoints: home dock → remote island dock (axis from biome layout). */
 export function waterBridgeEndpoints(): {
   home: [number, number, number]
   island: [number, number, number]
 } {
-  const [, , wz] = worldCenter('water')
-  return {
-    home: [0, 0, homeHalf() - 1],
-    island: [0, 0, wz - biomeHalf() + 0.5],
-  }
+  return bridgeEndpointsForChain(chainForBiome(getBiomeLayout(), 'water'))
 }
 
 export function lavaBridgeEndpoints(): {
   home: [number, number, number]
   island: [number, number, number]
 } {
-  const [lx] = worldCenter('lava')
-  return {
-    home: [homeHalf() - 1, 0, 0],
-    island: [lx - biomeHalf() + 0.5, 0, 0],
-  }
+  return bridgeEndpointsForChain(chainForBiome(getBiomeLayout(), 'lava'))
 }
 
 export function rainforestBridgeEndpoints(): {
   home: [number, number, number]
   island: [number, number, number]
 } {
-  const [, , rz] = worldCenter('rainforest')
-  return {
-    home: [0, 0, -(homeHalf() - 1)],
-    island: [0, 0, rz + biomeHalf() - 0.5],
-  }
+  return bridgeEndpointsForChain(chainForBiome(getBiomeLayout(), 'rainforest'))
 }
 
 export function worldPlayableHalf(_world: WorldId): number {
